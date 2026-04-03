@@ -157,7 +157,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-djc-id-ca1bc3f data-id=123>
+            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
                 content
             </div>
             """,  # noqa: E501
@@ -212,7 +212,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-djc-id-ca1bc3f data-id="123" x-data="{hello: 'world'}">
+            <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-id="123" x-data="{hello: 'world'}">
                 content
             </div>
             """,  # noqa: E501
@@ -240,7 +240,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-djc-id-ca1bc3f data-id=123>
+            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
                 content
             </div>
             """,  # noqa: E501
@@ -272,7 +272,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-djc-id-ca1bc3f data-id="123" x-data="{hello: 'world'}">
+            <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-id="123" x-data="{hello: 'world'}">
                 content
             </div>
             """,  # noqa: E501
@@ -299,7 +299,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div class="added_class another-class from_agg_key" data-djc-id-ca1bc3f data-id="123" type="submit">
+            <div class="added_class another-class from_agg_key" data-id="123" type="submit">
                 content
             </div>
             """,
@@ -351,7 +351,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div class="added_class another-class override-me" data-djc-id-ca1bc3f data-id=123>
+            <div class="added_class another-class override-me" data-id=123>
                 content
             </div>
             """,
@@ -380,7 +380,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-djc-id-ca1bc3f data-id=123>
+            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
                 content
             </div>
             """,  # noqa: E501
@@ -405,7 +405,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div class="added_class another-class" data-djc-id-ca1bc3f data-id="123">
+            <div class="added_class another-class" data-id="123">
                 content
             </div>
             """,
@@ -433,7 +433,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc3f>
+            <div>
                 content
             </div>
             """,
@@ -461,7 +461,7 @@ class TestHtmlAttrs:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc3f>
+            <div>
                 content
             </div>
             """,

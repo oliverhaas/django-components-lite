@@ -156,11 +156,8 @@ and keeping your CSS and Javascript in the static directory.
 
 !!! info
 
-    Remember that you can use
-    [`{% component_js_dependencies %}`](../../reference/template_tags#component_js_dependencies)
-    and [`{% component_css_dependencies %}`](../../reference/template_tags#component_css_dependencies)
-    to change where the `<script>` and `<style>` tags will be rendered
-    (See [Default JS / CSS locations](../../concepts/advanced/rendering_js_css#default-js-css-locations)).
+    Components' JS and CSS files are served via Django's static files system.
+    `<link>` and `<script>` tags are automatically prepended to each component's rendered HTML.
 
 !!! info
 

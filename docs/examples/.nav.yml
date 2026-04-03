@@ -4,7 +4,6 @@ nav:
   - Scenarios:
     - Form Submission: ./form_submission
     - HTML fragments: ./fragments
-    - Error handling: ./error_fallback
     - Recursion: ./recursion
     - A/B testing: ./ab_testing
     - Analytics: ./analytics

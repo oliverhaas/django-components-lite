@@ -23,13 +23,6 @@ if TYPE_CHECKING:
 TClass = TypeVar("TClass", bound=Type[Any])
 
 
-# Mark object as related to extension commands so we can place these in
-# a separate documentation section
-def mark_extension_command_api(obj: TClass) -> TClass:
-    obj._extension_command_api = True
-    return obj
-
-
 #############################
 # Argparse typing
 #############################
@@ -51,10 +44,9 @@ The basic type of action to be taken when this argument is encountered at the co
 This is a subset of the values for `action` in
 [`ArgumentParser.add_argument()`](https://docs.python.org/3/library/argparse.html#the-add-argument-method).
 """
-mark_extension_command_api(CommandLiteralAction)  # type: ignore[type-var]
 
 
-@mark_extension_command_api
+
 @dataclass
 class CommandArg:
     """
@@ -111,7 +103,7 @@ class CommandArg:
         return _remove_none_values(asdict(self))
 
 
-@mark_extension_command_api
+
 @dataclass
 class CommandArgGroup:
     """
@@ -137,7 +129,7 @@ class CommandArgGroup:
         return _remove_none_values(asdict(self))
 
 
-@mark_extension_command_api
+
 @dataclass
 class CommandSubcommand:
     """
@@ -194,7 +186,7 @@ class CommandSubcommand:
         return _remove_none_values(asdict(self))
 
 
-@mark_extension_command_api
+
 @dataclass
 class CommandParserInput:
     """
@@ -240,12 +232,12 @@ class CommandParserInput:
 #############################
 
 
-@mark_extension_command_api
+
 class CommandHandler(Protocol):
     def __call__(self, *args: Any, **kwargs: Any) -> None: ...
 
 
-@mark_extension_command_api
+
 class ComponentCommand:
     """
     Definition of a CLI command.

@@ -59,19 +59,9 @@ and other tags:
     {% button name="John" job="Developer" / %}
     ```
 
-    You can do so by setting the "shorthand" [Tag formatter](../../advanced/tag_formatters) in the settings:
-
-    ```python
-    # settings.py
-    COMPONENTS = {
-        "tag_formatter": "django_components.component_shorthand_formatter",
-    }
-    ```
-
 !!! info "Extended template tag syntax"
 
-    Unlike regular Django template tags, django-components' tags offer extra features like
-    defining literal lists and dicts, and more. Read more about [Template tag syntax](../template_tag_syntax).
+    Read more about [Template tag syntax](../template_tag_syntax).
 
 ### Registering components
 
@@ -476,45 +466,6 @@ class Button(Component):
 Neither [`Component.render()`](../../../reference/api/#django_components.Component.render)
 nor [`Component.render_to_response()`](../../../reference/api/#django_components.Component.render_to_response)
 are typed, due to limitations of Python's type system.
-
-To add type hints, you can wrap the inputs
-in component's [`Args`](../../../reference/api/#django_components.Component.Args),
-[`Kwargs`](../../../reference/api/#django_components.Component.Kwargs),
-and [`Slots`](../../../reference/api/#django_components.Component.Slots) classes.
-
-Read more on [Typing and validation](../../fundamentals/typing_and_validation).
-
-```python
-from typing import Optional
-from django_components import Component, Slot, SlotInput
-
-# Define the component with the types
-class Button(Component):
-    class Args(
-        name: str
-
-    class Kwargs:
-        surname: str
-        age: int
-
-    class Slots:
-        my_slot: Optional[SlotInput] = None
-        footer: SlotInput
-
-# Add type hints to the render call
-Button.render(
-    args=Button.Args(
-        name="John",
-    ),
-    kwargs=Button.Kwargs(
-        surname="Doe",
-        age=30,
-    ),
-    slots=Button.Slots(
-        footer=Slot(lambda ctx: "Click me!"),
-    ),
-)
-```
 
 ## Components as input
 

@@ -6,9 +6,7 @@ from django.template.base import Node, Origin, Parser
 from django.template.library import InclusionNode
 from django.template.loader_tags import IncludeNode
 
-from django_components.context import _COMPONENT_CONTEXT_KEY, _STRATEGY_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY
-from django_components.dependencies import COMPONENT_COMMENT_REGEX, render_dependencies
-from django_components.extension import OnTemplateCompiledContext, OnTemplateLoadedContext, extensions
+from django_components.context import _COMPONENT_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY
 from django_components.util.template_parser import parse_template
 
 
@@ -48,43 +46,19 @@ def monkeypatch_template_init(template_cls: Type[Template]) -> None:
         # If this Template instance was created by us when loading a template file for a component
         # with `load_component_template()`, then we do 2 things:
         #
-        # 1. Associate the Component class with the template by setting it on the `Origin` instance
-        #    (`template.origin.component_cls`). This way the `{% component%}` and `{% slot %}` tags
-        #    will know inside which Component class they were defined.
-        #
-        # 2. Apply `extensions.on_template_preprocess()` to the template, so extensions can modify
-        #    the template string before it's compiled into a nodelist.
+        # Associate the Component class with the template by setting it on the `Origin` instance
+        # (`template.origin.component_cls`). This way the `{% component%}` and `{% slot %}` tags
+        # will know inside which Component class they were defined.
         if get_component_from_origin(origin) is not None:
-            component_cls = get_component_from_origin(origin)
+            pass  # already set
         elif origin is not None and origin.template_name is not None:
             component_cls = get_component_by_template_file(origin.template_name)
             if component_cls is not None:
                 set_component_to_origin(origin, component_cls)
-        else:
-            component_cls = None
-
-        if component_cls is not None:
-            template_string = str(template_string)
-            template_string = extensions.on_template_loaded(
-                OnTemplateLoadedContext(
-                    component_cls=component_cls,
-                    content=template_string,
-                    origin=origin,
-                    name=name,
-                ),
-            )
 
         # Calling original `Template.__init__` should also compile the template into a Nodelist
         # via `Template.compile_nodelist()`.
         original_init(self, template_string, origin, name, *args, **kwargs)  # type: ignore[misc]
-
-        if component_cls is not None:
-            extensions.on_template_compiled(
-                OnTemplateCompiledContext(
-                    component_cls=component_cls,
-                    template=self,
-                ),
-            )
 
     template_cls.__init__ = __init__
 
@@ -172,53 +146,13 @@ def monkeypatch_template_render(template_cls: Type[Template]) -> None:
             # and `False` otherwise.
             isolated_context = not context[COMPONENT_IS_NESTED_KEY]
 
-        # This is original implementation, except we override `isolated_context`,
-        # and we post-process the result with `render_dependencies()`.
         with context.render_context.push_state(self, isolated_context=isolated_context):
             if context.template is None:
                 with context.bind_template(self):
                     context.template_name = self.name
-                    result: str = self._render(context, *args, **kwargs)
+                    return self._render(context, *args, **kwargs)
             else:
-                result = self._render(context, *args, **kwargs)
-
-        # If the key is present, that means this Template is rendered as part of `Component.render()`
-        # or `{% component %}`. In that case the parent component will take care of rendering the
-        # dependencies, so we don't need to do that here.
-        if _COMPONENT_CONTEXT_KEY in context:
-            return result
-
-        # NOTE: Only process dependencies if the rendered result contains AT LEAST ONE rendered component.
-        #       This has two reasons:
-        #       1. To keep the behavior consistent with the previous implementation, when `Template.render()`
-        #          didn't call `render_dependencies()`.
-        #       2. To avoid unnecessary processing which otherwise has a considerable perf overhead.
-        #          See https://github.com/django-components/django-components/pull/1166#issuecomment-2850899765
-        if not COMPONENT_COMMENT_REGEX.search(result.encode("utf-8")):
-            return result
-
-        # Don't post-process if this template was rendered with Django's InclusionNode.
-        # Fix for https://github.com/django-components/django-components/issues/1390
-        # NOTE: Lenght of 2 means a Context with single layer (+ layer with defaults)
-        if "_DJC_INSIDE_INCLUSION_TAG" in context and len(context.dicts) == 2:
-            return result
-
-        # Allow users to configure the `deps_strategy` kwarg of `render_dependencies()`, even if
-        # they render a Template directly with `Template.render()` or Django's `django.shortcuts.render()`.
-        #
-        # Example:
-        # ```
-        # result = render_dependencies(
-        #     result,
-        #     Context({ "DJC_DEPS_STRATEGY": "fragment" }),
-        # )
-        # ```
-        if _STRATEGY_CONTEXT_KEY in context and context[_STRATEGY_CONTEXT_KEY] is not None:
-            strategy = context[_STRATEGY_CONTEXT_KEY]
-            result = render_dependencies(result, strategy)
-        else:
-            result = render_dependencies(result)
-        return result
+                return self._render(context, *args, **kwargs)
 
     template_cls.render = _template_render
 
@@ -256,7 +190,7 @@ def monkeypatch_include_render(include_node_cls: Type[Node]) -> None:
         #       Otherwise, the state leaks, and if both `{% include %}` templates use the `{% extends %}` tag,
         #       the second one raises, because it would be like using two `{% extends %}` tags in the same template.
         #       See https://github.com/django-components/django-components/issues/1389
-        with context.update({_STRATEGY_CONTEXT_KEY: "ignore", COMPONENT_IS_NESTED_KEY: False}):
+        with context.update({COMPONENT_IS_NESTED_KEY: False}):
             return orig_include_render(self, context, *args, **kwargs)
 
     include_node_cls.render = _include_render

@@ -255,13 +255,18 @@ def _get_component_template(component: "Component") -> Optional[Template]:
             template = None
             template_string = template_sources["get_template"]
     elif component.template or component.template_file:
-        # If the template was loaded from `Component.template` or `Component.template_file`,
-        # then the Template instance was already created and cached in `Component._template`.
-        #
-        # NOTE: This is important to keep in mind, because the implication is that we should
-        # treat Templates AND their nodelists as IMMUTABLE.
-        template = component.__class__._component_media._template  # type: ignore[attr-defined]
-        template_string = None
+        # Check if there's a cached Template instance on the class
+        cached = getattr(component.__class__, "_cached_template", None)
+        if cached is not None:
+            template = cached
+            template_string = None
+        elif component.template_file:
+            template = _load_django_template(component.template_file)
+            component.__class__._cached_template = template
+            template_string = None
+        elif component.template:
+            template = None
+            template_string = component.template
     # No template
     else:
         template = None
@@ -373,36 +378,8 @@ def cache_component_template_file(component_cls: Type["Component"]) -> None:
     if not component_template_file_cache_initialized:
         return
 
-    # NOTE: Avoids circular import
-    from django_components.component_media import (  # noqa: PLC0415
-        ComponentMedia,
-        Unset,
-        _resolve_component_relative_files,
-        is_set,
-    )
-
-    # If we access the `Component.template_file` attribute, then this triggers media resolution if it was not done yet.
-    # The problem is that this also causes the loading of the Template, if Component has defined `template_file`.
-    # This triggers `Template.__init__()`, which then triggers another call to `cache_component_template_file()`.
-    #
-    # At the same time, at this point we don't need the media files to be loaded. But we DO need for the relative
-    # file path to be resolved.
-    #
-    # So for this reason, `ComponentMedia.resolved_relative_files` was added to track if the media files were resolved.
-    # Once relative files were resolved, we can safely access the template file from `ComponentMedia` instance
-    # directly, thus avoiding the triggering of the Template loading.
-    comp_media: ComponentMedia = component_cls._component_media  # type: ignore[attr-defined]
-    if comp_media.resolved and comp_media.resolved_relative_files:
-        template_file: Union[str, Unset, None] = component_cls.template_file
-    else:
-        # NOTE: This block of code is based on `_resolve_media()` in `component_media.py`
-        if not comp_media.resolved_relative_files:
-            comp_dirs = get_component_dirs()
-            _resolve_component_relative_files(component_cls, comp_media, comp_dirs=comp_dirs)
-
-        template_file = comp_media.template_file
-
-    if not is_set(template_file):
+    template_file = getattr(component_cls, "template_file", None)
+    if not template_file:
         return
 
     if template_file not in component_template_file_cache:

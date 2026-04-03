@@ -6,13 +6,10 @@ from django_components import (
     AlreadyRegistered,
     Component,
     ComponentRegistry,
-    ContextBehavior,
     NotRegistered,
     RegistrySettings,
     TagProtectedError,
     all_registries,
-    component_formatter,
-    component_shorthand_formatter,
     register,
     registry,
     types,
@@ -142,114 +139,6 @@ class TestComponentRegistry:
         custom_registry = ComponentRegistry()
         with pytest.raises(NotRegistered):
             custom_registry.unregister(name="testcomponent")
-
-
-@djc_test
-class TestMultipleComponentRegistries:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_different_registries_have_different_settings(self, components_settings):
-        library_a = Library()
-        registry_a = ComponentRegistry(
-            library=library_a,
-            settings=RegistrySettings(
-                context_behavior=ContextBehavior.ISOLATED.value,
-                tag_formatter=component_shorthand_formatter,
-            ),
-        )
-
-        library_b = Library()
-        registry_b = ComponentRegistry(
-            library=library_b,
-            settings=RegistrySettings(
-                context_behavior=ContextBehavior.DJANGO.value,
-                tag_formatter=component_formatter,
-            ),
-        )
-
-        # NOTE: We cannot load the Libraries above using `{% load xxx %}` tag, because
-        # for that we'd need to register a Django app and whatnot.
-        # Instead, we insert the Libraries directly into the engine's builtins.
-        engine = Engine.get_default()
-
-        # Add the custom template tags to Django's built-in tags
-        engine.template_builtins.append(library_a)
-        engine.template_builtins.append(library_b)
-
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                Variable: <strong>{{ variable }}</strong>
-                Slot: {% slot "default" default / %}
-            """
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "variable": kwargs.get("variable", None),
-                }
-
-        registry_a.register("simple_a", SimpleComponent)
-        registry_b.register("simple_b", SimpleComponent)
-
-        template_str: types.django_html = """
-            {% simple_a variable=123 %}
-                SLOT 123
-            {% endsimple_a %}
-            {% component "simple_b" variable=123 %}
-                SLOT ABC
-            {% endcomponent %}
-        """
-        template = Template(template_str)
-
-        rendered = template.render(Context({}))
-
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong data-djc-id-ca1bc40>123</strong>
-            Slot:
-            SLOT 123
-
-            Variable: <strong data-djc-id-ca1bc42>123</strong>
-            Slot:
-            SLOT ABC
-            """,
-        )
-
-        # Remove the custom template tags to clean up after tests
-        engine.template_builtins.remove(library_a)
-        engine.template_builtins.remove(library_b)
-
-
-@djc_test
-class TestProtectedTags:
-    # NOTE: Use the `component_shorthand_formatter` formatter, so the components
-    # are registered under that tag
-    @djc_test(
-        components_settings={
-            "tag_formatter": "django_components.component_shorthand_formatter",
-        },
-    )
-    def test_raises_on_overriding_our_tags(self):
-        for tag in [
-            "component_css_dependencies",
-            "component_js_dependencies",
-            "fill",
-            "html_attrs",
-            "provide",
-            "slot",
-        ]:
-            with pytest.raises(TagProtectedError):
-
-                @register(tag)
-                class TestComponent(Component):
-                    pass
-
-        @register("sth_else")
-        class TestComponent2(Component):
-            pass
-
-        # Cleanup
-        registry.unregister("sth_else")
 
 
 @djc_test

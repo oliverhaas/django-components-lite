@@ -67,16 +67,11 @@ class TestComponentLegacyApi:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -90,16 +85,11 @@ class TestComponentLegacyApi:
                 return {
                     "variable": variable,
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -120,7 +110,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc3f>
+            <div>
                 Name: simple
             </div>
             """,
@@ -131,7 +121,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc40>
+            <div>
                 Name: simple
             </div>
             """,
@@ -142,7 +132,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc41>
+            <div>
                 Name: SimpleComponent
             </div>
             """,
@@ -166,13 +156,13 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             SvgComponent.render(kwargs={"name": "svg1"}),
             """
-            <svg data-djc-id-ca1bc3e>Dynamic1</svg>
+            <svg>Dynamic1</svg>
             """,
         )
         assertHTMLEqual(
             SvgComponent.render(kwargs={"name": "svg2"}),
             """
-            <svg data-djc-id-ca1bc3f>Dynamic2</svg>
+            <svg>Dynamic2</svg>
             """,
         )
 
@@ -190,16 +180,11 @@ class TestComponentLegacyApi:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -220,7 +205,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -262,7 +247,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong> MY_SLOT
+            Variable: <strong>test</strong> MY_SLOT
             """,
         )
 
@@ -287,16 +272,11 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -309,16 +289,11 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -373,30 +348,20 @@ class TestComponent:
                     "variable": kwargs.get("variable", None),
                 }
 
-        _ = SimpleComponent1.template  # Triggers template loading
-        _ = SimpleComponent2.template  # Triggers template loading
+        # Render to trigger template caching
+        SimpleComponent1.render(kwargs={"variable": "test"})
+        SimpleComponent2.render(kwargs={"variable": "test"})
 
-        # Both components have their own Template instance, but they point to the same template file.
-        assert isinstance(SimpleComponent1._template, Template)
-        assert isinstance(SimpleComponent2._template, Template)
-        assert SimpleComponent1._template is not SimpleComponent2._template
-        assert SimpleComponent1._template.source == SimpleComponent2._template.source
-
-        # The Template instances have different origins, but they point to the same template file.
-        assert SimpleComponent1._template.origin is not SimpleComponent2._template.origin
-        assert SimpleComponent1._template.origin.template_name == SimpleComponent2._template.origin.template_name
-        assert SimpleComponent1._template.origin.name == SimpleComponent2._template.origin.name
-        assert SimpleComponent1._template.origin.loader == SimpleComponent2._template.origin.loader
-
-        # The origins point to their respective Component classes.
-        assert SimpleComponent1._template.origin.component_cls == SimpleComponent1
-        assert SimpleComponent2._template.origin.component_cls == SimpleComponent2
+        # Both components have their own cached Template instance
+        assert isinstance(SimpleComponent1._cached_template, Template)
+        assert isinstance(SimpleComponent2._cached_template, Template)
+        assert SimpleComponent1._cached_template.source == SimpleComponent2._cached_template.source
 
         rendered = SimpleComponent1.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -404,7 +369,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3f>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -417,11 +382,6 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         # Access fields on Component class
         assert SimpleComponent.template_name == "simple_template.html"
         assert SimpleComponent.template_file == "simple_template.html"
@@ -435,7 +395,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -457,7 +417,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc40>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -530,7 +490,7 @@ class TestComponentRenderAPI:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong> MY_SLOT
+            Variable: <strong>test</strong> MY_SLOT
             """,
         )
 
@@ -549,46 +509,6 @@ class TestComponentRenderAPI:
                 assert list(self.slots.keys()) == ["my_slot"]
                 my_slot = self.slots["my_slot"]
                 assert my_slot() == "MY_SLOT"
-
-        TestComponent.render(
-            kwargs={"variable": "test", "another": 1},
-            args=(123, "str"),
-            slots={"my_slot": "MY_SLOT"},
-        )
-
-        assert called
-
-    def test_args_kwargs_slots__typed(self):
-        called = False
-
-        class TestComponent(Component):
-            template_file = "test_component/args-kwargs-slots--typed.html"
-
-            class Args:
-                variable: int
-                another: str
-
-            class Kwargs:
-                variable: str
-                another: int
-
-            class Slots:
-                my_slot: SlotInput
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal called
-                called = True
-
-                assert self.args == TestComponent.Args(123, "str")  # type: ignore[call-arg]
-                assert self.kwargs == TestComponent.Kwargs(variable="test", another=1)  # type: ignore[call-arg]
-                assert isinstance(self.slots, TestComponent.Slots)
-                assert isinstance(self.slots.my_slot, Slot)
-                assert self.slots.my_slot() == "MY_SLOT"
-
-                # Check that the instances are reused across multiple uses
-                assert self.args is self.args
-                assert self.kwargs is self.kwargs
-                assert self.slots is self.slots
 
         TestComponent.render(
             kwargs={"variable": "test", "another": 1},
@@ -678,7 +598,6 @@ class TestComponentRenderAPI:
         assert comp.registered_name == "test"
 
         assert comp.node is not None
-        assert comp.node.template_component == Outer
 
         # Now uses template_file, so template_name is the file path
         assert comp.node.template_name.endswith("test_component/outer.html")  # type: ignore[union-attr]
@@ -747,57 +666,10 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
+            <div class="test-component">
                 args: [123, 'str']
                 kwargs: {'variable': 'test', 'another': 1}
                 slots: {'my_slot': <Slot component_name='TestComponent' slot_name='my_slot'>}
-                arg: 123
-                kwarg: test
-                slot: <Slot component_name='TestComponent' slot_name='my_slot'>
-            </div>
-            """,
-        )
-
-    def test_args_kwargs_slots__simple_typed(self):
-        class TestComponent(Component):
-            class Args:
-                variable: int
-                another: str
-
-            class Kwargs:
-                variable: str
-                another: int
-
-            class Slots:
-                my_slot: SlotInput
-
-            template: types.django_html = """
-                {% load component_tags %}
-                <div class="test-component">
-                    {# Test whole objects #}
-                    args: {{ component_vars.args|safe }}
-                    kwargs: {{ component_vars.kwargs|safe }}
-                    slots: {{ component_vars.slots|safe }}
-
-                    {# Test individual values #}
-                    arg: {{ component_vars.args.variable|safe }}
-                    kwarg: {{ component_vars.kwargs.variable|safe }}
-                    slot: {{ component_vars.slots.my_slot|safe }}
-                </div>
-            """
-
-        html = TestComponent.render(
-            args=[123, "str"],
-            kwargs={"variable": "test", "another": 1},
-            slots={"my_slot": "MY_SLOT"},
-        )
-        assertHTMLEqual(
-            html,
-            """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                args: Args(variable=123, another='str')
-                kwargs: Kwargs(variable='test', another=1)
-                slots: Slots(my_slot=<Slot component_name='TestComponent' slot_name='my_slot'>)
                 arg: 123
                 kwarg: test
                 slot: <Slot component_name='TestComponent' slot_name='my_slot'>
@@ -843,73 +715,11 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                <div class="wrapper" data-djc-id-ca1bc40="">
+            <div class="test-component">
+                <div class="wrapper">
                     args: [123, 'str']
                     kwargs: {'variable': 'test', 'another': 1}
                     slots: {'my_slot': <Slot component_name='TestComponent' slot_name='my_slot'>}
-                    arg: 123
-                    kwarg: test
-                    slot: <Slot component_name='TestComponent' slot_name='my_slot'>
-                </div>
-            </div>
-            """,
-        )
-
-    def test_args_kwargs_slots__nested_typed(self):
-        @register("wrapper")
-        class Wrapper(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                <div class="wrapper">
-                    {% slot "content" default %}
-                        <div class="test">DEFAULT</div>
-                    {% endslot %}
-                </div>
-            """
-
-        class TestComponent(Component):
-            class Args:
-                variable: int
-                another: str
-
-            class Kwargs:
-                variable: str
-                another: int
-
-            class Slots:
-                my_slot: SlotInput
-
-            template: types.django_html = """
-                {% load component_tags %}
-                <div class="test-component">
-                    {% component "wrapper" %}
-                        {# Test whole objects #}
-                        args: {{ component_vars.args|safe }}
-                        kwargs: {{ component_vars.kwargs|safe }}
-                        slots: {{ component_vars.slots|safe }}
-
-                        {# Test individual values #}
-                        arg: {{ component_vars.args.variable|safe }}
-                        kwarg: {{ component_vars.kwargs.variable|safe }}
-                        slot: {{ component_vars.slots.my_slot|safe }}
-                    {% endcomponent %}
-                </div>
-            """
-
-        html = TestComponent.render(
-            args=[123, "str"],
-            kwargs={"variable": "test", "another": 1},
-            slots={"my_slot": "MY_SLOT"},
-        )
-        assertHTMLEqual(
-            html,
-            """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                <div class="wrapper" data-djc-id-ca1bc40="">
-                    args: Args(variable=123, another='str')
-                    kwargs: Kwargs(variable='test', another=1)
-                    slots: Slots(my_slot=<Slot component_name='TestComponent' slot_name='my_slot'>)
                     arg: 123
                     kwarg: test
                     slot: <Slot component_name='TestComponent' slot_name='my_slot'>
@@ -952,8 +762,8 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                <div class="wrapper" data-djc-id-ca1bc41="">
+            <div class="test-component">
+                <div class="wrapper">
                     <div class="subtitle">SUBTITLE_FILLED</div>
                 </div>
             </div>
@@ -1141,7 +951,7 @@ class TestComponentRender:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc3e>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
@@ -1163,7 +973,7 @@ class TestComponentRender:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc3e>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
@@ -1186,7 +996,7 @@ class TestComponentRender:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc3e>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
@@ -1234,7 +1044,7 @@ class TestComponentRender:
             rendered,
             """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3e lang="en">
+            <html lang="en">
             <body>
                 <main role="main">
                 <div class='container main-container'>
@@ -1259,7 +1069,7 @@ class TestComponentRender:
         rendered = TestComponent.render()
         assertHTMLEqual(
             rendered,
-            "Variable: <strong data-djc-id-ca1bc3e>ca1bc3e</strong>",
+            "Variable: <strong>ca1bc3e</strong>",
         )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -1275,7 +1085,7 @@ class TestComponentRender:
         rendered_resp = TestComponent.render_to_response()
         assertHTMLEqual(
             rendered_resp.content.decode("utf-8"),
-            "Variable: <strong data-djc-id-ca1bc3e>ca1bc3e</strong>",
+            "Variable: <strong>ca1bc3e</strong>",
         )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -1364,702 +1174,6 @@ class TestComponentRender:
         ):
             Root.render()
 
-
-@djc_test
-class TestComponentHook:
-    def _gen_slotted_component(self, calls: List[str]):
-        class Slotted(Component):
-            template_file = "test_component/slotted.html"
-
-            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-                calls.append("slotted__on_render_before")
-
-            def on_render(self, context: Context, template: Optional[Template]):
-                calls.append("slotted__on_render_pre")
-                _html, _error = yield lambda: template.render(context)  # type: ignore[union-attr]
-
-                calls.append("slotted__on_render_post")
-
-            # Check that modifying the context or template does nothing
-            def on_render_after(
-                self,
-                context: Context,
-                template: Optional[Template],
-                html: Optional[str],
-                error: Optional[Exception],
-            ) -> None:
-                calls.append("slotted__on_render_after")
-
-        return Slotted
-
-    def _gen_inner_component(self, calls: List[str]):
-        class Inner(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                Inner start
-                {% slot "content" default / %}
-                Inner end
-            """
-
-            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-                calls.append("inner__on_render_before")
-
-            def on_render(self, context: Context, template: Optional[Template]):
-                calls.append("inner__on_render_pre")
-                if template is None:
-                    yield None
-                else:
-                    _html, _error = yield lambda: template.render(context)
-
-                calls.append("inner__on_render_post")
-
-            # Check that modifying the context or template does nothing
-            def on_render_after(
-                self,
-                context: Context,
-                template: Optional[Template],
-                html: Optional[str],
-                error: Optional[Exception],
-            ) -> None:
-                calls.append("inner__on_render_after")
-
-        return Inner
-
-    def _gen_middle_component(self, calls: List[str]):
-        class Middle(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                Middle start
-                {% component "inner" %}
-                    {% component "slotted" / %}
-                {% endcomponent %}
-                Middle text
-                {% component "inner" / %}
-                Middle end
-            """
-
-            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-                calls.append("middle__on_render_before")
-
-            def on_render(self, context: Context, template: Optional[Template]):
-                calls.append("middle__on_render_pre")
-                _html, _error = yield lambda: template.render(context)  # type: ignore[union-attr]
-
-                calls.append("middle__on_render_post")
-
-            # Check that modifying the context or template does nothing
-            def on_render_after(
-                self,
-                context: Context,
-                template: Optional[Template],
-                html: Optional[str],
-                error: Optional[Exception],
-            ) -> None:
-                calls.append("middle__on_render_after")
-
-        return Middle
-
-    def _gen_outer_component(self, calls: List[str]):
-        class Outer(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                Outer start
-                {% component "middle" / %}
-                Outer text
-                {% component "middle" / %}
-                Outer end
-            """
-
-            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-                calls.append("outer__on_render_before")
-
-            def on_render(self, context: Context, template: Optional[Template]):
-                calls.append("outer__on_render_pre")
-                _html, _error = yield lambda: template.render(context)  # type: ignore[union-attr]
-
-                calls.append("outer__on_render_post")
-
-            # Check that modifying the context or template does nothing
-            def on_render_after(
-                self,
-                context: Context,
-                template: Optional[Template],
-                html: Optional[str],
-                error: Optional[Exception],
-            ) -> None:
-                calls.append("outer__on_render_after")
-
-        return Outer
-
-    def _gen_broken_component(self):
-        class BrokenComponent(Component):
-            def on_render(self, context: Context, template: Template):
-                raise ValueError("BROKEN")
-
-        return BrokenComponent
-
-    def test_order(self):
-        calls: List[str] = []
-
-        registry.register("slotted", self._gen_slotted_component(calls))
-        registry.register("inner", self._gen_inner_component(calls))
-        registry.register("middle", self._gen_middle_component(calls))
-        Outer = self._gen_outer_component(calls)
-
-        result = Outer.render()
-
-        assertHTMLEqual(
-            result,
-            """
-            Outer start
-                Middle start
-                    Inner start
-                        Hello from slotted
-                    Inner end
-                    Middle text
-                    Inner start
-                    Inner end
-                Middle end
-                Outer text
-                Middle start
-                    Inner start
-                        Hello from slotted
-                    Inner end
-                    Middle text
-                    Inner start
-                    Inner end
-                Middle end
-            Outer end
-            """,
-        )
-
-        assert calls == [
-            "outer__on_render_before",
-            "outer__on_render_pre",
-            "middle__on_render_before",
-            "middle__on_render_before",
-            "middle__on_render_pre",
-            "inner__on_render_before",
-            "inner__on_render_before",
-            "inner__on_render_pre",
-            "slotted__on_render_before",
-            "slotted__on_render_pre",
-            "slotted__on_render_post",
-            "slotted__on_render_after",
-            "inner__on_render_post",
-            "inner__on_render_after",
-            "inner__on_render_pre",
-            "inner__on_render_post",
-            "inner__on_render_after",
-            "middle__on_render_post",
-            "middle__on_render_after",
-            "middle__on_render_pre",
-            "inner__on_render_before",
-            "inner__on_render_before",
-            "inner__on_render_pre",
-            "slotted__on_render_before",
-            "slotted__on_render_pre",
-            "slotted__on_render_post",
-            "slotted__on_render_after",
-            "inner__on_render_post",
-            "inner__on_render_after",
-            "inner__on_render_pre",
-            "inner__on_render_post",
-            "inner__on_render_after",
-            "middle__on_render_post",
-            "middle__on_render_after",
-            "outer__on_render_post",
-            "outer__on_render_after",
-        ]
-
-    def test_context(self):
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                from_on_before: {{ from_on_before }}
-                from_on_before__edited1: {{ from_on_before__edited1 }}
-                from_on_before__edited2: {{ from_on_before__edited2 }}
-                from_on_render_pre: {{ from_on_render_pre }}
-                from_on_render_post: {{ from_on_render_post }}
-                from_on_render_pre__edited2: {{ from_on_render_pre__edited2 }}
-                from_on_render_post__edited2: {{ from_on_render_post__edited2 }}
-                from_on_after: {{ from_on_after }}
-            """
-
-            def on_render_before(self, context: Context, template: Template) -> None:
-                # Insert value into the Context
-                context["from_on_before"] = "1"
-
-            def on_render(self, context: Context, template: Template):
-                context["from_on_render_pre"] = "2"
-                # Check we can modify entries set by other methods
-                context["from_on_before__edited1"] = context["from_on_before"] + " (on_render)"
-
-                _html, _error = yield lambda: template.render(context)
-
-                context["from_on_render_post"] = "3"
-
-            # NOTE: Since this is called AFTER the render, the values set here should NOT
-            #       make it to the rendered output.
-            def on_render_after(
-                self,
-                context: Context,
-                template: Template,
-                html: Optional[str],
-                error: Optional[Exception],
-            ) -> None:
-                context["from_on_after"] = "4"
-                # Check we can modify entries set by other methods
-                # NOTE: These also check that the previous values are available
-                context["from_on_before__edited2"] = context["from_on_before"] + " (on_render_after)"
-                context["from_on_render_pre__edited2"] = context["from_on_render_pre"] + " (on_render_after)"
-                context["from_on_render_post__edited2"] = context["from_on_render_post"] + " (on_render_after)"
-
-        rendered = SimpleComponent.render()
-
-        assertHTMLEqual(
-            rendered,
-            """
-            from_on_before: 1
-            from_on_before__edited1: 1 (on_render)
-            from_on_before__edited2:
-            from_on_render_pre: 2
-            from_on_render_post:
-            from_on_render_pre__edited2:
-            from_on_render_post__edited2:
-            from_on_after:
-            """,
-        )
-
-    def test_template(self):
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                text
-            """
-
-            def on_render_before(self, context: Context, template: Template) -> None:
-                # Insert text into the Template
-                #
-                # NOTE: Users should NOT do this, because this will insert the text every time
-                #       the component is rendered.
-                template.nodelist.append(TextNode("\n---\nFROM_ON_BEFORE"))
-
-            def on_render(self, context: Context, template: Template):
-                template.nodelist.append(TextNode("\n---\nFROM_ON_RENDER_PRE"))
-
-                _html, _error = yield lambda: template.render(context)
-
-                template.nodelist.append(TextNode("\n---\nFROM_ON_RENDER_POST"))
-
-            # NOTE: Since this is called AFTER the render, the values set here should NOT
-            #       make it to the rendered output.
-            def on_render_after(
-                self,
-                context: Context,
-                template: Template,
-                html: Optional[str],
-                error: Optional[Exception],
-            ) -> None:
-                template.nodelist.append(TextNode("\n---\nFROM_ON_AFTER"))
-
-        rendered = SimpleComponent.render()
-        assertHTMLEqual(
-            rendered,
-            """
-            text
-            ---
-            FROM_ON_BEFORE
-            ---
-            FROM_ON_RENDER_PRE
-            """,
-        )
-
-    def test_lambda_yield(self):
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                text
-            """
-
-            def on_render(self, context: Context, template: Template):
-                html, _error = yield lambda: template.render(context)
-                return html + "<p>Hello</p>"
-
-        rendered = SimpleComponent.render()
-        assertHTMLEqual(
-            rendered,
-            "text<p data-djc-id-ca1bc3e>Hello</p>",
-        )
-
-        # Works without lambda
-        class SimpleComponent2(SimpleComponent):
-            def on_render(self, context: Context, template: Template):
-                html, _error = yield template.render(context)
-                return html + "<p>Hello</p>"
-
-        rendered2 = SimpleComponent2.render()
-        assertHTMLEqual(
-            rendered2,
-            "text<p data-djc-id-ca1bc3f>Hello</p>",
-        )
-
-    def test_lambda_yield_error(self):
-        def broken_template():
-            raise ValueError("BROKEN")
-
-        class SimpleComponent(Component):
-            def on_render(self, context: Context, template: Template):
-                _html, error = yield lambda: broken_template()
-                error.args = ("ERROR MODIFIED",)
-
-        with pytest.raises(
-            ValueError, match=re.escape("An error occured while rendering components SimpleComponent:\nERROR MODIFIED")
-        ):
-            SimpleComponent.render()
-
-        # Does NOT work without lambda
-        class SimpleComponent2(SimpleComponent):
-            def on_render(self, context: Context, template: Template):
-                # This raises an error instead of capturing it,
-                # so we never get to modifying the error.
-                _html, error = yield broken_template()
-                error.args = ("ERROR MODIFIED",)
-
-        with pytest.raises(
-            ValueError, match=re.escape("An error occured while rendering components SimpleComponent2:\nBROKEN")
-        ):
-            SimpleComponent2.render()
-
-    def test_on_render_no_yield(self):
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                text
-            """
-
-            def on_render(self, context: Context, template: Template):
-                return "OVERRIDDEN"
-
-        rendered = SimpleComponent.render()
-        assert rendered == "OVERRIDDEN"
-
-    def test_on_render_reraise_error(self):
-        registry.register("broken", self._gen_broken_component())
-
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                {% component "broken" / %}
-            """
-
-            def on_render(self, context: Context, template: Template):
-                _html, error = yield lambda: template.render(context)
-
-                raise error from None  # Re-raise original error
-
-        with pytest.raises(ValueError, match=re.escape("BROKEN")):
-            SimpleComponent.render()
-
-    def test_on_render_multiple_yields(self):
-        registry.register("broken", self._gen_broken_component())
-
-        results = []
-
-        class SimpleComponent(Component):
-            template: types.django_html = """
-                {% if case == 1 %}
-                    {% component "broken" / %}
-                {% elif case == 2 %}
-                    <div>Hello</div>
-                {% elif case == 3 %}
-                    <div>There</div>
-                {% endif %}
-            """
-
-            def on_render(self, context: Context, template: Optional[Template]):
-                assert template is not None
-
-                with context.push({"case": 1}):
-                    html1, error1 = yield lambda: template.render(context)
-                    results.append((html1, error1))
-
-                with context.push({"case": 2}):
-                    html2, error2 = yield lambda: template.render(context)
-                    results.append((html2.strip(), error2))
-
-                with context.push({"case": 3}):
-                    html3, error3 = yield lambda: template.render(context)
-                    results.append((html3.strip(), error3))
-
-                html4, error4 = yield "<div>Other result</div>"
-                results.append((html4, error4))
-
-                return "<div>Final result</div>"
-
-        result = SimpleComponent.render()
-        assert result == '<div data-djc-id-ca1bc3e="">Final result</div>'
-
-        # NOTE: Exceptions are stubborn, comparison evaluates to False even with the same message.
-        assert results[0][0] is None
-        assert isinstance(results[0][1], ValueError)
-        assert results[0][1].args[0] == "An error occured while rendering components broken:\nBROKEN"
-
-        # NOTE: It's important that all the results are wrapped in `<div>`
-        #       so we can check if the djc-id attribute was set.
-        assert results[1:] == [
-            ('<div data-djc-id-ca1bc3e="">Hello</div>', None),
-            ('<div data-djc-id-ca1bc3e="">There</div>', None),
-            ('<div data-djc-id-ca1bc3e="">Other result</div>', None),
-        ]
-
-    @djc_test(
-        parametrize=(
-            ["template", "action", "method"],
-            [
-                # on_render - return None
-                ["simple", "return_none", "on_render"],
-                ["broken", "return_none", "on_render"],
-                [None, "return_none", "on_render"],
-                # on_render_after - return None
-                ["simple", "return_none", "on_render_after"],
-                ["broken", "return_none", "on_render_after"],
-                [None, "return_none", "on_render_after"],
-                # on_render - no return
-                ["simple", "no_return", "on_render"],
-                ["broken", "no_return", "on_render"],
-                [None, "no_return", "on_render"],
-                # on_render_after - no return
-                ["simple", "no_return", "on_render_after"],
-                ["broken", "no_return", "on_render_after"],
-                [None, "no_return", "on_render_after"],
-                # on_render - raise error
-                ["simple", "raise_error", "on_render"],
-                ["broken", "raise_error", "on_render"],
-                [None, "raise_error", "on_render"],
-                # on_render_after - raise error
-                ["simple", "raise_error", "on_render_after"],
-                ["broken", "raise_error", "on_render_after"],
-                [None, "raise_error", "on_render_after"],
-                # on_render - return html
-                ["simple", "return_html", "on_render"],
-                ["broken", "return_html", "on_render"],
-                [None, "return_html", "on_render"],
-                # on_render_after - return html
-                ["simple", "return_html", "on_render_after"],
-                ["broken", "return_html", "on_render_after"],
-                [None, "return_html", "on_render_after"],
-            ],
-            None,
-        ),
-    )
-    def test_result_interception(
-        self,
-        template: Optional[Literal["simple", "broken"]],
-        action: Literal["return_none", "no_return", "raise_error", "return_html"],
-        method: Literal["on_render", "on_render_after"],
-    ):
-        calls: List[str] = []
-
-        Broken = self._gen_broken_component()
-        Slotted = self._gen_slotted_component(calls)
-        Inner = self._gen_inner_component(calls)
-        Middle = self._gen_middle_component(calls)
-        Outer = self._gen_outer_component(calls)
-
-        # Make modifications to the components based on the parameters
-
-        # Set template
-        if template is None:
-
-            class Inner(Inner):  # type: ignore  # noqa: PGH003
-                template = None
-
-        elif template == "broken":
-
-            class Inner(Inner):  # type: ignore  # noqa: PGH003
-                template = "{% component 'broken' / %}"
-
-        elif template == "simple":
-            pass
-
-        # Set `on_render` behavior
-        if method == "on_render":
-            if action == "return_none":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Optional[Template]):
-                        if template is None:
-                            yield None
-                        else:
-                            _html, _error = yield lambda: template.render(context)
-                        return None  # noqa: PLR1711
-
-            elif action == "no_return":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Optional[Template]):
-                        if template is None:
-                            yield None
-                        else:
-                            _html, _error = yield lambda: template.render(context)
-
-            elif action == "raise_error":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Optional[Template]):
-                        if template is None:
-                            yield None
-                        else:
-                            _html, _error = yield lambda: template.render(context)
-                        raise ValueError("ERROR_FROM_ON_RENDER")
-
-            elif action == "return_html":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Optional[Template]):
-                        if template is None:
-                            yield None
-                        else:
-                            _html, _error = yield lambda: template.render(context)
-                        return "HTML_FROM_ON_RENDER"
-
-            else:
-                raise pytest.fail(f"Unknown action: {action}")
-
-        # Set `on_render_after` behavior
-        elif method == "on_render_after":
-            if action == "return_none":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render_after(
-                        self,
-                        context: Context,
-                        template: Template,
-                        html: Optional[str],
-                        error: Optional[Exception],
-                    ):
-                        return None
-
-            elif action == "no_return":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render_after(
-                        self,
-                        context: Context,
-                        template: Template,
-                        html: Optional[str],
-                        error: Optional[Exception],
-                    ):
-                        pass
-
-            elif action == "raise_error":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render_after(
-                        self,
-                        context: Context,
-                        template: Template,
-                        html: Optional[str],
-                        error: Optional[Exception],
-                    ):
-                        raise ValueError("ERROR_FROM_ON_RENDER")
-
-            elif action == "return_html":
-
-                class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render_after(
-                        self,
-                        context: Context,
-                        template: Template,
-                        html: Optional[str],
-                        error: Optional[Exception],
-                    ):
-                        return "HTML_FROM_ON_RENDER"
-
-            else:
-                raise pytest.fail(f"Unknown action: {action}")
-        else:
-            raise pytest.fail(f"Unknown method: {method}")
-
-        registry.register("broken", Broken)
-        registry.register("slotted", Slotted)
-        registry.register("inner", Inner)
-        registry.register("middle", Middle)
-        registry.register("outer", Outer)
-
-        def _gen_expected_output(inner1: str, inner2: str):
-            return f"""
-                Outer start
-                Middle start
-                {inner1}
-                Middle text
-                {inner2}
-                Middle end
-                Outer text
-                Middle start
-                {inner1}
-                Middle text
-                {inner2}
-                Middle end
-                Outer end
-            """
-
-        # Assert based on the behavior
-        if template is None:
-            # Overriden HTML
-            if action == "return_html":
-                expected = _gen_expected_output(inner1="HTML_FROM_ON_RENDER", inner2="HTML_FROM_ON_RENDER")
-                result = Outer.render()
-                assertHTMLEqual(result, expected)
-            # Overriden error
-            elif action == "raise_error":
-                with pytest.raises(ValueError, match="ERROR_FROM_ON_RENDER"):
-                    Outer.render()
-            # Original output
-            elif action in ["return_none", "no_return"]:
-                expected = _gen_expected_output(inner1="", inner2="")
-                result = Outer.render()
-                assertHTMLEqual(result, expected)
-            else:
-                raise pytest.fail(f"Unknown action: {action}")
-
-        elif template == "simple":
-            # Overriden HTML
-            if action == "return_html":
-                expected = _gen_expected_output(inner1="HTML_FROM_ON_RENDER", inner2="HTML_FROM_ON_RENDER")
-                result = Outer.render()
-                assertHTMLEqual(result, expected)
-            # Overriden error
-            elif action == "raise_error":
-                with pytest.raises(ValueError, match="ERROR_FROM_ON_RENDER"):
-                    Outer.render()
-            # Original output
-            elif action in ["return_none", "no_return"]:
-                expected = _gen_expected_output(
-                    inner1="Inner start Hello from slotted Inner end",
-                    inner2="Inner start Inner end",
-                )
-                result = Outer.render()
-                assertHTMLEqual(result, expected)
-            else:
-                raise pytest.fail(f"Unknown action: {action}")
-
-        elif template == "broken":
-            # Overriden HTML
-            if action == "return_html":
-                expected = _gen_expected_output(inner1="HTML_FROM_ON_RENDER", inner2="HTML_FROM_ON_RENDER")
-                result = Outer.render()
-                assertHTMLEqual(result, expected)
-            # Overriden error
-            elif action == "raise_error":
-                with pytest.raises(ValueError, match="ERROR_FROM_ON_RENDER"):
-                    Outer.render()
-            # Original output
-            elif action in ["return_none", "no_return"]:
-                with pytest.raises(ValueError, match="broken"):
-                    Outer.render()
-            else:
-                raise pytest.fail(f"Unknown action: {action}")
-
-        else:
-            raise pytest.fail(f"Unknown template: {template}")
 
 
 @djc_test

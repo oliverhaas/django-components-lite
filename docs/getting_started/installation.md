@@ -56,20 +56,6 @@
     ]
     ```
 
-5. Add django-component's URL paths to your `urlpatterns`:
-
-    Django components already prefixes all URLs with `components/`. So when you are
-    adding the URLs to `urlpatterns`, you can use an empty string as the first argument:
-
-    ```python
-    from django.urls import include, path
-
-    urlpatterns = [
-        ...
-        path("", include("django_components.urls")),
-    ]
-    ```
-
 ## Adding support for JS and CSS
 
 If you want to use JS or CSS with components, you will need to:
@@ -89,32 +75,8 @@ If you want to use JS or CSS with components, you will need to:
     ```
 
 
-2. _Optional._ If you want to change where the JS and CSS is rendered, use
-    [`{% component_js_dependencies %}`](../reference/template_tags.md#component_css_dependencies)
-    and [`{% component_css_dependencies %}`](../reference/template_tags.md#component_js_dependencies).
-
-    By default, the JS `<script>` and CSS `<link>` tags are automatically inserted
-    into the HTML (See [Default JS / CSS locations](../../concepts/advanced/rendering_js_css/#default-js-css-locations)).
-
-    ```django
-    <!doctype html>
-    <html>
-      <head>
-        ...
-        {% component_css_dependencies %}
-      </head>
-      <body>
-        ...
-        {% component_js_dependencies %}
-      </body>
-    </html>
-    ```
-
-3. _Optional._ By default, components' JS and CSS files are cached in memory.
-   
-    If you want to change the cache backend, set the [`COMPONENTS.cache`](../reference/settings.md#django_components.app_settings.ComponentsSettings.cache) setting.
-
-    Read more in [Caching](../../guides/setup/caching).
+    Components' JS and CSS files are served as static files. When a component is rendered,
+    `<link>` and `<script>` tags are automatically prepended to the component's HTML output.
 
 ## Optional
 

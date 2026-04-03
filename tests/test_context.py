@@ -148,8 +148,8 @@ class TestContext:
         template = Template(template_str)
         rendered = template.render(Context())
 
-        assertInHTML("<h1 data-djc-id-ca1bc43>Shadowing variable = override</h1>", rendered)
-        assertInHTML("<h1 data-djc-id-ca1bc44>Shadowing variable = slot_default_override</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = override</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = slot_default_override</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -167,9 +167,9 @@ class TestContext:
         template = Template(template_str)
         rendered = template.render(Context())
 
-        assertInHTML("<h1 data-djc-id-ca1bc43>Uniquely named variable = unique_val</h1>", rendered)
+        assertInHTML("<h1>Uniquely named variable = unique_val</h1>", rendered)
         assertInHTML(
-            "<h1 data-djc-id-ca1bc44>Uniquely named variable = slot_default_unique</h1>",
+            "<h1>Uniquely named variable = slot_default_unique</h1>",
             rendered,
         )
 
@@ -190,8 +190,8 @@ class TestContext:
         template = Template(template_str)
         rendered = template.render(Context())
 
-        assertInHTML("<h1 data-djc-id-ca1bc45>Shadowing variable = override</h1>", rendered)
-        assertInHTML("<h1 data-djc-id-ca1bc46>Shadowing variable = shadow_from_slot</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = override</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = shadow_from_slot</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -211,8 +211,8 @@ class TestContext:
         template = Template(template_str)
         rendered = template.render(Context())
 
-        assertInHTML("<h1 data-djc-id-ca1bc45>Uniquely named variable = unique_val</h1>", rendered)
-        assertInHTML("<h1 data-djc-id-ca1bc46>Uniquely named variable = unique_from_slot</h1>", rendered)
+        assertInHTML("<h1>Uniquely named variable = unique_val</h1>", rendered)
+        assertInHTML("<h1>Uniquely named variable = unique_from_slot</h1>", rendered)
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_nested_component_context_shadows_outer_context_with_unfilled_slots_and_component_tag(
@@ -229,8 +229,8 @@ class TestContext:
         template = Template(template_str)
         rendered = template.render(Context({"shadowing_variable": "NOT SHADOWED"}))
 
-        assertInHTML("<h1 data-djc-id-ca1bc43>Shadowing variable = override</h1>", rendered)
-        assertInHTML("<h1 data-djc-id-ca1bc44>Shadowing variable = slot_default_override</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = override</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = slot_default_override</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -253,8 +253,8 @@ class TestContext:
         template = Template(template_str)
         rendered = template.render(Context({"shadowing_variable": "NOT SHADOWED"}))
 
-        assertInHTML("<h1 data-djc-id-ca1bc45>Shadowing variable = override</h1>", rendered)
-        assertInHTML("<h1 data-djc-id-ca1bc46>Shadowing variable = shadow_from_slot</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = override</h1>", rendered)
+        assertInHTML("<h1>Shadowing variable = shadow_from_slot</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
 
@@ -277,15 +277,15 @@ class TestParentArgs:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc3f>
+            <div>
                 <h1>Parent content</h1>
-                <h1 data-djc-id-ca1bc43>Shadowing variable = passed_in</h1>
-                <h1 data-djc-id-ca1bc43>Uniquely named variable = unique_val</h1>
+                <h1>Shadowing variable = passed_in</h1>
+                <h1>Uniquely named variable = unique_val</h1>
             </div>
-            <div data-djc-id-ca1bc3f>
+            <div>
                 <h2>Slot content</h2>
-                <h1 data-djc-id-ca1bc44>Shadowing variable = slot_default_override</h1>
-                <h1 data-djc-id-ca1bc44>Uniquely named variable = passed_in</h1>
+                <h1>Shadowing variable = slot_default_override</h1>
+                <h1>Uniquely named variable = passed_in</h1>
             </div>
             """,
         )
@@ -306,15 +306,15 @@ class TestParentArgs:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc3f>
+            <div>
                 <h1>Parent content</h1>
-                <h1 data-djc-id-ca1bc43>Shadowing variable = passed_in</h1>
-                <h1 data-djc-id-ca1bc43>Uniquely named variable = unique_val</h1>
+                <h1>Shadowing variable = passed_in</h1>
+                <h1>Uniquely named variable = unique_val</h1>
             </div>
-            <div data-djc-id-ca1bc3f>
+            <div>
                 <h2>Slot content</h2>
-                <h1 data-djc-id-ca1bc44>Shadowing variable = slot_default_override</h1>
-                <h1 data-djc-id-ca1bc44>Uniquely named variable = passed_in</h1>
+                <h1>Shadowing variable = slot_default_override</h1>
+                <h1>Uniquely named variable = passed_in</h1>
             </div>
             """,
         )
@@ -324,10 +324,9 @@ class TestParentArgs:
         parametrize=(
             ["components_settings", "first_val", "second_val"],
             [
-                [{"context_behavior": "django"}, "passed_in", "passed_in"],
-                [{"context_behavior": "isolated"}, "passed_in", ""],
+                [{}, "passed_in", ""],
             ],
-            ["django", "isolated"],
+            ["isolated"],
         ),
     )
     def test_parent_args_available_in_slots(self, components_settings, first_val, second_val):
@@ -350,14 +349,14 @@ class TestParentArgs:
         assertHTMLEqual(
             rendered,
             f"""
-            <div data-djc-id-ca1bc41>
+            <div>
                 <h1>Parent content</h1>
-                <h1 data-djc-id-ca1bc45>Shadowing variable = {first_val}</h1>
-                <h1 data-djc-id-ca1bc45>Uniquely named variable = unique_val</h1>
+                <h1>Shadowing variable = {first_val}</h1>
+                <h1>Uniquely named variable = unique_val</h1>
             </div>
-            <div data-djc-id-ca1bc41>
-                <h1 data-djc-id-ca1bc46>Shadowing variable = value_from_slot</h1>
-                <h1 data-djc-id-ca1bc46>Uniquely named variable = {second_val}</h1>
+            <div>
+                <h1>Shadowing variable = value_from_slot</h1>
+                <h1>Uniquely named variable = {second_val}</h1>
             </div>
             """,
         )
@@ -376,7 +375,7 @@ class TestContextCalledOnce:
         rendered = template.render(Context()).strip().replace("\n", "")
         assertHTMLEqual(
             rendered,
-            '<p class="incrementer" data-djc-id-ca1bc3f>value=1;calls=1</p>',
+            '<p class="incrementer">value=1;calls=1</p>',
         )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -392,7 +391,7 @@ class TestContextCalledOnce:
         assertHTMLEqual(
             rendered,
             """
-            <p class="incrementer" data-djc-id-ca1bc3f>value=3;calls=1</p>
+            <p class="incrementer">value=3;calls=1</p>
             """,
         )
 
@@ -406,7 +405,7 @@ class TestContextCalledOnce:
         template = Template(template_str)
         rendered = template.render(Context()).strip()
 
-        assertHTMLEqual(rendered, '<p class="incrementer" data-djc-id-ca1bc3f>value=1;calls=1</p>')
+        assertHTMLEqual(rendered, '<p class="incrementer">value=1;calls=1</p>')
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_component_and_arg(self, components_settings):
@@ -418,7 +417,7 @@ class TestContextCalledOnce:
         template = Template(template_str)
         rendered = template.render(Context()).strip()
 
-        assertHTMLEqual(rendered, '<p class="incrementer" data-djc-id-ca1bc3f>value=4;calls=1</p>')
+        assertHTMLEqual(rendered, '<p class="incrementer">value=4;calls=1</p>')
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_slot(self, components_settings):
@@ -437,8 +436,8 @@ class TestContextCalledOnce:
         assertHTMLEqual(
             rendered,
             """
-            <p class="incrementer" data-djc-id-ca1bc40>value=1;calls=1</p>
-            <p data-djc-id-ca1bc40>slot</p>
+            <p class="incrementer">value=1;calls=1</p>
+            <p>slot</p>
             """,
             rendered,
         )
@@ -460,8 +459,8 @@ class TestContextCalledOnce:
         assertHTMLEqual(
             rendered,
             """
-            <p class="incrementer" data-djc-id-ca1bc40>value=4;calls=1</p>
-            <p data-djc-id-ca1bc40>slot</p>
+            <p class="incrementer">value=4;calls=1</p>
+            <p>slot</p>
             """,
             rendered,
         )
@@ -473,10 +472,9 @@ class TestComponentsCanAccessOuterContext:
         parametrize=(
             ["components_settings", "expected_value"],
             [
-                [{"context_behavior": "django"}, "outer_value"],
-                [{"context_behavior": "isolated"}, ""],
+                [{}, ""],
             ],
-            ["django", "isolated"],
+            ["isolated"],
         ),
     )
     def test_simple_component_can_use_outer_context(self, components_settings, expected_value):
@@ -490,7 +488,7 @@ class TestComponentsCanAccessOuterContext:
         assertHTMLEqual(
             rendered,
             f"""
-            Variable: <strong data-djc-id-ca1bc3f> {expected_value} </strong>
+            Variable: <strong> {expected_value} </strong>
             """,
         )
 
@@ -502,7 +500,7 @@ class TestIsolatedContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: types.django_html = """
             {% load component_tags %}
-            {% component 'simple_component' variable=variable only %}{% endcomponent %}
+            {% component 'simple_component' variable=variable %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -513,7 +511,7 @@ class TestIsolatedContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: types.django_html = """
             {% load component_tags %}
-            {% component 'simple_component' only %}{% endcomponent %}
+            {% component 'simple_component' %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -522,7 +520,7 @@ class TestIsolatedContext:
 
 @djc_test
 class TestIsolatedContextSetting:
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_tag_includes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -535,7 +533,7 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" in rendered
 
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_tag_excludes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -548,7 +546,7 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" not in rendered
 
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_includes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -562,7 +560,7 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" in rendered
 
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_excludes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -985,7 +983,7 @@ class TestOuterContextProperty:
 
         template_str: types.django_html = """
             {% load component_tags %}
-            {% component 'outer_context_component' only %}{% endcomponent %}
+            {% component 'outer_context_component' %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -1060,7 +1058,7 @@ class TestContextVarsIsFilled:
         rendered = Template(template).render(Context())
 
         expected = """
-            <div class="frontmatter-component" data-djc-id-ca1bc42>
+            <div class="frontmatter-component">
                 title: True
                 my_title: False
                 my_title_1: False
@@ -1082,7 +1080,7 @@ class TestContextVarsIsFilled:
         """
         rendered = Template(template).render(Context())
         expected = """
-            <div class="frontmatter-component" data-djc-id-ca1bc3f>
+            <div class="frontmatter-component">
                 bla bla
                 title: False
                 my_title: False
@@ -1102,7 +1100,7 @@ class TestContextVarsIsFilled:
             {% component "conditional_slots" %}{% endcomponent %}
         """
         expected = """
-            <div class="frontmatter-component" data-djc-id-ca1bc3f>
+            <div class="frontmatter-component">
             <div class="title">
             Title
             </div>
@@ -1122,7 +1120,7 @@ class TestContextVarsIsFilled:
             {% endcomponent %}
         """
         expected = """
-            <div class="frontmatter-component" data-djc-id-ca1bc40>
+            <div class="frontmatter-component">
                 <div class="title">
                     Title
                 </div>
@@ -1148,7 +1146,7 @@ class TestContextVarsIsFilled:
             {% endcomponent %}
         """
         expected = """
-           <div class="frontmatter-component" data-djc-id-ca1bc40>
+           <div class="frontmatter-component">
              <div class="title">
                 Title
              </div>
@@ -1173,7 +1171,7 @@ class TestContextVarsIsFilled:
            {% endcomponent %}
         """
         expected = """
-           <div class="frontmatter-component" data-djc-id-ca1bc3f>
+           <div class="frontmatter-component">
              <div class="title">
              Title
              </div>
@@ -1207,7 +1205,7 @@ class TestContextVarsIsFilled:
             {% endcomponent %}
         """
         expected = """
-            <div class="frontmatter-component" data-djc-id-ca1bc3f>
+            <div class="frontmatter-component">
                 <div class="title">
                 Title
                 </div>

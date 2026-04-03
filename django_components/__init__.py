@@ -24,7 +24,6 @@ from django_components.component_registry import (
 )
 from django_components.dependencies import DependenciesStrategy, render_dependencies
 from django_components.library import TagProtectedError
-from django_components.node import BaseNode, template_tag
 from django_components.slots import (
     FillNode,
     Slot,
@@ -47,7 +46,6 @@ from django_components.util.types import Empty
 
 __all__ = [
     "AlreadyRegistered",
-    "BaseNode",
     "Component",
     "ComponentFileEntry",
     "ComponentInput",
@@ -83,6 +81,5 @@ __all__ = [
     "register",
     "registry",
     "render_dependencies",
-    "template_tag",
     "types",
 ]

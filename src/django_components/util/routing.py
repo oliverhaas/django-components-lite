@@ -1,24 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, Optional, Protocol, Type, TypeVar
+from typing import Any, Dict, Iterable, Optional, Protocol, Type
 
-TClass = TypeVar("TClass", bound=Type[Any])
-
-
-# Mark object as related to extension URLs so we can place these in
-# a separate documentation section
-def mark_extension_url_api(obj: TClass) -> TClass:
-    obj._extension_url_api = True
-    return obj
-
-
-@mark_extension_url_api
 class URLRouteHandler(Protocol):
     """Framework-agnostic 'view' function for routes"""
 
     def __call__(self, request: Any, *args: Any, **kwargs: Any) -> Any: ...
 
 
-@mark_extension_url_api
 @dataclass
 class URLRoute:
     """

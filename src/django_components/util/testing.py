@@ -30,12 +30,7 @@ from django.test import override_settings
 from django_components import ComponentsSettings
 from django_components.component import ALL_COMPONENTS, Component, component_node_subclasses_by_name
 from django_components.component_registry import ALL_REGISTRIES, ComponentRegistry
-from django_components.extension import extensions
-from django_components.perfutil.provide import provide_cache
 from django_components.template import _reset_component_template_file_cache, loading_components
-
-if TYPE_CHECKING:
-    from django_components.component_media import ComponentMedia
 
 # NOTE: `ReferenceType` is NOT a generic pre-3.9
 if sys.version_info >= (3, 9):
@@ -467,8 +462,6 @@ def _setup_djc_global_state(
     from django_components.app_settings import app_settings  # noqa: PLC0415
 
     app_settings._load_settings()
-    extensions._initialized = False
-    extensions._init_app()
 
 
 def _clear_djc_global_state(
@@ -503,9 +496,6 @@ def _clear_djc_global_state(
     # if component_media_cache:
     #     component_media_cache.clear()
 
-    if provide_cache:
-        provide_cache.clear()
-
     # Remove cached Node subclasses
     component_node_subclasses_by_name.clear()
 
@@ -515,14 +505,7 @@ def _clear_djc_global_state(
         if comp_cls is None:
             continue
 
-        for file_attr, value_attr in [("template_file", "template"), ("js_file", "js"), ("css_file", "css")]:
-            # If both fields are set, then the value was set from the file field.
-            # Since we have some tests that check for these, we need to reset the state.
-            comp_media: ComponentMedia = comp_cls._component_media  # type: ignore[attr-defined]
-            if getattr(comp_media, file_attr, None) and getattr(comp_media, value_attr, None):
-                # Remove the value field, so it's not used in the next test
-                setattr(comp_media, value_attr, None)
-                comp_media.reset()
+        pass
 
     # Remove components that were created during the test
     initial_components_set = set(initial_components)
@@ -567,9 +550,6 @@ def _clear_djc_global_state(
     for mod in LOADED_MODULES:
         sys.modules.pop(mod, None)
     LOADED_MODULES.clear()
-
-    # Clear extensions caches
-    extensions._route_to_url.clear()
 
     # Clear other djc state
     _reset_component_template_file_cache()

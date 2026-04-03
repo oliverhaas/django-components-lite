@@ -2,19 +2,12 @@ import sys
 from typing import TYPE_CHECKING, Callable, Dict, List, NamedTuple, Optional, Set, Type, TypeVar, Union
 from weakref import ReferenceType, finalize
 
-from django.template import Library
+from django.template import Library, TemplateSyntaxError
 from django.template.base import Parser, Token
 
-from django_components.app_settings import ContextBehaviorType, app_settings
-from django_components.extension import (
-    OnComponentRegisteredContext,
-    OnComponentUnregisteredContext,
-    OnRegistryCreatedContext,
-    OnRegistryDeletedContext,
-    extensions,
-)
+from django_components.app_settings import app_settings
 from django_components.library import is_tag_protected, mark_protected_tags, register_tag
-from django_components.tag_formatter import TagFormatterABC, get_tag_formatter
+from django_components.util.misc import is_str_wrapped_in_quotes
 from django_components.util.weakref import cached_ref
 
 if TYPE_CHECKING:
@@ -62,77 +55,8 @@ class ComponentRegistryEntry(NamedTuple):
 
 
 class RegistrySettings(NamedTuple):
-    """
-    Configuration for a [`ComponentRegistry`](./api.md#django_components.ComponentRegistry).
-
-    These settings define how the components registered with this registry will behave when rendered.
-
-    ```python
-    from django_components import ComponentRegistry, RegistrySettings
-
-    registry_settings = RegistrySettings(
-        context_behavior="django",
-        tag_formatter="django_components.component_shorthand_formatter",
-    )
-
-    registry = ComponentRegistry(settings=registry_settings)
-    ```
-    """
-
-    context_behavior: Optional[ContextBehaviorType] = None
-    """
-    Same as the global
-    [`COMPONENTS.context_behavior`](./settings.md#django_components.app_settings.ComponentsSettings.context_behavior)
-    setting, but for this registry.
-
-    If omitted, defaults to the global
-    [`COMPONENTS.context_behavior`](./settings.md#django_components.app_settings.ComponentsSettings.context_behavior)
-    setting.
-    """
-
-    # TODO_REMOVE_IN_V1
-    CONTEXT_BEHAVIOR: Optional[ContextBehaviorType] = None
-    """
-    _Deprecated. Use `context_behavior` instead. Will be removed in v1._
-
-    Same as the global
-    [`COMPONENTS.context_behavior`](./settings.md#django_components.app_settings.ComponentsSettings.context_behavior)
-    setting, but for this registry.
-
-    If omitted, defaults to the global
-    [`COMPONENTS.context_behavior`](./settings.md#django_components.app_settings.ComponentsSettings.context_behavior)
-    setting.
-    """
-
-    tag_formatter: Optional[Union["TagFormatterABC", str]] = None
-    """
-    Same as the global
-    [`COMPONENTS.tag_formatter`](./settings.md#django_components.app_settings.ComponentsSettings.tag_formatter)
-    setting, but for this registry.
-
-    If omitted, defaults to the global
-    [`COMPONENTS.tag_formatter`](./settings.md#django_components.app_settings.ComponentsSettings.tag_formatter)
-    setting.
-    """
-
-    # TODO_REMOVE_IN_V1
-    TAG_FORMATTER: Optional[Union["TagFormatterABC", str]] = None
-    """
-    _Deprecated. Use `tag_formatter` instead. Will be removed in v1._
-
-    Same as the global
-    [`COMPONENTS.tag_formatter`](./settings.md#django_components.app_settings.ComponentsSettings.tag_formatter)
-    setting, but for this registry.
-
-    If omitted, defaults to the global
-    [`COMPONENTS.tag_formatter`](./settings.md#django_components.app_settings.ComponentsSettings.tag_formatter)
-    setting.
-    """
-
-
-class InternalRegistrySettings(NamedTuple):
-    context_behavior: ContextBehaviorType
-    tag_formatter: Union["TagFormatterABC", str]
+    """Configuration for a ComponentRegistry. Currently empty — reserved for future settings."""
+    pass
 
 
 # We keep track of all registries that exist so that, when users want to
@@ -247,23 +171,7 @@ class ComponentRegistry:
 
         ALL_REGISTRIES.append(cached_ref(self))
 
-        extensions.on_registry_created(
-            OnRegistryCreatedContext(
-                registry=self,
-            ),
-        )
-
     def __del__(self) -> None:
-        # Skip if `extensions` was deleted before this registry
-        if not extensions:
-            return
-
-        extensions.on_registry_deleted(
-            OnRegistryDeletedContext(
-                registry=self,
-            ),
-        )
-
         # Unregister all components when the registry is deleted
         self.clear()
 
@@ -295,26 +203,11 @@ class ComponentRegistry:
         return lib
 
     @property
-    def settings(self) -> InternalRegistrySettings:
-        """[Registry settings](./api.md#django_components.RegistrySettings) configured for this registry."""
-        # NOTE: We allow the settings to be given as a getter function
-        # so the settings can respond to changes.
+    def settings(self) -> RegistrySettings:
+        """Registry settings configured for this registry."""
         if callable(self._settings):
-            settings_input: Optional[RegistrySettings] = self._settings(self)
-        else:
-            settings_input = self._settings
-
-        if settings_input:
-            context_behavior = settings_input.context_behavior or settings_input.CONTEXT_BEHAVIOR
-            tag_formatter = settings_input.tag_formatter or settings_input.TAG_FORMATTER
-        else:
-            context_behavior = None
-            tag_formatter = None
-
-        return InternalRegistrySettings(
-            context_behavior=context_behavior or app_settings.CONTEXT_BEHAVIOR.value,
-            tag_formatter=tag_formatter or app_settings.TAG_FORMATTER,
-        )
+            return self._settings(self) or RegistrySettings()
+        return self._settings or RegistrySettings()
 
     def register(self, name: str, component: Type["Component"]) -> None:
         """
@@ -360,14 +253,6 @@ class ComponentRegistry:
 
         # If the component class is deleted, unregister it from this registry.
         finalize(entry.cls, lambda: self.unregister(name) if name in self._registry else None)
-
-        extensions.on_component_registered(
-            OnComponentRegisteredContext(
-                registry=self,
-                name=name,
-                component_cls=entry.cls,
-            ),
-        )
 
     def unregister(self, name: str) -> None:
         """
@@ -421,14 +306,6 @@ class ComponentRegistry:
 
         entry = self._registry[name]
         del self._registry[name]
-
-        extensions.on_component_unregistered(
-            OnComponentUnregisteredContext(
-                registry=self,
-                name=name,
-                component_cls=entry.cls,
-            ),
-        )
 
     def get(self, name: str) -> Type["Component"]:
         """
@@ -549,32 +426,35 @@ class ComponentRegistry:
         # Define a tag function that pre-processes the tokens, extracting
         # the component name and passing the rest to the actual tag function.
         def tag_fn(parser: Parser, token: Token) -> ComponentNode:
-            # Let the TagFormatter pre-process the tokens
             bits = token.split_contents()
-            formatter = get_tag_formatter(registry)
-            result = formatter.parse([*bits])
-            start_tag = formatter.start_tag(result.component_name)
-            end_tag = formatter.end_tag(result.component_name)
+            _tag, *args = bits
 
-            # NOTE: The tokens returned from TagFormatter.parse do NOT include the tag itself,
-            # so we add it back in.
-            bits = [bits[0], *result.tokens]
-            token.contents = " ".join(bits)
+            if not args:
+                raise TemplateSyntaxError("Component tag did not receive a component name")
+
+            comp_name_token = None if "=" in args[0] else args.pop(0)
+            if not comp_name_token:
+                raise TemplateSyntaxError("Component name must be a non-empty quoted string, e.g. 'my_comp'")
+            if not is_str_wrapped_in_quotes(comp_name_token):
+                raise TemplateSyntaxError(f"Component name must be a string 'literal', got: {comp_name_token}")
+
+            parsed_name = comp_name_token[1:-1]
+
+            # Reconstruct token contents without the component name
+            token.contents = " ".join([bits[0], *args])
 
             return ComponentNode.parse(
                 parser,
                 token,
                 registry=registry,
-                name=result.component_name,
-                start_tag=start_tag,
-                end_tag=end_tag,
+                name=parsed_name,
+                start_tag="component",
+                end_tag="endcomponent",
             )
 
-        formatter = get_tag_formatter(registry)
-        start_tag = formatter.start_tag(comp_name)
-        register_tag(self.library, start_tag, tag_fn)
+        register_tag(self.library, "component", tag_fn)
 
-        return ComponentRegistryEntry(cls=component, tag=start_tag)
+        return ComponentRegistryEntry(cls=component, tag="component")
 
 
 # This variable represents the global component registry

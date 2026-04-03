@@ -24,17 +24,7 @@ setup_test_config()
 # Test interaction of the `Slot` instances with Component rendering
 @djc_test
 class TestSlot:
-    @djc_test(
-        parametrize=(
-            ["components_settings", "is_isolated"],
-            [
-                [{"context_behavior": "django"}, False],
-                [{"context_behavior": "isolated"}, True],
-            ],
-            ["django", "isolated"],
-        ),
-    )
-    def test_render_slot_as_func(self, components_settings, is_isolated):
+    def test_render_slot_as_func(self):
         class SimpleComponent(Component):
             template: types.django_html = """
                 {% load component_tags %}
@@ -57,16 +47,11 @@ class TestSlot:
             # the same way as it does in templates - when in "isolated" mode, then the
             # slot fill has access only to the "root" context, but not to the data of
             # get_template_data() of SimpleComponent.
-            if is_isolated:
-                assert context.get("the_arg") is None
-                assert context.get("the_kwarg") is None
-                assert context.get("kwargs") is None
-                assert context.get("abc") is None
-            else:
-                assert context["the_arg"] == "1"
-                assert context["the_kwarg"] == 3
-                assert context["kwargs"] == {}
-                assert context["abc"] == "def"
+            # Isolated context — slot fill has no access to get_template_data() output
+            assert context.get("the_arg") is None
+            assert context.get("the_kwarg") is None
+            assert context.get("kwargs") is None
+            assert context.get("abc") is None
 
             slot_data_expected = {
                 "data1": "abc",
@@ -728,17 +713,8 @@ class TestSlot:
 
         results = [slot().strip() for slot in seen_slots]
 
-        if components_settings["context_behavior"] == "django":
-            assert results == [
-                "<!-- _RENDERED MyInnerComponent_fb676b,ca1bc49,, -->Hello!",
-                "<!-- _RENDERED MyInnerComponent_fb676b,ca1bc4a,, -->Hello!",
-                "<!-- _RENDERED MyInnerComponent_fb676b,ca1bc4b,, -->Hello!",
-            ]
-        else:
-            # TODO - Incorrect for slots!
-            #        To be fixed in https://github.com/django-components/django-components/issues/1259
-            assert results == [
-                '<template djc-render-id="ca1bc49"></template>',
-                '<template djc-render-id="ca1bc4a"></template>',
-                '<template djc-render-id="ca1bc4b"></template>',
-            ]
+        assert results == [
+            "Hello!",
+            "Hello!",
+            "Hello!",
+        ]

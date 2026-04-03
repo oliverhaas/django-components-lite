@@ -10,10 +10,9 @@ from django.conf import settings
 PARAMETRIZE_CONTEXT_BEHAVIOR = (
     ["components_settings"],
     [
-        [{"context_behavior": "django"}],
-        [{"context_behavior": "isolated"}],
+        [{}],
     ],
-    ["django", "isolated"],
+    ["isolated"],
 )
 
 

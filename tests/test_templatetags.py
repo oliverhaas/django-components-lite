@@ -44,7 +44,7 @@ class TestMultilineTags:
         """
         rendered = Template(template).render(Context())
         expected = """
-            Variable: <strong data-djc-id-ca1bc3f>123</strong>
+            Variable: <strong>123</strong>
         """
         assertHTMLEqual(rendered, expected)
 
@@ -71,7 +71,7 @@ class TestNestedTags:
         """
         rendered = Template(template).render(Context())
         expected = """
-            Variable: <strong data-djc-id-ca1bc3f>organisation&#x27;s</strong>
+            Variable: <strong>organisation&#x27;s</strong>
         """
         assertHTMLEqual(rendered, expected)
 
@@ -85,7 +85,7 @@ class TestNestedTags:
         """
         rendered = Template(template).render(Context())
         expected = """
-            Variable: <strong data-djc-id-ca1bc3f>organisation&#x27;s</strong>
+            Variable: <strong>organisation&#x27;s</strong>
         """
         assertHTMLEqual(rendered, expected)
 
@@ -99,7 +99,7 @@ class TestNestedTags:
         """
         rendered = Template(template).render(Context())
         expected = """
-            Variable: <strong data-djc-id-ca1bc3f>organisation"s</strong>
+            Variable: <strong>organisation"s</strong>
         """
         assertHTMLEqual(rendered, expected)
 
@@ -113,6 +113,6 @@ class TestNestedTags:
         """
         rendered = Template(template).render(Context())
         expected = """
-            Variable: <strong data-djc-id-ca1bc3f>organisation"s</strong>
+            Variable: <strong>organisation"s</strong>
         """
         assertHTMLEqual(rendered, expected)

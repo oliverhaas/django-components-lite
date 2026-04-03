@@ -27,111 +27,7 @@ from django.conf import settings
 
 from django_components.util.misc import default
 
-if TYPE_CHECKING:
-    from django_components.extension import ComponentExtension
-    from django_components.tag_formatter import TagFormatterABC
-
-
 T = TypeVar("T")
-
-
-ContextBehaviorType = Literal["django", "isolated"]
-
-
-class ContextBehavior(str, Enum):
-    """
-    Configure how (and whether) the context is passed to the component fills
-    and what variables are available inside the [`{% fill %}`](./template_tags.md#fill) tags.
-
-    Also see [Component context and scope](../concepts/advanced/component_context_scope.md#context-behavior).
-
-    **Options:**
-
-    - `django`: With this setting, component fills behave as usual Django tags.
-    - `isolated`: This setting makes the component fills behave similar to Vue or React.
-    """
-
-    DJANGO = "django"
-    """
-    With this setting, component fills behave as usual Django tags.
-    That is, they enrich the context, and pass it along.
-
-    1. Component fills use the context of the component they are within.
-    2. Variables from [`Component.get_template_data()`](./api.md#django_components.Component.get_template_data)
-    are available to the component fill.
-
-    **Example:**
-
-    Given this template
-    ```django
-    {% with cheese="feta" %}
-      {% component 'my_comp' %}
-        {{ my_var }}  # my_var
-        {{ cheese }}  # cheese
-      {% endcomponent %}
-    {% endwith %}
-    ```
-
-    and this context returned from the `Component.get_template_data()` method
-    ```python
-    { "my_var": 123 }
-    ```
-
-    Then if component "my_comp" defines context
-    ```python
-    { "my_var": 456 }
-    ```
-
-    Then this will render:
-    ```django
-    456   # my_var
-    feta  # cheese
-    ```
-
-    Because "my_comp" overrides the variable "my_var",
-    so `{{ my_var }}` equals `456`.
-
-    And variable "cheese" will equal `feta`, because the fill CAN access
-    the current context.
-    """
-
-    ISOLATED = "isolated"
-    """
-    This setting makes the component fills behave similar to Vue or React, where
-    the fills use EXCLUSIVELY the context variables defined in
-    [`Component.get_template_data()`](./api.md#django_components.Component.get_template_data).
-
-    **Example:**
-
-    Given this template
-    ```django
-    {% with cheese="feta" %}
-      {% component 'my_comp' %}
-        {{ my_var }}  # my_var
-        {{ cheese }}  # cheese
-      {% endcomponent %}
-    {% endwith %}
-    ```
-
-    and this context returned from the `get_template_data()` method
-    ```python
-    { "my_var": 123 }
-    ```
-
-    Then if component "my_comp" defines context
-    ```python
-    { "my_var": 456 }
-    ```
-
-    Then this will render:
-    ```django
-    123   # my_var
-          # cheese
-    ```
-
-    Because both variables "my_var" and "cheese" are taken from the root context.
-    Since "cheese" is not defined in root context, it's empty.
-    """
 
 
 # This is the source of truth for the settings that are available. If the documentation
@@ -146,52 +42,6 @@ class ComponentsSettings(NamedTuple):
     COMPONENTS = ComponentsSettings(
         autodiscover=False,
         dirs = [BASE_DIR / "components"],
-    )
-    ```
-    """
-
-    extensions: Optional[Sequence[Union[Type["ComponentExtension"], str]]] = None
-    """
-    List of [extensions](../concepts/advanced/extensions.md) to be loaded.
-
-    The extensions can be specified as:
-
-    - Python import path, e.g. `"path.to.my_extension.MyExtension"`.
-    - Extension class, e.g. `my_extension.MyExtension`.
-
-    Read more about [extensions](../concepts/advanced/extensions.md).
-
-    **Example:**
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        extensions=[
-            "path.to.my_extension.MyExtension",
-            StorybookExtension,
-        ],
-    )
-    ```
-    """
-
-    extensions_defaults: Optional[Dict[str, Any]] = None
-    """
-    Global defaults for the extension classes.
-
-    Read more about [Extension defaults](../concepts/advanced/extensions.md#extension-defaults).
-
-    **Example:**
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        extensions_defaults={
-            "my_extension": {
-                "my_setting": "my_value",
-            },
-            "cache": {
-                "enabled": True,
-                "ttl": 60,
-            },
-        },
     )
     ```
     """
@@ -281,33 +131,6 @@ class ComponentsSettings(NamedTuple):
         cache="my_cache",
     )
     ```
-    """
-
-    context_behavior: Optional[ContextBehaviorType] = None
-    """
-    Configure whether, inside a component template, you can use variables from the outside
-    ([`"django"`](./api.md#django_components.ContextBehavior.DJANGO))
-    or not ([`"isolated"`](./api.md#django_components.ContextBehavior.ISOLATED)).
-    This also affects what variables are available inside the [`{% fill %}`](./template_tags.md#fill)
-    tags.
-
-    Also see [Component context and scope](../concepts/advanced/component_context_scope.md#context-behavior).
-
-    Defaults to `"django"`.
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        context_behavior="isolated",
-    )
-    ```
-
-    > NOTE: `context_behavior` and `slot_context_behavior` options were merged in v0.70.
-    >
-    > If you are migrating from BEFORE v0.67, set `context_behavior` to `"django"`.
-    > From v0.67 to v0.78 (incl) the default value was `"isolated"`.
-    >
-    > For v0.79 and later, the default is again `"django"`. See the rationale for change
-    > [here](https://github.com/django-components/django-components/issues/498).
     """
 
     # TODO_v1 - remove. Users should use extension defaults instead.
@@ -555,72 +378,6 @@ class ComponentsSettings(NamedTuple):
         See [Security notes](../overview/security_notes.md).
     """
 
-    tag_formatter: Optional[Union["TagFormatterABC", str]] = None
-    """
-    Configure what syntax is used inside Django templates to render components.
-    See the [available tag formatters](./tag_formatters.md).
-
-    Defaults to `"django_components.component_formatter"`.
-
-    Learn more about [Customizing component tags with TagFormatter](../concepts/advanced/tag_formatters.md).
-
-    Can be set either as direct reference:
-
-    ```python
-    from django_components import component_formatter
-
-    COMPONENTS = ComponentsSettings(
-        "tag_formatter": component_formatter
-    )
-    ```
-
-    Or as an import string;
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        "tag_formatter": "django_components.component_formatter"
-    )
-    ```
-
-    **Examples:**
-
-    - `"django_components.component_formatter"`
-
-        Set
-
-        ```python
-        COMPONENTS = ComponentsSettings(
-            "tag_formatter": "django_components.component_formatter"
-        )
-        ```
-
-        To write components like this:
-
-        ```django
-        {% component "button" href="..." %}
-            Click me!
-        {% endcomponent %}
-        ```
-
-    - `django_components.component_shorthand_formatter`
-
-        Set
-
-        ```python
-        COMPONENTS = ComponentsSettings(
-            "tag_formatter": "django_components.component_shorthand_formatter"
-        )
-        ```
-
-        To write components like this:
-
-        ```django
-        {% button href="..." %}
-            Click me!
-        {% endbutton %}
-        ```
-    """
-
     # TODO_V1 - remove
     template_cache_size: Optional[int] = None
     """
@@ -702,7 +459,6 @@ class Dynamic(Generic[T]):
 defaults = ComponentsSettings(
     autodiscover=True,
     cache=None,
-    context_behavior=ContextBehavior.DJANGO.value,  # "django" | "isolated"
     # Root-level "components" dirs, e.g. `/path/to/proj/components/`
     dirs=Dynamic(lambda: [Path(settings.BASE_DIR) / "components"]),  # type: ignore[arg-type]
     # App-level "components" dirs, e.g. `[app]/components/`
@@ -710,8 +466,6 @@ defaults = ComponentsSettings(
     debug_highlight_components=False,
     debug_highlight_slots=False,
     dynamic_component_name="dynamic",
-    extensions=[],
-    extensions_defaults={},
     libraries=[],  # E.g. ["mysite.components.forms", ...]
     multiline_tags=True,
     reload_on_file_change=False,
@@ -731,7 +485,6 @@ defaults = ComponentsSettings(
         # Python files
         ".py", ".pyc",
     ],
-    tag_formatter="django_components.component_formatter",
     template_cache_size=128,
 )
 # --endsnippet:defaults--
@@ -776,46 +529,17 @@ class InternalSettings:
                 defaults.dynamic_component_name,
             ),
             libraries=default(components_settings.libraries, defaults.libraries),
-            # NOTE: Internally we store the extensions as a list of instances, but the user
-            #       can pass in either a list of classes or a list of import strings.
-            extensions=self._prepare_extensions(components_settings),  # type: ignore[arg-type]
-            extensions_defaults=default(components_settings.extensions_defaults, defaults.extensions_defaults),
             multiline_tags=default(components_settings.multiline_tags, defaults.multiline_tags),
             reload_on_file_change=self._prepare_reload_on_file_change(components_settings),
             template_cache_size=default(components_settings.template_cache_size, defaults.template_cache_size),
             static_files_allowed=default(components_settings.static_files_allowed, defaults.static_files_allowed),
             static_files_forbidden=self._prepare_static_files_forbidden(components_settings),
-            context_behavior=self._prepare_context_behavior(components_settings),
-            tag_formatter=default(components_settings.tag_formatter, defaults.tag_formatter),  # type: ignore[arg-type]
         )
 
     def _get_settings(self) -> ComponentsSettings:
         if self._settings is None:
             self._load_settings()
         return cast("ComponentsSettings", self._settings)
-
-    def _prepare_extensions(self, new_settings: ComponentsSettings) -> List["ComponentExtension"]:
-        extensions: Sequence[Union[Type[ComponentExtension], str]] = default(
-            new_settings.extensions,
-            cast("List[str]", defaults.extensions),
-        )
-
-        # Extensions may be passed in either as classes or import strings.
-        extension_instances: List[ComponentExtension] = []
-        for extension in extensions:
-            if isinstance(extension, str):
-                import_path, class_name = extension.rsplit(".", 1)
-                extension_module = import_module(import_path)
-                extension = cast("Type[ComponentExtension]", getattr(extension_module, class_name))  # noqa: PLW2901
-
-            if isinstance(extension, type):
-                extension_instance = extension()
-            else:
-                extension_instances.append(extension)
-
-            extension_instances.append(extension_instance)
-
-        return extension_instances
 
     def _prepare_reload_on_file_change(self, new_settings: ComponentsSettings) -> bool:
         val = new_settings.reload_on_file_change
@@ -832,19 +556,6 @@ class InternalSettings:
             val = new_settings.forbidden_static_files
 
         return default(val, cast("List[Union[str, re.Pattern]]", defaults.static_files_forbidden))
-
-    def _prepare_context_behavior(self, new_settings: ComponentsSettings) -> Literal["django", "isolated"]:
-        raw_value = cast(
-            "Literal['django', 'isolated']",
-            default(new_settings.context_behavior, defaults.context_behavior),
-        )
-        try:
-            ContextBehavior(raw_value)
-        except ValueError as err:
-            valid_values = [behavior.value for behavior in ContextBehavior]
-            raise ValueError(f"Invalid context behavior: {raw_value}. Valid options are {valid_values}") from err
-
-        return raw_value
 
     @property
     def AUTODISCOVER(self) -> bool:
@@ -879,14 +590,6 @@ class InternalSettings:
         return self._get_settings().libraries  # type: ignore[return-value]
 
     @property
-    def EXTENSIONS(self) -> List["ComponentExtension"]:
-        return self._get_settings().extensions  # type: ignore[return-value]
-
-    @property
-    def EXTENSIONS_DEFAULTS(self) -> Dict[str, Any]:
-        return self._get_settings().extensions_defaults  # type: ignore[return-value]
-
-    @property
     def MULTILINE_TAGS(self) -> bool:
         return self._get_settings().multiline_tags  # type: ignore[return-value]
 
@@ -905,14 +608,5 @@ class InternalSettings:
     @property
     def STATIC_FILES_FORBIDDEN(self) -> Sequence[Union[str, re.Pattern]]:
         return self._get_settings().static_files_forbidden  # type: ignore[return-value]
-
-    @property
-    def CONTEXT_BEHAVIOR(self) -> ContextBehavior:
-        return ContextBehavior(self._get_settings().context_behavior)
-
-    @property
-    def TAG_FORMATTER(self) -> Union["TagFormatterABC", str]:
-        return self._get_settings().tag_formatter  # type: ignore[return-value]
-
 
 app_settings = InternalSettings()
