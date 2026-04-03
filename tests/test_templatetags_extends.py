@@ -76,8 +76,8 @@ class TestExtendsCompat:
                 <body>
                     <main role="main">
                         <div class='container main-container'>
-                            <div data-djc-id-ca1bc40>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc40>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
@@ -126,14 +126,14 @@ class TestExtendsCompat:
                 <body>
                     <main role="main">
                         <div class='container main-container'>
-                            <div data-djc-id-ca1bc42>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc42>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
                             </custom-template>
-                            <div data-djc-id-ca1bc46>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc46>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN 2</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
@@ -195,14 +195,14 @@ class TestExtendsCompat:
                 <body>
                     <main role="main">
                         <div class='container main-container'>
-                            <div data-djc-id-ca1bc42>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc42>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
                             </custom-template>
-                            <div data-djc-id-ca1bc46>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc46>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN 2</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
@@ -263,14 +263,14 @@ class TestExtendsCompat:
                 <body>
                     <main role="main">
                         <div class='container main-container'>
-                            <div data-djc-id-ca1bc42>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc42>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
                             </custom-template>
-                            <div data-djc-id-ca1bc46>BLOCK OVERRIDEN</div>
-                            <custom-template data-djc-id-ca1bc46>
+                            <div>BLOCK OVERRIDEN</div>
+                            <custom-template>
                                 <header>SLOT OVERRIDEN 2</header>
                                 <main>Default main</main>
                                 <footer>Default footer</footer>
@@ -314,8 +314,8 @@ class TestExtendsCompat:
             <!DOCTYPE html>
             <html lang="en">
                 <body>
-                    <div data-djc-id-ca1bc40>BLOCK OVERRIDEN</div>
-                    <custom-template data-djc-id-ca1bc40>
+                    <div>BLOCK OVERRIDEN</div>
+                    <custom-template>
                         <header>SLOT OVERRIDEN</header>
                         <main>Default main</main>
                         <footer>Default footer</footer>
@@ -362,14 +362,14 @@ class TestExtendsCompat:
             <!DOCTYPE html>
             <html lang="en">
                 <body>
-                    <div data-djc-id-ca1bc42>BLOCK OVERRIDEN</div>
-                    <custom-template data-djc-id-ca1bc42>
+                    <div>BLOCK OVERRIDEN</div>
+                    <custom-template>
                         <header>SLOT OVERRIDEN</header>
                         <main>Default main</main>
                         <footer>Default footer</footer>
                     </custom-template>
-                    <div data-djc-id-ca1bc46>BLOCK OVERRIDEN</div>
-                    <custom-template data-djc-id-ca1bc46>
+                    <div>BLOCK OVERRIDEN</div>
+                    <custom-template>
                         <header>SLOT OVERRIDEN 2</header>
                         <main>Default main</main>
                         <footer>Default footer</footer>
@@ -416,11 +416,11 @@ class TestExtendsCompat:
                 <body>
                     <main role="main">
                         <div class='container main-container'>
-                            <custom-template data-djc-id-ca1bc42>
+                            <custom-template>
                                 <header>Default header</header>
                                 <main>
-                                    <div data-djc-id-ca1bc49>BLOCK OVERRIDEN</div>
-                                    <custom-template data-djc-id-ca1bc49>
+                                    <div>BLOCK OVERRIDEN</div>
+                                    <custom-template>
                                         <header>SLOT OVERRIDEN</header>
                                         <main>Default main</main>
                                         <footer>Default footer</footer>
@@ -462,7 +462,7 @@ class TestExtendsCompat:
                     <main role="main">
                         <div class='container main-container'>
                             Variable: <strong></strong>
-                            Variable: <strong data-djc-id-ca1bc3f></strong>
+                            Variable: <strong></strong>
                         </div>
                     </main>
                 </body>
@@ -480,7 +480,7 @@ class TestExtendsCompat:
                     <main role="main">
                         <div class='container main-container'>
                             Variable: <strong></strong>
-                            Variable: <strong data-djc-id-ca1bc41></strong>
+                            Variable: <strong></strong>
                         </div>
                     </main>
                 </body>
@@ -509,9 +509,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc40 lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc45>
+                <custom-template>
                     <header></header>
                     <main>BODY_FROM_FILL</main>
                     <footer>Default footer</footer>
@@ -542,9 +542,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc40 lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc45>
+                <custom-template>
                     <header></header>
                     <main>BODY_FROM_FILL</main>
                     <footer>Default footer</footer>
@@ -571,38 +571,21 @@ class TestExtendsCompat:
             </body>
         """
 
+        # Dependency tags are prepended directly to the component's HTML — DJC_DEPS_STRATEGY has no effect.
+        expected = """
+            <body>
+                <outer>
+                    <link href="style.css" media="all" rel="stylesheet">
+                    <script src="script.js"></script>
+                    <div>Hello</div>
+                </outer>
+            </body>
+        """
+
         rendered_raw = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected_raw = """
-            <body>
-                <outer>
-                    <div data-djc-id-ca1bc3f>Hello</div>
-                </outer>
-            </body>
-        """
-        assertHTMLEqual(rendered_raw, expected_raw)
+        assertHTMLEqual(rendered_raw, expected)
 
-        template_obj = Template(template)
-        context = Context()
-        rendered = template_obj.render(context)
-
-        # NOTE: It's important that the <script> tags are rendered outside of <div> and <outer> tags,
-        # because that tells us that the JS/CSS is rendered by the parent template, not the component
-        # inside the include.
-        # NOTE 2: The IDs differ when rendered as part of whole test suite vs as a single test.
-        comp_id = "ca1bc41" if "ca1bc41" in rendered else "ca1bc40"
-        expected = f"""
-            <body>
-                <outer>
-                    <div data-djc-id-{comp_id}>Hello</div>
-                </outer>
-                <script src="django_components/django_components.min.js"></script>
-                <script type="application/json" data-djc>{{"loadedCssUrls": ["c3R5bGUuY3Nz"],
-                    "loadedJsUrls": ["c2NyaXB0Lmpz"],
-                    "toLoadCssTags": [],
-                    "toLoadJsTags": []}}</script>
-                <script src="script.js"></script>
-            </body>
-        """
+        rendered = Template(template).render(Context())
         assertHTMLEqual(rendered, expected)
 
     # In this case, because `{% include %}` is rendered inside a `{% component %}` tag,
@@ -630,39 +613,22 @@ class TestExtendsCompat:
             </html>
         """
 
+        expected = """
+            <html>
+                <body>
+                    <outer>
+                        <link href="style.css" media="all" rel="stylesheet">
+                        <script src="script.js"></script>
+                        <div>Hello</div>
+                    </outer>
+                </body>
+            </html>
+        """
+
         rendered_raw = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected_raw = """
-            <html>
-                <body data-djc-id-ca1bc3f>
-                    <outer>
-                        <div data-djc-id-ca1bc41>Hello</div>
-                    </outer>
-                </body>
-            </html>
-        """
-        assertHTMLEqual(rendered_raw, expected_raw)
+        assertHTMLEqual(rendered_raw, expected)
 
-        template_obj = Template(template)
-        context = Context()
-        rendered = template_obj.render(context)
-
-        # NOTE: The IDs differ when rendered as part of whole test suite vs as a single test.
-        comp_id = "ca1bc45" if "ca1bc45" in rendered else "ca1bc44"
-        expected = f"""
-            <html>
-                <body data-djc-id-ca1bc43>
-                    <outer>
-                        <div data-djc-id-{comp_id}>Hello</div>
-                    </outer>
-                    <script src="django_components/django_components.min.js"></script>
-                    <script type="application/json" data-djc>{{"loadedCssUrls": ["c3R5bGUuY3Nz"],
-                        "loadedJsUrls": ["c2NyaXB0Lmpz"],
-                        "toLoadCssTags": [],
-                        "toLoadJsTags": []}}</script>
-                    <script src="script.js"></script>
-                </body>
-            </html>
-        """
+        rendered = Template(template).render(Context())
         assertHTMLEqual(rendered, expected)
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -688,7 +654,7 @@ class TestExtendsCompat:
             <body>
                 <main role="main">
                     <div class='container main-container'>
-                        <custom-template data-djc-id-ca1bc42>
+                        <custom-template>
                             <header></header>
                             <main>TEST</main>
                             <footer></footer>
@@ -717,7 +683,7 @@ class TestExtendsCompat:
             <!DOCTYPE html>
             <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc41>
+                <custom-template>
                     <header></header>
                     <main>
                         <div> 58 giraffes and 2 pantaloons </div>
@@ -744,9 +710,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3f lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc43>
+                <custom-template>
                     <header></header>
                     <main>
                         <div> 58 giraffes and 2 pantaloons </div>
@@ -784,9 +750,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc40 lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc49>
+                <custom-template>
                     <header></header>
                     <main>BODY_FROM_FILL</main>
                     <footer>Default footer</footer>
@@ -814,9 +780,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3f lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc44>
+                <custom-template>
                     <header></header>
                     <main>
                         Helloodiddoo
@@ -850,9 +816,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3f lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc44>
+                <custom-template>
                     <header></header>
                     <main>
                         Helloodiddoo
@@ -886,9 +852,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc40 lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc45>
+                <custom-template>
                     <header></header>
                     <main>
                         Helloodiddoo
@@ -932,9 +898,9 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc41 lang="en">
+            <html lang="en">
             <body>
-                <custom-template data-djc-id-ca1bc47>
+                <custom-template>
                     <header></header>
                     <main>
                         Helloodiddoo
@@ -960,7 +926,7 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3f="" lang="en">
+            <html lang="en">
               <body>
                 <main role="main">
                   <div class='container main-container'>
@@ -986,7 +952,7 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3f="" lang="en">
+            <html lang="en">
               <body>
                 <main role="main">
                   <div class='container main-container'>
@@ -1031,10 +997,10 @@ class TestExtendsCompat:
         assertHTMLEqual(
             rendered,
             """
-            <p data-djc-id-ca1bc40>This is the outer component.</p>
-            <p data-djc-id-ca1bc40 data-djc-id-ca1bc42>This is the inner component.</p>
-            <p data-djc-id-ca1bc40 data-djc-id-ca1bc42>This template gets extended.</p>
-            <p data-djc-id-ca1bc40 data-djc-id-ca1bc42>This template extends another template.</p>
+            <p>This is the outer component.</p>
+            <p>This is the inner component.</p>
+            <p>This template gets extended.</p>
+            <p>This template extends another template.</p>
         """,
         )
 
@@ -1096,8 +1062,8 @@ class TestExtendsCompat:
               <body>
                 <main role="main">
                   <div class='container main-container'>
-                    Variable: <strong data-djc-id-ca1bc40="">INCLUDED 1</strong>
-                    Variable: <strong data-djc-id-ca1bc40="">INCLUDED 2</strong>
+                    Variable: <strong>INCLUDED 1</strong>
+                    Variable: <strong>INCLUDED 2</strong>
                   </div>
                 </main>
               </body>

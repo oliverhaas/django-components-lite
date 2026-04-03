@@ -54,10 +54,6 @@ class TestComponentTemplateTag:
                 "variable2": kwargs.get("variable2", "default"),
             }
 
-        class Media:
-            css = "style.css"
-            js = "script.js"
-
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_single_component(self, components_settings):
         registry.register(name="test", component=self.SimpleComponent)
@@ -69,7 +65,7 @@ class TestComponentTemplateTag:
 
         template = Template(simple_tag_template)
         rendered = template.render(Context({}))
-        assertHTMLEqual(rendered, "Variable: <strong data-djc-id-ca1bc3f>variable</strong>\n")
+        assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_single_component_self_closing(self, components_settings):
@@ -82,7 +78,7 @@ class TestComponentTemplateTag:
 
         template = Template(simple_tag_template)
         rendered = template.render(Context({}))
-        assertHTMLEqual(rendered, "Variable: <strong data-djc-id-ca1bc3f>variable</strong>\n")
+        assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_call_with_invalid_name(self, components_settings):
@@ -108,7 +104,7 @@ class TestComponentTemplateTag:
 
         template = Template(simple_tag_template)
         rendered = template.render(Context({}))
-        assertHTMLEqual(rendered, "Variable: <strong data-djc-id-ca1bc3f>variable</strong>\n")
+        assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_call_component_with_two_variables(self, components_settings):
@@ -127,10 +123,6 @@ class TestComponentTemplateTag:
                     "variable2": kwargs.get("variable2", "default"),
                 }
 
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         simple_tag_template: types.django_html = """
             {% load component_tags %}
             {% component "test" variable="variable" variable2="hej" %}{% endcomponent %}
@@ -141,8 +133,8 @@ class TestComponentTemplateTag:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3f>variable</strong>
-            Variable2: <strong data-djc-id-ca1bc3f>hej</strong>
+            Variable: <strong>variable</strong>
+            Variable2: <strong>hej</strong>
             """,
         )
 
@@ -157,7 +149,7 @@ class TestComponentTemplateTag:
 
         template = Template(simple_tag_template)
         rendered = template.render(Context({}))
-        assertHTMLEqual(rendered, "Variable: <strong data-djc-id-ca1bc3f>variable</strong>\n")
+        assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_raises_on_component_called_with_variable_as_name(self, components_settings):
@@ -201,8 +193,8 @@ class TestComponentTemplateTag:
         assertHTMLEqual(
             rendered,
             """
-            Provided variable: <strong data-djc-id-ca1bc3f>provided value</strong>
-            Default: <p data-djc-id-ca1bc3f>default text</p>
+            Provided variable: <strong>provided value</strong>
+            Default: <p>default text</p>
             """,
         )
 
@@ -227,14 +219,14 @@ class TestMultiComponent:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc40>
+            <custom-template>
                 <header>
                     Default header
                 </header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
             </custom-template>
-            <custom-template data-djc-id-ca1bc47>
+            <custom-template>
                 <header>
                     Default header
                 </header>
@@ -264,14 +256,14 @@ class TestMultiComponent:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc42>
+            <custom-template>
                 <header>
                     <p>Slot #1</p>
                 </header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
             </custom-template>
-            <custom-template data-djc-id-ca1bc49>
+            <custom-template>
                 <header>
                     <div>Slot #2</div>
                 </header>
@@ -300,14 +292,14 @@ class TestMultiComponent:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc41>
+            <custom-template>
                 <header>
                     <p>Slot #1</p>
                 </header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
             </custom-template>
-            <custom-template data-djc-id-ca1bc48>
+            <custom-template>
                 <header>
                     Default header
                 </header>
@@ -336,14 +328,14 @@ class TestMultiComponent:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc41>
+            <custom-template>
                 <header>
                     Default header
                 </header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
             </custom-template>
-            <custom-template data-djc-id-ca1bc48>
+            <custom-template>
                 <header>
                     <div>Slot #2</div>
                 </header>
@@ -389,17 +381,17 @@ class TestComponentIsolation:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc4a>
+            <custom-template>
                 <header>Override header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
             </custom-template>
-            <custom-template data-djc-id-ca1bc4b>
+            <custom-template>
                 <header>Default header</header>
                 <main>Override main</main>
                 <footer>Default footer</footer>
             </custom-template>
-            <custom-template data-djc-id-ca1bc4c>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Override footer</footer>

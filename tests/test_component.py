@@ -67,16 +67,11 @@ class TestComponentLegacyApi:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -90,16 +85,11 @@ class TestComponentLegacyApi:
                 return {
                     "variable": variable,
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -120,7 +110,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc3f>
+            <div>
                 Name: simple
             </div>
             """,
@@ -131,7 +121,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc40>
+            <div>
                 Name: simple
             </div>
             """,
@@ -142,7 +132,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            <div data-djc-id-ca1bc41>
+            <div>
                 Name: SimpleComponent
             </div>
             """,
@@ -166,13 +156,13 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             SvgComponent.render(kwargs={"name": "svg1"}),
             """
-            <svg data-djc-id-ca1bc3e>Dynamic1</svg>
+            <svg>Dynamic1</svg>
             """,
         )
         assertHTMLEqual(
             SvgComponent.render(kwargs={"name": "svg2"}),
             """
-            <svg data-djc-id-ca1bc3f>Dynamic2</svg>
+            <svg>Dynamic2</svg>
             """,
         )
 
@@ -190,16 +180,11 @@ class TestComponentLegacyApi:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -220,7 +205,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -262,7 +247,7 @@ class TestComponentLegacyApi:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong> MY_SLOT
+            Variable: <strong>test</strong> MY_SLOT
             """,
         )
 
@@ -287,16 +272,11 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -309,16 +289,11 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -396,7 +371,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -404,7 +379,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3f>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -417,11 +392,6 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
-
-            class Media:
-                css = "style.css"
-                js = "script.js"
-
         # Access fields on Component class
         assert SimpleComponent.template_name == "simple_template.html"
         assert SimpleComponent.template_file == "simple_template.html"
@@ -435,7 +405,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -457,7 +427,7 @@ class TestComponent:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc40>test</strong>
+            Variable: <strong>test</strong>
             """,
         )
 
@@ -530,7 +500,7 @@ class TestComponentRenderAPI:
         assertHTMLEqual(
             rendered,
             """
-            Variable: <strong data-djc-id-ca1bc3e>test</strong> MY_SLOT
+            Variable: <strong>test</strong> MY_SLOT
             """,
         )
 
@@ -747,7 +717,7 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
+            <div class="test-component">
                 args: [123, 'str']
                 kwargs: {'variable': 'test', 'another': 1}
                 slots: {'my_slot': <Slot component_name='TestComponent' slot_name='my_slot'>}
@@ -794,7 +764,7 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
+            <div class="test-component">
                 args: Args(variable=123, another='str')
                 kwargs: Kwargs(variable='test', another=1)
                 slots: Slots(my_slot=<Slot component_name='TestComponent' slot_name='my_slot'>)
@@ -843,8 +813,8 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                <div class="wrapper" data-djc-id-ca1bc40="">
+            <div class="test-component">
+                <div class="wrapper">
                     args: [123, 'str']
                     kwargs: {'variable': 'test', 'another': 1}
                     slots: {'my_slot': <Slot component_name='TestComponent' slot_name='my_slot'>}
@@ -905,8 +875,8 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                <div class="wrapper" data-djc-id-ca1bc40="">
+            <div class="test-component">
+                <div class="wrapper">
                     args: Args(variable=123, another='str')
                     kwargs: Kwargs(variable='test', another=1)
                     slots: Slots(my_slot=<Slot component_name='TestComponent' slot_name='my_slot'>)
@@ -952,8 +922,8 @@ class TestComponentTemplateVars:
         assertHTMLEqual(
             html,
             """
-            <div class="test-component" data-djc-id-ca1bc3e="">
-                <div class="wrapper" data-djc-id-ca1bc41="">
+            <div class="test-component">
+                <div class="wrapper">
                     <div class="subtitle">SUBTITLE_FILLED</div>
                 </div>
             </div>
@@ -1141,7 +1111,7 @@ class TestComponentRender:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc3e>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
@@ -1163,7 +1133,7 @@ class TestComponentRender:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc3e>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
@@ -1186,7 +1156,7 @@ class TestComponentRender:
         assertHTMLEqual(
             rendered,
             """
-            <custom-template data-djc-id-ca1bc3e>
+            <custom-template>
                 <header>Default header</header>
                 <main>Default main</main>
                 <footer>Default footer</footer>
@@ -1234,7 +1204,7 @@ class TestComponentRender:
             rendered,
             """
             <!DOCTYPE html>
-            <html data-djc-id-ca1bc3e lang="en">
+            <html lang="en">
             <body>
                 <main role="main">
                 <div class='container main-container'>
@@ -1259,7 +1229,7 @@ class TestComponentRender:
         rendered = TestComponent.render()
         assertHTMLEqual(
             rendered,
-            "Variable: <strong data-djc-id-ca1bc3e>ca1bc3e</strong>",
+            "Variable: <strong>ca1bc3e</strong>",
         )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -1275,7 +1245,7 @@ class TestComponentRender:
         rendered_resp = TestComponent.render_to_response()
         assertHTMLEqual(
             rendered_resp.content.decode("utf-8"),
-            "Variable: <strong data-djc-id-ca1bc3e>ca1bc3e</strong>",
+            "Variable: <strong>ca1bc3e</strong>",
         )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
@@ -1687,7 +1657,7 @@ class TestComponentHook:
         rendered = SimpleComponent.render()
         assertHTMLEqual(
             rendered,
-            "text<p data-djc-id-ca1bc3e>Hello</p>",
+            "text<p>Hello</p>",
         )
 
         # Works without lambda
@@ -1699,7 +1669,7 @@ class TestComponentHook:
         rendered2 = SimpleComponent2.render()
         assertHTMLEqual(
             rendered2,
-            "text<p data-djc-id-ca1bc3f>Hello</p>",
+            "text<p>Hello</p>",
         )
 
     def test_lambda_yield_error(self):
@@ -1794,7 +1764,7 @@ class TestComponentHook:
                 return "<div>Final result</div>"
 
         result = SimpleComponent.render()
-        assert result == '<div data-djc-id-ca1bc3e="">Final result</div>'
+        assert result == '<div>Final result</div>'
 
         # NOTE: Exceptions are stubborn, comparison evaluates to False even with the same message.
         assert results[0][0] is None
@@ -1804,9 +1774,9 @@ class TestComponentHook:
         # NOTE: It's important that all the results are wrapped in `<div>`
         #       so we can check if the djc-id attribute was set.
         assert results[1:] == [
-            ('<div data-djc-id-ca1bc3e="">Hello</div>', None),
-            ('<div data-djc-id-ca1bc3e="">There</div>', None),
-            ('<div data-djc-id-ca1bc3e="">Other result</div>', None),
+            ('<div>Hello</div>', None),
+            ('<div>There</div>', None),
+            ('<div>Other result</div>', None),
         ]
 
     @djc_test(

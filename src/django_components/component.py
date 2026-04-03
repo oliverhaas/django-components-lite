@@ -34,16 +34,7 @@ from django_components.component_registry import ComponentRegistry
 from django_components.component_registry import registry as registry_
 from django_components.constants import COMP_ID_PREFIX
 from django_components.context import _COMPONENT_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY, make_isolated_context_copy
-from django_components.dependencies import (
-    DependenciesStrategy,
-    cache_component_css,
-    cache_component_css_vars,
-    cache_component_js,
-    cache_component_js_vars,
-    insert_component_dependencies_comment,
-    set_component_attrs_for_js_and_css,
-)
-from django_components.dependencies import render_dependencies as _render_dependencies
+from django_components.dependencies import DependenciesStrategy, build_dependency_tags
 from django_components.node import BaseNode
 from django_components.perfutil.component import (
     OnComponentRenderedResult,
@@ -3498,14 +3489,6 @@ class Component(metaclass=ComponentMeta):
 
         template_data, js_data, css_data = component._call_data_methods(args_list, kwargs_dict)
 
-        # Cache component's JS and CSS scripts, in case they have been evicted from the cache.
-        cache_component_js(comp_cls, force=False)
-        cache_component_css(comp_cls, force=False)
-
-        # Create JS/CSS scripts that will load the JS/CSS variables into the page.
-        js_input_hash = cache_component_js_vars(comp_cls, js_data) if js_data else None
-        css_input_hash = cache_component_css_vars(comp_cls, css_data) if css_data else None
-
         #############################################################################
         # 4. Make Context copy
         #
@@ -3619,22 +3602,6 @@ class Component(metaclass=ComponentMeta):
         # It may be called multiple times for the same component, e.g. if `Component.on_render()`
         # contains multiple `yield` keywords.
         def on_component_intermediate(html_content: Optional[str]) -> Optional[str]:
-            # HTML attributes passed from parent to current component.
-            # NOTE: Is `None` for the root component.
-            curr_comp_attrs = component_tree_context.component_attrs.get(render_id, None)
-
-            if html_content:
-                # Add necessary HTML attributes to work with JS and CSS variables
-                html_content, child_components_attrs = set_component_attrs_for_js_and_css(
-                    html_content=html_content,
-                    component_id=render_id,
-                    css_input_hash=css_input_hash,
-                    root_attributes=curr_comp_attrs,
-                )
-
-                # Store the HTML attributes that will be passed from this component to its children's components
-                component_tree_context.component_attrs.update(child_components_attrs)
-
             return html_content
 
         component_tree_context.on_component_intermediate_callbacks[render_id] = on_component_intermediate
@@ -3672,16 +3639,11 @@ class Component(metaclass=ComponentMeta):
                 error = new_error
                 html = None
 
-            # Prepend an HTML comment to instruct how and what JS and CSS scripts are associated with it.
-            # E.g. `<!-- _RENDERED table,123,a92ef298,bd002c3 -->`
+            # Prepend <link>/<script> tags for this component's JS/CSS files
             if html is not None:
-                html = insert_component_dependencies_comment(
-                    html,
-                    component_cls=comp_cls,
-                    component_id=render_id,
-                    js_input_hash=js_input_hash,
-                    css_input_hash=css_input_hash,
-                )
+                dep_tags = build_dependency_tags(comp_cls)
+                if dep_tags:
+                    html = dep_tags + "\n" + html
 
             trace_component_msg(
                 "COMP_RENDER_END",
@@ -3695,19 +3657,13 @@ class Component(metaclass=ComponentMeta):
 
         component_tree_context.on_component_rendered_callbacks[render_id] = on_component_rendered
 
-        # This is triggered after a full component tree was rendered, we resolve
-        # all inserted HTML comments into <script> and <link> tags.
-        def on_component_tree_rendered(html: str) -> str:
-            html = _render_dependencies(html, deps_strategy)
-            return html
-
         return component_post_render(
             renderer=renderer_generator,
             render_id=render_id,
             component_name=component_name,
             parent_render_id=parent_id,
             component_tree_context=component_tree_context,
-            on_component_tree_rendered=on_component_tree_rendered,
+            on_component_tree_rendered=lambda html: html,
         )
 
     # Convert `Component.on_render()` to a generator function.

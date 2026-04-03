@@ -730,9 +730,9 @@ class TestSlot:
 
         if components_settings["context_behavior"] == "django":
             assert results == [
-                "<!-- _RENDERED MyInnerComponent_fb676b,ca1bc49,, -->Hello!",
-                "<!-- _RENDERED MyInnerComponent_fb676b,ca1bc4a,, -->Hello!",
-                "<!-- _RENDERED MyInnerComponent_fb676b,ca1bc4b,, -->Hello!",
+                "Hello!",
+                "Hello!",
+                "Hello!",
             ]
         else:
             # TODO - Incorrect for slots!
