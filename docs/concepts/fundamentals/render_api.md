@@ -6,11 +6,8 @@ We refer to these render-time-only methods and attributes as the "Render API".
 Render API is available inside these [`Component`](../../../reference/api#django_components.Component) methods:
 
 - [`get_template_data()`](../../../reference/api#django_components.Component.get_template_data)
-- [`get_js_data()`](../../../reference/api#django_components.Component.get_js_data)
-- [`get_css_data()`](../../../reference/api#django_components.Component.get_css_data)
 - [`get_context_data()`](../../../reference/api#django_components.Component.get_context_data)
 - [`on_render_before()`](../../../reference/api#django_components.Component.on_render_before)
-- [`on_render()`](../../../reference/api#django_components.Component.on_render)
 - [`on_render_after()`](../../../reference/api#django_components.Component.on_render_after)
 
 Example:
@@ -51,14 +48,10 @@ The Render API includes:
     - [`self.raw_kwargs`](../render_api/#kwargs) - Unmodified keyword arguments for the current render call
     - [`self.raw_slots`](../render_api/#slots) - Unmodified slots for the current render call
     - [`self.context`](../render_api/#context) - The context for the current render call
-    - [`self.deps_strategy`](../../advanced/rendering_js_css#dependencies-strategies) - The strategy for rendering dependencies
 
 - Request-related:
     - [`self.request`](../render_api/#request-and-context-processors) - The request object (if available)
     - [`self.context_processors_data`](../render_api/#request-and-context-processors) - Data from Django's context processors
-
-- Provide / inject:
-    - [`self.inject()`](../render_api/#provide-inject) - Inject data into the component
 
 - Template tag metadata:
     - [`self.node`](../render_api/#template-tag-metadata) - The [`ComponentNode`](../../../reference/api/#django_components.ComponentNode) instance
@@ -76,36 +69,9 @@ The Render API includes:
 The `args` argument as passed to
 [`Component.get_template_data()`](../../../reference/api/#django_components.Component.get_template_data).
 
-If you defined the [`Component.Args`](../../../reference/api/#django_components.Component.Args) class,
-then the [`Component.args`](../../../reference/api/#django_components.Component.args) property will return an instance of that class.
-
-Otherwise, `args` will be a plain list.
-
-Use [`self.raw_args`](../../../reference/api/#django_components.Component.raw_args)
-to access the positional arguments as a plain list irrespective of [`Component.Args`](../../../reference/api/#django_components.Component.Args).
+`args` is a plain list of positional arguments.
 
 **Example:**
-
-With `Args` class:
-
-```python
-from django_components import Component
-
-class Table(Component):
-    class Args:
-        page: int
-        per_page: int
-
-    def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-        assert self.args.page == 123
-        assert self.args.per_page == 10
-
-rendered = Table.render(
-    args=[123, 10],
-)
-```
-
-Without `Args` class:
 
 ```python
 from django_components import Component
@@ -121,36 +87,9 @@ class Table(Component):
 The `kwargs` argument as passed to
 [`Component.get_template_data()`](../../../reference/api/#django_components.Component.get_template_data).
 
-If you defined the [`Component.Kwargs`](../../../reference/api/#django_components.Component.Kwargs) class,
-then the [`Component.kwargs`](../../../reference/api/#django_components.Component.kwargs) property will return an instance of that class.
-
-Otherwise, `kwargs` will be a plain dictionary.
-
-Use [`self.raw_kwargs`](../../../reference/api/#django_components.Component.raw_kwargs)
-to access the keyword arguments as a plain dictionary irrespective of [`Component.Kwargs`](../../../reference/api/#django_components.Component.Kwargs).
+`kwargs` is a plain dictionary of keyword arguments.
 
 **Example:**
-
-With `Kwargs` class:
-
-```python
-from django_components import Component
-
-class Table(Component):
-    class Kwargs:
-        page: int
-        per_page: int
-
-    def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-        assert self.kwargs.page == 123
-        assert self.kwargs.per_page == 10
-
-rendered = Table.render(
-    kwargs={"page": 123, "per_page": 10},
-)
-```
-
-Without `Kwargs` class:
 
 ```python
 from django_components import Component
@@ -166,42 +105,12 @@ class Table(Component):
 The `slots` argument as passed to
 [`Component.get_template_data()`](../../../reference/api/#django_components.Component.get_template_data).
 
-If you defined the [`Component.Slots`](../../../reference/api/#django_components.Component.Slots) class,
-then the [`Component.slots`](../../../reference/api/#django_components.Component.slots) property will return an instance of that class.
-
-Otherwise, `slots` will be a plain dictionary.
-
-Use [`self.raw_slots`](../../../reference/api/#django_components.Component.raw_slots)
-to access the slots as a plain dictionary irrespective of [`Component.Slots`](../../../reference/api/#django_components.Component.Slots).
+`slots` is a plain dictionary of slot definitions.
 
 **Example:**
 
-With `Slots` class:
-
 ```python
-from django_components import Component, Slot, SlotInput
-
-class Table(Component):
-    class Slots:
-        header: SlotInput
-        footer: SlotInput
-
-    def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-        assert isinstance(self.slots.header, Slot)
-        assert isinstance(self.slots.footer, Slot)
-
-rendered = Table.render(
-    slots={
-        "header": "MY_HEADER",
-        "footer": lambda ctx: "FOOTER: " + ctx.data["user_id"],
-    },
-)
-```
-
-Without `Slots` class:
-
-```python
-from django_components import Component, Slot, SlotInput
+from django_components import Component, Slot
 
 class Table(Component):
     def on_render_before(self, context: Context, template: Optional[Template]) -> None:
@@ -288,26 +197,6 @@ rendered = Table.render(
 )
 ```
 
-## Provide / Inject
-
-Components support a provide / inject system as known from Vue or React.
-
-When rendering the component, you can call [`self.inject()`](../../../reference/api/#django_components.Component.inject) with the key of the data you want to inject.
-
-The object returned by [`self.inject()`](../../../reference/api/#django_components.Component.inject)
-
-To provide data to components, use the [`{% provide %}`](../../../reference/template_tags#provide) template tag.
-
-Read more about [Provide / Inject](../advanced/provide_inject.md).
-
-```python
-class Table(Component):
-    def get_template_data(self, args, kwargs, slots, context):
-        # Access provided data
-        data = self.inject("some_data")
-        assert data.some_data == "some_data"
-```
-
 ## Template tag metadata
 
 If the component is rendered with [`{% component %}`](../../../reference/template_tags#component) template tag,
@@ -346,8 +235,6 @@ class MyComponent(Component):
         if self.node is not None:
             assert self.node.name == "my_component"
 ```
-
-Accessing the [`ComponentNode`](../../../reference/api/#django_components.ComponentNode) is mostly useful for extensions, which can modify their behaviour based on the source of the Component.
 
 For example, if `MyComponent` was used in another component - that is,
 with a `{% component "my_component" %}` tag
