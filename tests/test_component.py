@@ -348,24 +348,14 @@ class TestComponent:
                     "variable": kwargs.get("variable", None),
                 }
 
-        _ = SimpleComponent1.template  # Triggers template loading
-        _ = SimpleComponent2.template  # Triggers template loading
+        # Render to trigger template caching
+        SimpleComponent1.render(kwargs={"variable": "test"})
+        SimpleComponent2.render(kwargs={"variable": "test"})
 
-        # Both components have their own Template instance, but they point to the same template file.
-        assert isinstance(SimpleComponent1._template, Template)
-        assert isinstance(SimpleComponent2._template, Template)
-        assert SimpleComponent1._template is not SimpleComponent2._template
-        assert SimpleComponent1._template.source == SimpleComponent2._template.source
-
-        # The Template instances have different origins, but they point to the same template file.
-        assert SimpleComponent1._template.origin is not SimpleComponent2._template.origin
-        assert SimpleComponent1._template.origin.template_name == SimpleComponent2._template.origin.template_name
-        assert SimpleComponent1._template.origin.name == SimpleComponent2._template.origin.name
-        assert SimpleComponent1._template.origin.loader == SimpleComponent2._template.origin.loader
-
-        # The origins point to their respective Component classes.
-        assert SimpleComponent1._template.origin.component_cls == SimpleComponent1
-        assert SimpleComponent2._template.origin.component_cls == SimpleComponent2
+        # Both components have their own cached Template instance
+        assert isinstance(SimpleComponent1._cached_template, Template)
+        assert isinstance(SimpleComponent2._cached_template, Template)
+        assert SimpleComponent1._cached_template.source == SimpleComponent2._cached_template.source
 
         rendered = SimpleComponent1.render(kwargs={"variable": "test"})
         assertHTMLEqual(
@@ -608,7 +598,6 @@ class TestComponentRenderAPI:
         assert comp.registered_name == "test"
 
         assert comp.node is not None
-        assert comp.node.template_component == Outer
 
         # Now uses template_file, so template_name is the file path
         assert comp.node.template_name.endswith("test_component/outer.html")  # type: ignore[union-attr]

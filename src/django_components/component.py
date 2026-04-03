@@ -21,7 +21,6 @@ from typing import (
 )
 from weakref import ReferenceType, WeakKeyDictionary, WeakValueDictionary, finalize, ref
 
-from django.forms.widgets import Media as MediaCls
 from django.http import HttpRequest, HttpResponse
 from django.template.base import NodeList, Parser, Template, Token
 from django.template.context import Context, RequestContext
@@ -29,7 +28,7 @@ from django.template.loader_tags import BLOCK_CONTEXT_KEY, BlockContext
 from django.test.signals import template_rendered
 
 from django_components.app_settings import ContextBehavior
-from django_components.component_media import ComponentMediaInput, ComponentMediaMeta
+from django_components.component_media import resolve_component_files
 from django_components.component_registry import ComponentRegistry
 from django_components.component_registry import registry as registry_
 from django_components.constants import COMP_ID_PREFIX
@@ -488,7 +487,15 @@ class ComponentTemplateNameDescriptor:
         cls.template_file = value
 
 
-class ComponentMeta(ComponentMediaMeta):
+class ComponentMeta(type):
+    def __setattr__(cls, name: str, value: Any) -> None:
+        # Support descriptor protocol for class-level attribute assignment
+        desc = cls.__dict__.get(name, None)
+        if hasattr(desc, "__set__"):
+            desc.__set__(cls, value)
+        else:
+            super().__setattr__(name, value)
+
     def __new__(mcs, name: str, bases: Tuple[Type, ...], attrs: Dict) -> Type:
         # If user set `template_name` on the class, we instead set it to `template_file`,
         # because we want `template_name` to be the descriptor that proxies to `template_file`.
@@ -498,10 +505,17 @@ class ComponentMeta(ComponentMediaMeta):
 
         cls = cast("Type[Component]", super().__new__(mcs, name, bases, attrs))
 
+        # Resolve relative file paths (template_file, js_file, css_file) into
+        # paths relative to COMPONENTS.dirs root.
+        try:
+            resolve_component_files(cls)
+        except Exception:
+            # May fail during Django startup when settings aren't ready yet.
+            # Files will be resolved on first access instead.
+            pass
+
         # If the component defined `template_file`, then associate this Component class
         # with that template file path.
-        # This way, when we will be instantiating `Template` in order to load the Component's template,
-        # and its template_name matches this path, then we know that the template belongs to this Component class.
         if attrs.get("template_file"):
             cache_component_template_file(cls)
 
@@ -1017,96 +1031,6 @@ class Component(metaclass=ComponentMeta):
     ```
     """
 
-    media: Optional[MediaCls] = None
-    """
-    Normalized definition of JS and CSS media files associated with this component.
-    `None` if [`Component.Media`](../api#django_components.Component.Media) is not defined.
-
-    This field is generated from [`Component.media_class`](../api#django_components.Component.media_class).
-
-    Read more on [Accessing component's Media JS / CSS](../../concepts/fundamentals/secondary_js_css_files/#accessing-media-files).
-
-    **Example:**
-
-    ```py
-    class MyComponent(Component):
-        class Media:
-            js = "path/to/script.js"
-            css = "path/to/style.css"
-
-    print(MyComponent.media)
-    # Output:
-    # <script src="/static/path/to/script.js"></script>
-    # <link href="/static/path/to/style.css" media="all" rel="stylesheet">
-    ```
-    """  # noqa: E501
-
-    media_class: ClassVar[Type[MediaCls]] = MediaCls
-    """
-    Set the [Media class](https://docs.djangoproject.com/en/5.2/topics/forms/media/#assets-as-a-static-definition)
-    that will be instantiated with the JS and CSS media files from
-    [`Component.Media`](../api#django_components.Component.Media).
-
-    This is useful when you want to customize the behavior of the media files, like
-    customizing how the JS or CSS files are rendered into `<script>` or `<link>` HTML tags.
-
-    Read more in [Media class](../../concepts/fundamentals/secondary_js_css_files/#media-class).
-
-    **Example:**
-
-    ```py
-    class MyTable(Component):
-        class Media:
-            js = "path/to/script.js"
-            css = "path/to/style.css"
-
-        media_class = MyMediaClass
-    ```
-    """
-
-    Media: ClassVar[Optional[Type[ComponentMediaInput]]] = None
-    """
-    Defines JS and CSS media files associated with this component.
-
-    This `Media` class behaves similarly to
-    [Django's Media class](https://docs.djangoproject.com/en/5.2/topics/forms/media/#assets-as-a-static-definition):
-
-    - Paths are generally handled as static file paths, and resolved URLs are rendered to HTML with
-      `media_class.render_js()` or `media_class.render_css()`.
-    - A path that starts with `http`, `https`, or `/` is considered a URL, skipping the static file resolution.
-      This path is still rendered to HTML with `media_class.render_js()` or `media_class.render_css()`.
-    - A `SafeString` (with `__html__` method) is considered an already-formatted HTML tag, skipping both static file
-        resolution and rendering with `media_class.render_js()` or `media_class.render_css()`.
-    - You can set [`extend`](../api#django_components.ComponentMediaInput.extend) to configure
-      whether to inherit JS / CSS from parent components. See
-      [Media inheritance](../../concepts/fundamentals/secondary_js_css_files/#media-inheritance).
-
-    However, there's a few differences from Django's Media class:
-
-    1. Our Media class accepts various formats for the JS and CSS files: either a single file, a list,
-       or (CSS-only) a dictionary (See [`ComponentMediaInput`](../api#django_components.ComponentMediaInput)).
-    2. Individual JS / CSS files can be any of `str`, `bytes`, `Path`,
-       [`SafeString`](https://dev.to/doridoro/django-safestring-afj), or a function
-       (See [`ComponentMediaInputPath`](../api#django_components.ComponentMediaInputPath)).
-
-    **Example:**
-
-    ```py
-    class MyTable(Component):
-        class Media:
-            js = [
-                "path/to/script.js",
-                "https://unpkg.com/alpinejs@3.14.7/dist/cdn.min.js",  # AlpineJS
-            ]
-            css = {
-                "all": [
-                    "path/to/style.css",
-                    "https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css",  # TailwindCSS
-                ],
-                "print": ["path/to/style2.css"],
-            }
-    ```
-    """
 
     response_class: ClassVar[Type[HttpResponse]] = HttpResponse
     """

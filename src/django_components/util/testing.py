@@ -32,9 +32,6 @@ from django_components.component import ALL_COMPONENTS, Component, component_nod
 from django_components.component_registry import ALL_REGISTRIES, ComponentRegistry
 from django_components.template import _reset_component_template_file_cache, loading_components
 
-if TYPE_CHECKING:
-    from django_components.component_media import ComponentMedia
-
 # NOTE: `ReferenceType` is NOT a generic pre-3.9
 if sys.version_info >= (3, 9):
     RegistryRef = ReferenceType[ComponentRegistry]
@@ -508,14 +505,7 @@ def _clear_djc_global_state(
         if comp_cls is None:
             continue
 
-        for file_attr, value_attr in [("template_file", "template"), ("js_file", "js"), ("css_file", "css")]:
-            # If both fields are set, then the value was set from the file field.
-            # Since we have some tests that check for these, we need to reset the state.
-            comp_media: ComponentMedia = comp_cls._component_media  # type: ignore[attr-defined]
-            if getattr(comp_media, file_attr, None) and getattr(comp_media, value_attr, None):
-                # Remove the value field, so it's not used in the next test
-                setattr(comp_media, value_attr, None)
-                comp_media.reset()
+        pass
 
     # Remove components that were created during the test
     initial_components_set = set(initial_components)

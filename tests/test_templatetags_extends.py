@@ -29,10 +29,8 @@ def gen_blocked_and_slotted_component():
 def gen_component_inside_include():
     class ComponentInsideInclude(Component):
         template: types.django_html = """<div>Hello</div>"""
-
-        class Media:
-            css = "style.css"
-            js = "script.js"
+        css_file = "style.css"
+        js_file = "script.js"
 
     return ComponentInsideInclude
 
