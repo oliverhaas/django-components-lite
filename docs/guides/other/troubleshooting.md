@@ -4,10 +4,10 @@ As larger projects get more complex, it can be hard to debug issues. Django Comp
 
 Django Components provides a visual debugging feature that helps you understand the structure and boundaries of your components and slots. When enabled, it adds a colored border and a label around each component and slot on your rendered page.
 
-To enable component and slot highlighting for all components and slots, set `highlight_components` and `highlight_slots` to `True` in [extensions defaults](../../../reference/settings/#django_components.app_settings.ComponentsSettings.extensions_defaults) in your `settings.py` file:
+To enable component and slot highlighting for all components and slots, set `highlight_components` and `highlight_slots` to `True` in [extensions defaults](../../../reference/settings/#django_components_lite.app_settings.ComponentsSettings.extensions_defaults) in your `settings.py` file:
 
 ```python
-from django_components import ComponentsSettings
+from django_components_lite import ComponentsSettings
 
 COMPONENTS = ComponentsSettings(
     extensions_defaults={
@@ -75,7 +75,7 @@ KeyError: "An error occured while rendering components my_page > layout > layout
 
 Django components supports [logging with Django](https://docs.djangoproject.com/en/5.2/howto/logging/#logging-how-to).
 
-To configure logging for Django components, set the `django_components` logger in
+To configure logging for Django components, set the `django_components_lite` logger in
 [`LOGGING`](https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-LOGGING)
 in `settings.py` (below).
 
@@ -95,7 +95,7 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django_components": {
+        "django_components_lite": {
             "level": logging.DEBUG,
             "handlers": ["console"],
         },
@@ -110,7 +110,7 @@ LOGGING = {
     ```py
     LOGGING = {
         "loggers": {
-            "django_components": {
+            "django_components_lite": {
                 "level": 5,
                 "handlers": ["console"],
             },
@@ -185,7 +185,7 @@ with open("result.html", "wb") as f:
 Next, we provide the agent with info on HOW we got the result that we have. We do so
 by providing the agent with the trace-level logs.
 
-In your `settings.py`, configure the trace-level logs to be written to the `django_components.log` file:
+In your `settings.py`, configure the trace-level logs to be written to the `django_components_lite.log` file:
 
 ```python
 LOGGING = {
@@ -194,12 +194,12 @@ LOGGING = {
     "handlers": {
         "file": {
             "class": "logging.FileHandler",
-            "filename": "django_components.log",
+            "filename": "django_components_lite.log",
             "mode": "w",  # Overwrite the file each time
         },
     },
     "loggers": {
-        "django_components": {
+        "django_components_lite": {
             "level": 5,
             "handlers": ["file"],
         },
@@ -216,7 +216,7 @@ Now, you can prompt the agent and include the trace log and the rendered output 
 > In the view `project_view`, I am rendering the `ProjectPage` component. However, the output is not as expected.
 > The output is missing the tabs.
 >
-> You have access to the full log trace in `django_components.log`.
+> You have access to the full log trace in `django_components_lite.log`.
 >
 > You can also see the rendered output in `result.html`.
 >

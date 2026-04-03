@@ -4,9 +4,9 @@ Each component can have single "primary" HTML, CSS and JS file associated with t
 
 Each of these can be defined as a file path:
 
-- HTML files are defined using [`Component.template_file`](../../reference/api.md#django_components.Component.template_file)
-- CSS files are defined using [`Component.css_file`](../../reference/api.md#django_components.Component.css_file)
-- JS files are defined using [`Component.js_file`](../../reference/api.md#django_components.Component.js_file)
+- HTML files are defined using [`Component.template_file`](../../reference/api.md#django_components_lite.Component.template_file)
+- CSS files are defined using [`Component.css_file`](../../reference/api.md#django_components_lite.Component.css_file)
+- JS files are defined using [`Component.js_file`](../../reference/api.md#django_components_lite.Component.js_file)
 
 ```py
 @register("calendar")
@@ -30,9 +30,9 @@ JS and CSS files are served via Django's static files system. When a component i
 Components use Django's template system to define their HTML.
 This means that you can use [Django's template syntax](https://docs.djangoproject.com/en/5.2/ref/templates/language/) to define your HTML.
 
-Inside the template, you can access the data returned from the [`get_template_data()`](../../../reference/api/#django_components.Component.get_template_data) method.
+Inside the template, you can access the data returned from the [`get_template_data()`](../../../reference/api/#django_components_lite.Component.get_template_data) method.
 
-Define the HTML in a separate file and reference it using [`template_file`](../../reference/api.md#django_components.Component.template_file):
+Define the HTML in a separate file and reference it using [`template_file`](../../reference/api.md#django_components_lite.Component.template_file):
 
 ```python
 class Button(Component):
@@ -79,7 +79,7 @@ Here is how the HTML is post-processed:
 
 ## JS
 
-Define the component's JS in a separate file using [`js_file`](../../reference/api.md#django_components.Component.js_file):
+Define the component's JS in a separate file using [`js_file`](../../reference/api.md#django_components_lite.Component.js_file):
 
 ```python
 class Button(Component):
@@ -95,7 +95,7 @@ static file URL is prepended to the component's rendered HTML.
 
 ## CSS
 
-Define the component's CSS in a separate file using [`css_file`](../../reference/api.md#django_components.Component.css_file):
+Define the component's CSS in a separate file using [`css_file`](../../reference/api.md#django_components_lite.Component.css_file):
 
 ```python
 class Button(Component):
@@ -129,7 +129,7 @@ So if you have a directory with following files:
 You can define the component like this:
 
 ```py title="[project root]/components/calendar/calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -139,11 +139,11 @@ class Calendar(Component):
 ```
 
 Assuming that
-[`COMPONENTS.dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
+[`COMPONENTS.dirs`](../../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.dirs)
 contains path `[project root]/components`, the example above is the same as writing out:
 
 ```py title="[project root]/components/calendar/calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -154,9 +154,9 @@ class Calendar(Component):
 
 If the path cannot be resolved relative to the component, django-components will attempt
 to resolve the path relative to the component directories, as set in
-[`COMPONENTS.dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
+[`COMPONENTS.dirs`](../../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.dirs)
 or
-[`COMPONENTS.app_dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.app_dirs).
+[`COMPONENTS.app_dirs`](../../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.app_dirs).
 
 ## File path resolution
 
@@ -165,6 +165,6 @@ component is first rendered or when its attributes are first accessed.
 
 File paths are resolved relative to the component's Python file location. If not found there,
 they are resolved relative to the component directories set in
-[`COMPONENTS.dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
+[`COMPONENTS.dirs`](../../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.dirs)
 or
-[`COMPONENTS.app_dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.app_dirs).
+[`COMPONENTS.app_dirs`](../../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.app_dirs).

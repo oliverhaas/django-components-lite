@@ -10,11 +10,11 @@ What we want is to be able to use the Calendar component within the template lik
 ### 1. Understading component inputs
 
 In section [Create your first component](../your_first_component), we defined
-the [`get_template_data()`](../../reference/api#django_components.Component.get_template_data) method
+the [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data) method
 that defines what variables will be available within the template:
 
 ```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -26,7 +26,7 @@ class Calendar(Component):
         }
 ```
 
-What we didn't say is that [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+What we didn't say is that [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
 actually receives the args and kwargs that were passed to a component.
 
 So if we call a component with a `date` and `extra_class` keywords:
@@ -62,13 +62,13 @@ Calendar.get_template_data(
 ### 2. Define inputs
 
 Let's put this to test. We want to pass `date` and `extra_class` kwargs to the component.
-And so, we can write the [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+And so, we can write the [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
 method such that it expects those parameters:
 
 ```python title="[project root]/components/calendar/calendar.py"
 from datetime import date
 
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -91,7 +91,7 @@ So both following calls are valid:
 
 !!! warning
 
-    [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+    [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
     differentiates between positional and keyword arguments,
     so you have to make sure to pass the arguments correctly.
 
@@ -107,7 +107,7 @@ So both following calls are valid:
 
 ### 3. Process inputs
 
-The [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+The [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
 method is powerful, because it allows us to decouple
 component inputs from the template variables. In other words, we can pre-process
 the component inputs, and massage them into a shape that's most appropriate for
@@ -160,13 +160,13 @@ cities_by_pop = [
 ]
 ```
 
-Without the [`get_template_data()`](../../reference/api#django_components.Component.get_template_data) method,
+Without the [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data) method,
 we'd have to either:
 
 1. Pre-process the data in Python before passing it to the components.
 2. Define a Django filter or template tag to take the data and process it on the spot.
 
-Instead, with [`get_template_data()`](../../reference/api#django_components.Component.get_template_data),
+Instead, with [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data),
 we can keep this transformation private to this component,
 and keep the rest of the codebase clean.
 
@@ -184,13 +184,13 @@ class PopulationTable(Component):
         }
 ```
 
-Similarly we can make use of [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+Similarly we can make use of [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
 to pre-process the date that was given to the component:
 
 ```python title="[project root]/components/calendar/calendar.py"
 from datetime import date
 
-from django_components import Component, register
+from django_components_lite import Component, register
 
 # If date is Sat or Sun, shift it to next Mon, so the date is always workweek.
 def to_workweek_date(d: date):

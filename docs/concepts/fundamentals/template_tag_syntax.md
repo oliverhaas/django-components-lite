@@ -124,7 +124,7 @@ However, this can become unwieldy if you have a component with a lot of inputs:
 {% component "card" title="Joanne Arc" subtitle="Head of Kitty Relations" date_last_active="2024-09-03" ... %}
 ```
 
-Instead, when you install django_components, it automatically configures Django
+Instead, when you install django_components_lite, it automatically configures Django
 to suport multi-line tags.
 
 So we can rewrite the above as:

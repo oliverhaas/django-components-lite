@@ -1,6 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from django_components import Component, types
+from django_components_lite import Component, types
 
 
 class FormSubmissionPage(Component):

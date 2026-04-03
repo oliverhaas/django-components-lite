@@ -24,7 +24,7 @@ def setup_test_config(
 
     default_settings = {
         "BASE_DIR": Path(__file__).resolve().parent,
-        "INSTALLED_APPS": ("django_components", "tests.test_app"),
+        "INSTALLED_APPS": ("django_components_lite", "tests.test_app"),
         "TEMPLATES": [
             {
                 "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -34,7 +34,7 @@ def setup_test_config(
                 ],
                 "OPTIONS": {
                     "builtins": [
-                        "django_components.templatetags.component_tags",
+                        "django_components_lite.templatetags.component_tags",
                     ],
                     "loaders": [
                         # Default Django loader
@@ -42,7 +42,7 @@ def setup_test_config(
                         # Including this is the same as APP_DIRS=True
                         "django.template.loaders.app_directories.Loader",
                         # Components loader
-                        "django_components.template_loader.Loader",
+                        "django_components_lite.template_loader.Loader",
                     ],
                 },
             },
@@ -59,7 +59,7 @@ def setup_test_config(
             },
         },
         "SECRET_KEY": "secret",
-        "ROOT_URLCONF": "django_components.urls",
+        "ROOT_URLCONF": "django_components_lite.urls",
     }
 
     settings.configure(

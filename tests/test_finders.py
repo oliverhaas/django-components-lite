@@ -4,7 +4,7 @@ from pathlib import Path
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.management.commands.collectstatic import Command
 
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 from .testutils import setup_test_config
 
@@ -71,7 +71,7 @@ common_settings = {
     "STATIC_URL": "static/",
     "STATIC_ROOT": "staticfiles",
     "ROOT_URLCONF": __name__,
-    "INSTALLED_APPS": ("django_components", "django.contrib.staticfiles"),
+    "INSTALLED_APPS": ("django_components_lite", "django.contrib.staticfiles"),
 }
 COMPONENTS = {
     "dirs": [Path(__file__).resolve().parent / "components"],
@@ -113,7 +113,7 @@ class TestStaticFilesFinder:
                 "django.contrib.staticfiles.finders.FileSystemFinder",
                 "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                 # Django components
-                "django_components.finders.ComponentsFileSystemFinder",
+                "django_components_lite.finders.ComponentsFileSystemFinder",
             ],
         },
         components_settings=COMPONENTS,
@@ -138,7 +138,7 @@ class TestStaticFilesFinder:
                 "django.contrib.staticfiles.finders.FileSystemFinder",
                 "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                 # Django components
-                "django_components.finders.ComponentsFileSystemFinder",
+                "django_components_lite.finders.ComponentsFileSystemFinder",
             ],
         },
         components_settings={
@@ -169,7 +169,7 @@ class TestStaticFilesFinder:
                 "django.contrib.staticfiles.finders.FileSystemFinder",
                 "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                 # Django components
-                "django_components.finders.ComponentsFileSystemFinder",
+                "django_components_lite.finders.ComponentsFileSystemFinder",
             ],
         },
         components_settings={
@@ -202,7 +202,7 @@ class TestStaticFilesFinder:
                 "django.contrib.staticfiles.finders.FileSystemFinder",
                 "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                 # Django components
-                "django_components.finders.ComponentsFileSystemFinder",
+                "django_components_lite.finders.ComponentsFileSystemFinder",
             ],
         },
         components_settings={
@@ -244,7 +244,7 @@ class TestStaticFilesFinder:
                 "django.contrib.staticfiles.finders.FileSystemFinder",
                 "django.contrib.staticfiles.finders.AppDirectoriesFinder",
                 # Django components
-                "django_components.finders.ComponentsFileSystemFinder",
+                "django_components_lite.finders.ComponentsFileSystemFinder",
             ],
         },
         components_settings=COMPONENTS,

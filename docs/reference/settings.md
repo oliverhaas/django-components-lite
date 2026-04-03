@@ -2,15 +2,15 @@
 
 # Settings
 
-You can configure django_components with a global `COMPONENTS` variable in your Django settings file, e.g. `settings.py`.
+You can configure django_components_lite with a global `COMPONENTS` variable in your Django settings file, e.g. `settings.py`.
 By default you don't need it set, there are resonable [defaults](#settings-defaults).
 
-To configure the settings you can instantiate [`ComponentsSettings`](../api#django_components.ComponentsSettings)
+To configure the settings you can instantiate [`ComponentsSettings`](../api#django_components_lite.ComponentsSettings)
 for validation and type hints. Or, for backwards compatibility, you can also use plain dictionary:
 
 ```python
 # settings.py
-from django_components import ComponentsSettings
+from django_components_lite import ComponentsSettings
 
 COMPONENTS = ComponentsSettings(
     autodiscover=True,
@@ -63,12 +63,12 @@ defaults = ComponentsSettings(
         # Python files
         ".py", ".pyc",
     ],
-    tag_formatter="django_components.component_formatter",
+    tag_formatter="django_components_lite.component_formatter",
     template_cache_size=128,
 )
 ```
 
-::: django_components.app_settings.ComponentsSettings.app_dirs
+::: django_components_lite.app_settings.ComponentsSettings.app_dirs
     options:
       show_root_heading: true
       show_signature: true
@@ -78,7 +78,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.autodiscover
+::: django_components_lite.app_settings.ComponentsSettings.autodiscover
     options:
       show_root_heading: true
       show_signature: true
@@ -88,7 +88,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.cache
+::: django_components_lite.app_settings.ComponentsSettings.cache
     options:
       show_root_heading: true
       show_signature: true
@@ -98,7 +98,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.context_behavior
+::: django_components_lite.app_settings.ComponentsSettings.context_behavior
     options:
       show_root_heading: true
       show_signature: true
@@ -108,7 +108,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.debug_highlight_components
+::: django_components_lite.app_settings.ComponentsSettings.debug_highlight_components
     options:
       show_root_heading: true
       show_signature: true
@@ -118,7 +118,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.debug_highlight_slots
+::: django_components_lite.app_settings.ComponentsSettings.debug_highlight_slots
     options:
       show_root_heading: true
       show_signature: true
@@ -128,7 +128,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.dirs
+::: django_components_lite.app_settings.ComponentsSettings.dirs
     options:
       show_root_heading: true
       show_signature: true
@@ -138,7 +138,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.dynamic_component_name
+::: django_components_lite.app_settings.ComponentsSettings.dynamic_component_name
     options:
       show_root_heading: true
       show_signature: true
@@ -148,7 +148,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.extensions
+::: django_components_lite.app_settings.ComponentsSettings.extensions
     options:
       show_root_heading: true
       show_signature: true
@@ -158,7 +158,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.extensions_defaults
+::: django_components_lite.app_settings.ComponentsSettings.extensions_defaults
     options:
       show_root_heading: true
       show_signature: true
@@ -168,7 +168,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.forbidden_static_files
+::: django_components_lite.app_settings.ComponentsSettings.forbidden_static_files
     options:
       show_root_heading: true
       show_signature: true
@@ -178,7 +178,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.libraries
+::: django_components_lite.app_settings.ComponentsSettings.libraries
     options:
       show_root_heading: true
       show_signature: true
@@ -188,7 +188,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.multiline_tags
+::: django_components_lite.app_settings.ComponentsSettings.multiline_tags
     options:
       show_root_heading: true
       show_signature: true
@@ -198,7 +198,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.reload_on_file_change
+::: django_components_lite.app_settings.ComponentsSettings.reload_on_file_change
     options:
       show_root_heading: true
       show_signature: true
@@ -208,7 +208,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.reload_on_template_change
+::: django_components_lite.app_settings.ComponentsSettings.reload_on_template_change
     options:
       show_root_heading: true
       show_signature: true
@@ -218,7 +218,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.static_files_allowed
+::: django_components_lite.app_settings.ComponentsSettings.static_files_allowed
     options:
       show_root_heading: true
       show_signature: true
@@ -228,7 +228,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.static_files_forbidden
+::: django_components_lite.app_settings.ComponentsSettings.static_files_forbidden
     options:
       show_root_heading: true
       show_signature: true
@@ -238,7 +238,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.tag_formatter
+::: django_components_lite.app_settings.ComponentsSettings.tag_formatter
     options:
       show_root_heading: true
       show_signature: true
@@ -248,7 +248,7 @@ defaults = ComponentsSettings(
       show_if_no_docstring: true
       show_labels: false
 
-::: django_components.app_settings.ComponentsSettings.template_cache_size
+::: django_components_lite.app_settings.ComponentsSettings.template_cache_size
     options:
       show_root_heading: true
       show_signature: true

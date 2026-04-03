@@ -1,4 +1,4 @@
-from django_components import Component, register
+from django_components_lite import Component, register
 
 
 # Used for testing the template_loader

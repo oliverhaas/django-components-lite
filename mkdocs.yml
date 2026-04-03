@@ -1,24 +1,22 @@
 ---
 # See https://www.mkdocs.org/user-guide/configuration
-site_name: Django-Components
-site_description: A way to create simple reusable template components in Django.
-site_url: https://django-components.github.io/django-components/
+site_name: django-components-lite
+site_description: Lightweight reusable template components for Django.
+site_url: https://oliverhaas.github.io/django-components-lite/
 
-repo_url: https://github.com/django-components/django-components
-repo_name: django-components
-edit_uri: https://github.com/django-components/django-components/edit/master/docs/
+repo_url: https://github.com/oliverhaas/django-components-lite
+repo_name: django-components-lite
+edit_uri: https://github.com/oliverhaas/django-components-lite/edit/main/docs/
 
 dev_addr: "127.0.0.1:9000"
 site_dir: site
 docs_dir: docs
 
 watch:
-  - django_components
+  - django_components_lite
   - docs
   - mkdocs.yml
   - README.md
-  - CHANGELOG.md
-  - scripts
 
 validation:
   absolute_links: warn

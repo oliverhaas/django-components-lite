@@ -3,19 +3,19 @@ Components can be defined in a single file, inlining the HTML, JS and CSS within
 ## Writing single file components
 
 To do this, you can use the
-[`template`](../../../reference/api#django_components.Component.template),
-[`js`](../../../reference/api#django_components.Component.js),
-and [`css`](../../../reference/api#django_components.Component.css)
+[`template`](../../../reference/api#django_components_lite.Component.template),
+[`js`](../../../reference/api#django_components_lite.Component.js),
+and [`css`](../../../reference/api#django_components_lite.Component.css)
 class attributes instead of the
-[`template_file`](../../../reference/api#django_components.Component.template_file),
-[`js_file`](../../../reference/api#django_components.Component.js_file),
-and [`css_file`](../../../reference/api#django_components.Component.css_file).
+[`template_file`](../../../reference/api#django_components_lite.Component.template_file),
+[`js_file`](../../../reference/api#django_components_lite.Component.js_file),
+and [`css_file`](../../../reference/api#django_components_lite.Component.css_file).
 
 For example, here's the calendar component from
 the [Getting started](../../getting_started/your_first_component.md) tutorial:
 
 ```py title="calendar.py"
-from django_components import Component
+from django_components_lite import Component
 
 class Calendar(Component):
     template_file = "calendar.html"
@@ -26,7 +26,7 @@ class Calendar(Component):
 And here is the same component, rewritten in a single file:
 
 ```djc_py title="[project root]/components/calendar.py"
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 @register("calendar")
 class Calendar(Component):
@@ -66,7 +66,7 @@ You can mix and match, so you can have a component with inlined HTML,
 while the JS and CSS are in separate files:
 
 ```djc_py title="[project root]/components/calendar.py"
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 @register("calendar")
 class Calendar(Component):
@@ -86,9 +86,9 @@ If you "inline" the HTML, JS and CSS code into the Python class, you should set 
 syntax highlighting to let your code editor know that the inlined code is HTML, JS and CSS.
 
 In the examples above, we've annotated the
-[`template`](../../../reference/api#django_components.Component.template),
-[`js`](../../../reference/api#django_components.Component.js),
-and [`css`](../../../reference/api#django_components.Component.css)
+[`template`](../../../reference/api#django_components_lite.Component.template),
+[`js`](../../../reference/api#django_components_lite.Component.js),
+and [`css`](../../../reference/api#django_components_lite.Component.css)
 attributes with
 the `types.django_html`, `types.js` and `types.css` types. These are used for syntax highlighting in VSCode.
 
@@ -104,13 +104,13 @@ the `types.django_html`, `types.js` and `types.css` types. These are used for sy
 1. First install [Python Inline Source Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=samwillis.python-inline-source) extension, it will give you syntax highlighting for the template, CSS, and JS.
 
 2. Next, in your component, set typings of
-[`Component.template`](../../../reference/api#django_components.Component.template),
-[`Component.js`](../../../reference/api#django_components.Component.js),
-[`Component.css`](../../../reference/api#django_components.Component.css)
+[`Component.template`](../../../reference/api#django_components_lite.Component.template),
+[`Component.js`](../../../reference/api#django_components_lite.Component.js),
+[`Component.css`](../../../reference/api#django_components_lite.Component.css)
 to `types.django_html`, `types.css`, and `types.js` respectively. The extension will recognize these and will activate syntax highlighting.
 
 ```djc_py title="[project root]/components/calendar.py"
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 @register("calendar")
 class Calendar(Component):
@@ -151,7 +151,7 @@ With PyCharm (or any other editor from Jetbrains), you don't need to use `types.
 You only need to write the comments `# language=<lang>` above the variables.
 
 ```djc_py
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -208,7 +208,7 @@ Now you can use the `djc_py` code block to write code blocks with syntax highlig
 
 ```txt
 \```djc_py
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -233,7 +233,7 @@ class Calendar(Component):
 Will be rendered as below. Notice that the CSS and HTML are highlighted correctly:
 
 ```djc_py
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):

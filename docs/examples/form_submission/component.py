@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from django.http import HttpRequest, HttpResponse
 
-from django_components import Component, get_component_url, register, types
+from django_components_lite import Component, get_component_url, register, types
 
 DESCRIPTION = "Handle the entire form submission flow in a single file and without Django's Form class."
 

@@ -5,13 +5,13 @@ Our calendar component can accept and pre-process data, defines its own CSS and 
 There's 3 ways to render a component:
 
 - Render the template that contains the [`{% component %}`](../../reference/template_tags#component) tag
-- Render the component directly with [`Component.render()`](../../reference/api#django_components.Component.render)
-- Render the component directly with [`Component.render_to_response()`](../../reference/api#django_components.Component.render_to_response)
+- Render the component directly with [`Component.render()`](../../reference/api#django_components_lite.Component.render)
+- Render the component directly with [`Component.render_to_response()`](../../reference/api#django_components_lite.Component.render_to_response)
 
 As a reminder, this is what the calendar component looks like:
 
 ```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -76,7 +76,7 @@ rendered_template = template.render()
 
 ### 2. Render the component
 
-You can also render the component directly with [`Component.render()`](../../reference/api#django_components.Component.render), without wrapping the component in a template.
+You can also render the component directly with [`Component.render()`](../../reference/api#django_components_lite.Component.render), without wrapping the component in a template.
 
 ```python
 from components.calendar import Calendar
@@ -119,9 +119,9 @@ rendered_component = calendar.render(
 
 A common pattern in Django is to render the component and then return the resulting HTML as a response to an HTTP request.
 
-For this, you can use the [`Component.render_to_response()`](../../reference/api#django_components.Component.render_to_response) convenience method.
+For this, you can use the [`Component.render_to_response()`](../../reference/api#django_components_lite.Component.render_to_response) convenience method.
 
-`render_to_response()` accepts the same args, kwargs, slots, and more, as [`Component.render()`](../../reference/api#django_components.Component.render), but wraps the result in an [`HttpResponse`](https://docs.djangoproject.com/en/5.2/ref/request-response/#django.http.HttpResponse).
+`render_to_response()` accepts the same args, kwargs, slots, and more, as [`Component.render()`](../../reference/api#django_components_lite.Component.render), but wraps the result in an [`HttpResponse`](https://docs.djangoproject.com/en/5.2/ref/request-response/#django.http.HttpResponse).
 
 ```python
 from components.calendar import Calendar
@@ -146,7 +146,7 @@ def my_view(request):
 
     While `render` method returns a plain string, `render_to_response` wraps the rendered content in a "Response" class. By default, this is [`django.http.HttpResponse`](https://docs.djangoproject.com/en/5.2/ref/request-response/#django.http.HttpResponse).
 
-    If you want to use a different Response class in `render_to_response`, set the [`Component.response_class`](../../reference/api#django_components.Component.response_class) attribute:
+    If you want to use a different Response class in `render_to_response`, set the [`Component.response_class`](../../reference/api#django_components_lite.Component.response_class) attribute:
 
     ```py
     class MyCustomResponse(HttpResponse):

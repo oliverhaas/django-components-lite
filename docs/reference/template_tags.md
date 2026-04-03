@@ -5,7 +5,7 @@
 
 All following template tags are defined in
 
-`django_components.templatetags.component_tags`
+`django_components_lite.templatetags.component_tags`
 
 Import as
 ```django
@@ -20,7 +20,7 @@ Import as
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L1052" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L1052" target="_blank">See source code</a>
 
 
 
@@ -43,7 +43,7 @@ If you insert this tag multiple times, ALL CSS links will be duplicately inserte
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L1074" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L1074" target="_blank">See source code</a>
 
 
 
@@ -67,12 +67,12 @@ If you insert this tag multiple times, ALL JS scripts will be duplicately insert
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L3803" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L3803" target="_blank">See source code</a>
 
 
 
 Renders one of the components that was previously registered with
-[`@register()`](./api.md#django_components.register)
+[`@register()`](./api.md#django_components_lite.register)
 decorator.
 
 The [`{% component %}`](../template_tags#component) tag takes:
@@ -132,7 +132,7 @@ can access only the data that was explicitly passed to it:
 ```
 
 Alternatively, you can set all components to be isolated by default, by setting
-[`context_behavior`](../settings#django_components.app_settings.ComponentsSettings.context_behavior)
+[`context_behavior`](../settings#django_components_lite.app_settings.ComponentsSettings.context_behavior)
 to `"isolated"` in your settings:
 
 ```python
@@ -157,20 +157,20 @@ in the settings:
 ```python
 # settings.py
 COMPONENTS = {
-    "tag_formatter": "django_components.component_shorthand_formatter",
+    "tag_formatter": "django_components_lite.component_shorthand_formatter",
 }
 ```
 
 ## fill
 
 ```django
-{% fill name: str, *, data: Optional[str] = None, fallback: Optional[str] = None, body: Union[str, django.utils.safestring.SafeString, django_components.slots.SlotFunc[~TSlotData], django_components.slots.Slot[~TSlotData], NoneType] = None, default: Optional[str] = None %}
+{% fill name: str, *, data: Optional[str] = None, fallback: Optional[str] = None, body: Union[str, django.utils.safestring.SafeString, django_components_lite.slots.SlotFunc[~TSlotData], django_components_lite.slots.Slot[~TSlotData], NoneType] = None, default: Optional[str] = None %}
 {% endfill %}
 ```
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L990" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L990" target="_blank">See source code</a>
 
 
 
@@ -284,12 +284,12 @@ use [`{% fill %}`](../template_tags#fill) with `name` set to `"default"`:
 You can pass a slot fill from Python to a component by setting the `body` kwarg
 on the [`{% fill %}`](../template_tags#fill) tag.
 
-First pass a [`Slot`](../api#django_components.Slot) instance to the template
-with the [`get_template_data()`](../api#django_components.Component.get_template_data)
+First pass a [`Slot`](../api#django_components_lite.Slot) instance to the template
+with the [`get_template_data()`](../api#django_components_lite.Component.get_template_data)
 method:
 
 ```python
-from django_components import component, Slot
+from django_components_lite import component, Slot
 
 class Table(Component):
   def get_template_data(self, args, kwargs, slots, context):
@@ -327,7 +327,7 @@ Then pass the slot to the [`{% fill %}`](../template_tags#fill) tag:
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L18" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L18" target="_blank">See source code</a>
 
 
 
@@ -389,7 +389,7 @@ See more usage examples in
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L12" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L12" target="_blank">See source code</a>
 
 
 
@@ -399,7 +399,7 @@ the [provide / inject feature](../../concepts/advanced/provide_inject).
 Pass kwargs to this tag to define the provider's data.
 
 Any components defined within the `{% provide %}..{% endprovide %}` tags will be able to access this data
-with [`Component.inject()`](../api#django_components.Component.inject).
+with [`Component.inject()`](../api#django_components_lite.Component.inject).
 
 This is similar to React's [`ContextProvider`](https://react.dev/learn/passing-data-deeply-with-context),
 or Vue's [`provide()`](https://vuejs.org/guide/components/provide-inject).
@@ -407,7 +407,7 @@ or Vue's [`provide()`](https://vuejs.org/guide/components/provide-inject).
 **Args:**
 
 - `name` (str, required): Provider name. This is the name you will then use in
-    [`Component.inject()`](../api#django_components.Component.inject).
+    [`Component.inject()`](../api#django_components_lite.Component.inject).
 - `**kwargs`: Any extra kwargs will be passed as the provided data.
 
 **Example:**
@@ -451,7 +451,7 @@ class Child(Component):
 ```
 
 Notice that the keys defined on the [`{% provide %}`](../template_tags#provide) tag are then accessed as attributes
-when accessing them with [`Component.inject()`](../api#django_components.Component.inject).
+when accessing them with [`Component.inject()`](../api#django_components_lite.Component.inject).
 
 ✅ Do this
 ```python
@@ -472,7 +472,7 @@ user = self.inject("user_data")["user"]
 
 
 
-<a href="https://github.com/django-components/django-components/tree/master/src/django_components/templatetags/component_tags.py#L513" target="_blank">See source code</a>
+<a href="https://github.com/django-components/django-components/tree/master/src/django_components_lite/templatetags/component_tags.py#L513" target="_blank">See source code</a>
 
 
 

@@ -6,9 +6,9 @@ from django.template import Context, Template, TemplateSyntaxError
 from django.template.base import Parser
 from django.template.engine import Engine
 
-from django_components import Component, register, types
-from django_components.testing import djc_test
-from django_components.util.tag_parser import TagAttr, TagValue, TagValuePart, TagValueStruct, parse_tag
+from django_components_lite import Component, register, types
+from django_components_lite.testing import djc_test
+from django_components_lite.util.tag_parser import TagAttr, TagValue, TagValuePart, TagValueStruct, parse_tag
 
 from .testutils import setup_test_config
 

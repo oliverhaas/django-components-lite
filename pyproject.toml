@@ -1,14 +1,13 @@
 [project]
-name = "django_components"
-version = "0.143.0"
-description = "A way to create simple reusable template components in Django."
+name = "django-components-lite"
+version = "0.1.0a1"
+description = "Lightweight reusable template components for Django. An exploratory fork of django-components."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
 keywords = ["django", "components", "css", "js", "html"]
 authors = [
-  { name = "Emil Stenström", email = "emil@emilstenstrom.se" },
-  { name = "Juro Oravec", email = "juraj.oravec.josefson@gmail.com" },
+  { name = "Oliver Haas", email = "ohaas@e1plus.de" },
 ]
 classifiers = [
   "Framework :: Django",
@@ -25,11 +24,9 @@ classifiers = [
 dependencies = ["Django>=5.2,<7"]
 
 [project.urls]
-Homepage = "https://github.com/django-components/django-components/"
-Documentation = "https://django-components.github.io/django-components/"
-Changelog = "https://django-components.github.io/django-components/latest/releases/"
-Issues = "https://github.com/django-components/django-components/issues"
-Donate = "https://github.com/sponsors/EmilStenstrom"
+Homepage = "https://github.com/oliverhaas/django-components-lite"
+Documentation = "https://oliverhaas.github.io/django-components-lite/"
+Issues = "https://github.com/oliverhaas/django-components-lite/issues"
 
 [dependency-groups]
 dev = [
@@ -80,16 +77,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["django_components"]
+packages = ["django_components_lite"]
 
 [tool.hatch.build.targets.sdist]
-include = ["django_components", "LICENSE", "README.md"]
+include = ["django_components_lite", "LICENSE", "README.md"]
 
 [tool.ruff]
 target-version = "py312"
 line-length = 119
 fix = true
-src = ["django_components", "tests"]
+src = ["django_components_lite", "tests"]
 exclude = [
   "migrations",
   "manage.py",
@@ -173,15 +170,9 @@ suppress-none-returning = true
 "docs/examples/**" = [
   "ARG002", "ANN", "S101", "T201", "DTZ",
 ]
-"scripts/**" = [
-  "ANN", "T201", "S324",
-]
-"convert_inline_templates.py" = [
-  "ANN", "T201", "S324", "RUF001", "SIM102", "EXE001", "PLR1722",
-]
 
 [tool.ruff.lint.isort]
-known-first-party = ["django_components"]
+known-first-party = ["django_components_lite"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -194,12 +185,11 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 exclude = [
   "build",
-  "sampleproject",
-  "test_structures",
+  "examples",
 ]
 
 [[tool.mypy.overrides]]
-module = "django_components.*"
+module = "django_components_lite.*"
 disallow_untyped_defs = true
 
 [tool.ty.rules]

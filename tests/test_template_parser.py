@@ -1,7 +1,7 @@
 from django.template.base import Token, TokenType
 
-from django_components.testing import djc_test
-from django_components.util.template_parser import parse_template
+from django_components_lite.testing import djc_test
+from django_components_lite.util.template_parser import parse_template
 
 from .testutils import setup_test_config
 

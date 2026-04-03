@@ -1,7 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.utils.safestring import mark_safe
 
-from django_components import Component, get_component_url, types
+from django_components_lite import Component, get_component_url, types
 
 from .component import AlpineFragment, SimpleFragment
 

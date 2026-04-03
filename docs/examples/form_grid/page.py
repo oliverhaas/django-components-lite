@@ -1,7 +1,7 @@
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
-from django_components import Component, types
+from django_components_lite import Component, types
 
 
 class FormGridPage(Component):

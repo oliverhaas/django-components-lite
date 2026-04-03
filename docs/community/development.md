@@ -155,17 +155,17 @@ To display individual components, add them to the `urls.py`, like in the case of
 
 ## Building JS code
 
-django_components uses a bit of JS code to:
+django_components_lite uses a bit of JS code to:
 
 - Manage the loading of JS and CSS files used by the components
 - Allow to pass data from Python to JS
 
 When you make changes to this JS code, you also need to compile it:
 
-1. Navigate to `src/django_components_js`:
+1. Navigate to `src/django_components_lite_js`:
 
     ```sh
-    cd src/django_components_js
+    cd src/django_components_lite_js
     ```
 
 2. Install the JS dependencies
@@ -181,7 +181,7 @@ When you make changes to this JS code, you also need to compile it:
     ```
 
     The script will combine all JS/TS code into a single `.js` file, minify it,
-    and copy it to `django_components/static/django_components/django_components.min.js`.
+    and copy it to `django_components_lite/static/django_components_lite/django_components_lite.min.js`.
 
 ## Documentation website
 
@@ -350,7 +350,7 @@ The version number is in the format `MAJOR.MINOR.PATCH` (e.g. `0.141.6`).
 
 ## Development guides
 
-Head over to [Dev guides](./devguides/dependency_mgmt.md) for a deep dive into how django_components' features are implemented.
+Head over to [Dev guides](./devguides/dependency_mgmt.md) for a deep dive into how django_components_lite' features are implemented.
 
 ## Maintenance
 

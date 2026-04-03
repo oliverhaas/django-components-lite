@@ -1,6 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 from .component import analytics_events, error_rate
 

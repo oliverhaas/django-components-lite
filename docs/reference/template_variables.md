@@ -6,11 +6,11 @@ Here is a list of all variables that are automatically available from inside the
 template:
 
 
-::: django_components.component.ComponentVars.args
+::: django_components_lite.component.ComponentVars.args
 
-::: django_components.component.ComponentVars.kwargs
+::: django_components_lite.component.ComponentVars.kwargs
 
-::: django_components.component.ComponentVars.slots
+::: django_components_lite.component.ComponentVars.slots
 
-::: django_components.component.ComponentVars.is_filled
+::: django_components_lite.component.ComponentVars.is_filled
 

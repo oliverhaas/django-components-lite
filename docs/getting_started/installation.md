@@ -1,18 +1,18 @@
 ### Basic installation
 
-1. Install `django_components` into your environment:
+1. Install `django_components_lite` into your environment:
 
     ```bash
-    pip install django_components
+    pip install django_components_lite
     ```
 
-2. Load `django_components` into Django by adding it into `INSTALLED_APPS` in your settings file:
+2. Load `django_components_lite` into Django by adding it into `INSTALLED_APPS` in your settings file:
 
     ```python
     # app/settings.py
     INSTALLED_APPS = [
         ...,
-        'django_components',
+        'django_components_lite',
     ]
     ```
 
@@ -48,7 +48,7 @@
                         # Including this is the same as APP_DIRS=True
                         'django.template.loaders.app_directories.Loader',
                         # Components loader
-                        'django_components.template_loader.Loader',
+                        'django_components_lite.template_loader.Loader',
                     ]
                 )],
             },
@@ -60,7 +60,7 @@
 
 If you want to use JS or CSS with components, you will need to:
 
-1. Add `"django_components.finders.ComponentsFileSystemFinder"` to `STATICFILES_FINDERS` in your settings file.
+1. Add `"django_components_lite.finders.ComponentsFileSystemFinder"` to `STATICFILES_FINDERS` in your settings file.
 
     This allows Django to serve component JS and CSS as static files.
 
@@ -70,7 +70,7 @@ If you want to use JS or CSS with components, you will need to:
         "django.contrib.staticfiles.finders.FileSystemFinder",
         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
         # Django components
-        "django_components.finders.ComponentsFileSystemFinder",
+        "django_components_lite.finders.ComponentsFileSystemFinder",
     ]
     ```
 
@@ -91,7 +91,7 @@ TEMPLATES = [
         'OPTIONS': {
             ...,
             'builtins': [
-                'django_components.templatetags.component_tags',
+                'django_components_lite.templatetags.component_tags',
             ]
         },
     },
@@ -104,14 +104,14 @@ django-components needs to know where to search for component HTML, JS and CSS f
 
 There are two ways to configure the component directories:
 
-- [`COMPONENTS.dirs`](../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs) sets global component directories.
-- [`COMPONENTS.app_dirs`](../reference/settings.md#django_components.app_settings.ComponentsSettings.app_dirs) sets app-level component directories.
+- [`COMPONENTS.dirs`](../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.dirs) sets global component directories.
+- [`COMPONENTS.app_dirs`](../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.app_dirs) sets app-level component directories.
 
 By default, django-components will look for a top-level `/components` directory,
 `{BASE_DIR}/components`, equivalent to:
 
 ```python
-from django_components import ComponentsSettings
+from django_components_lite import ComponentsSettings
 
 COMPONENTS = ComponentsSettings(
     dirs=[
@@ -124,7 +124,7 @@ COMPONENTS = ComponentsSettings(
 For app-level directories, the default is `[app]/components`, equivalent to:
 
 ```python
-from django_components import ComponentsSettings
+from django_components_lite import ComponentsSettings
 
 COMPONENTS = ComponentsSettings(
     app_dirs=[
@@ -136,7 +136,7 @@ COMPONENTS = ComponentsSettings(
 
 !!! note
 
-    The input to [`COMPONENTS.dirs`](../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
+    The input to [`COMPONENTS.dirs`](../reference/settings.md#django_components_lite.app_settings.ComponentsSettings.dirs)
     is the same as for `STATICFILES_DIRS`, and the paths must be full paths.
     [See Django docs](https://docs.djangoproject.com/en/5.2/ref/settings/#staticfiles-dirs).
 

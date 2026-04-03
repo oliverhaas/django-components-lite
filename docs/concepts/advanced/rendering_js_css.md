@@ -20,7 +20,7 @@ When a component defines `js_file` or `css_file`, django-components:
 For example, given this component:
 
 ```python
-from django_components import Component
+from django_components_lite import Component
 
 class MyButton(Component):
     template_file = "my_button/my_button.html"

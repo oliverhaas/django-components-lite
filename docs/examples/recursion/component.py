@@ -1,4 +1,4 @@
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 DESCRIPTION = "100 nested components? Not a problem! Handle recursive rendering out of the box."
 

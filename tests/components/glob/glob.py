@@ -1,4 +1,4 @@
-from django_components import Component
+from django_components_lite import Component
 
 
 # The Media JS / CSS glob and are relative to the component directory

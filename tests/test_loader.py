@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from django_components.testing import djc_test
-from django_components.util.loader import _filepath_to_python_module, get_component_dirs, get_component_files
+from django_components_lite.testing import djc_test
+from django_components_lite.util.loader import _filepath_to_python_module, get_component_dirs, get_component_files
 
 from .testutils import setup_test_config
 
@@ -36,7 +36,7 @@ class TestComponentDirs:
         assert len(apps_dirs) == 2
 
         # NOTE: Compare parts so that the test works on Windows too
-        assert apps_dirs[0].parts[-2:] == ("django_components", "components")
+        assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-3:] == ("tests", "test_app", "components")
 
     @djc_test(
@@ -54,7 +54,7 @@ class TestComponentDirs:
         assert len(apps_dirs) == 2
 
         # NOTE: Compare parts so that the test works on Windows too
-        assert apps_dirs[0].parts[-2:] == ("django_components", "components")
+        assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-3:] == ("tests", "test_app", "components")
 
         expected = [
@@ -73,7 +73,7 @@ class TestComponentDirs:
             ],
         },
     )
-    @patch("django_components.util.loader.logger.warning")
+    @patch("django_components_lite.util.loader.logger.warning")
     def test_get_dirs__components_dirs(self, mock_warning: MagicMock):
         mock_warning.reset_mock()
         dirs = sorted(get_component_dirs())
@@ -85,7 +85,7 @@ class TestComponentDirs:
         assert len(apps_dirs) == 2
 
         # NOTE: Compare parts so that the test works on Windows too
-        assert apps_dirs[0].parts[-2:] == ("django_components", "components")
+        assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-3:] == ("tests", "test_app", "components")
 
         assert own_dirs == [
@@ -113,7 +113,7 @@ class TestComponentDirs:
         assert len(apps_dirs) == 2
 
         # NOTE: Compare parts so that the test works on Windows too
-        assert apps_dirs[0].parts[-2:] == ("django_components", "components")
+        assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-3:] == ("tests", "test_app", "components")
 
     @djc_test(
@@ -204,7 +204,7 @@ class TestComponentDirs:
     @djc_test(
         django_settings={
             "BASE_DIR": Path(__file__).parent.resolve(),
-            "INSTALLED_APPS": ("django_components", "tests.test_app_nested.app"),
+            "INSTALLED_APPS": ("django_components_lite", "tests.test_app_nested.app"),
         },
     )
     def test_get_dirs__nested_apps(self):
@@ -217,7 +217,7 @@ class TestComponentDirs:
         assert len(apps_dirs) == 2
 
         # NOTE: Compare parts so that the test works on Windows too
-        assert apps_dirs[0].parts[-2:] == ("django_components", "components")
+        assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-4:] == ("tests", "test_app_nested", "app", "components")
 
         assert own_dirs == [
@@ -248,7 +248,7 @@ class TestComponentFiles:
             "components.single_file",
             "components.staticfiles.staticfiles",
             "components.urls",
-            "django_components.components",  # Empty module (built-in components removed)
+            "django_components_lite.components",  # Empty module (built-in components removed)
             "tests.test_app.components.app_lvl_comp.app_lvl_comp",
         ]
 
@@ -261,10 +261,10 @@ class TestComponentFiles:
         assert file_paths[5].parts[-3:] == ("tests", "components", "single_file.py")
         assert file_paths[6].parts[-4:] == ("tests", "components", "staticfiles", "staticfiles.py")
         assert file_paths[7].parts[-3:] == ("tests", "components", "urls.py")
-        assert file_paths[8].parts[-3:] == ("django_components", "components", "__init__.py")
+        assert file_paths[8].parts[-3:] == ("django_components_lite", "components", "__init__.py")
         # REMOVED: Built-in components (dynamic.py, error_fallback.py)
-        # assert file_paths[9].parts[-3:] == ("django_components", "components", "dynamic.py")
-        # assert file_paths[10].parts[-3:] == ("django_components", "components", "error_fallback.py")
+        # assert file_paths[9].parts[-3:] == ("django_components_lite", "components", "dynamic.py")
+        # assert file_paths[10].parts[-3:] == ("django_components_lite", "components", "error_fallback.py")
         assert file_paths[9].parts[-5:] == ("tests", "test_app", "components", "app_lvl_comp", "app_lvl_comp.py")
 
     @djc_test(

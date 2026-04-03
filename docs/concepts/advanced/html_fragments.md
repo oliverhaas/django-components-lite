@@ -43,8 +43,8 @@ of the initial page load. This means that:
 A component is rendered as a "document" when:
 
 - It is embedded inside a template as [`{% component %}`](../../reference/template_tags.md#component)
-- It is rendered with [`Component.render()`](../../../reference/api#django_components.Component.render)
-or [`Component.render_to_response()`](../../../reference/api#django_components.Component.render_to_response)
+- It is rendered with [`Component.render()`](../../../reference/api#django_components_lite.Component.render)
+or [`Component.render_to_response()`](../../../reference/api#django_components_lite.Component.render_to_response)
   with the `deps_strategy` kwarg set to `"document"` (default)
 
 Example:
@@ -76,8 +76,8 @@ The component renders HTML that will be inserted into the page as a fragment, at
 
 A component is rendered as "fragment" when:
 
-- It is rendered with [`Component.render()`](../../../reference/api#django_components.Component.render)
-  or [`Component.render_to_response()`](../../../reference/api#django_components.Component.render_to_response)
+- It is rendered with [`Component.render()`](../../../reference/api#django_components_lite.Component.render)
+  or [`Component.render_to_response()`](../../../reference/api#django_components_lite.Component.render_to_response)
   with the `deps_strategy` kwarg set to `"fragment"`
 
 Example:
@@ -107,7 +107,7 @@ Then navigate to these URLs:
 This is the HTML into which a fragment will be loaded using HTMX.
 
 ```djc_py title="[root]/components/demo.py"
-from django_components import Component, types
+from django_components_lite import Component, types
 
 class MyPage(Component):
     template = """
@@ -193,7 +193,7 @@ urlpatterns = [
 This is the HTML into which a fragment will be loaded using AlpineJS.
 
 ```djc_py title="[root]/components/demo.py"
-from django_components import Component, types
+from django_components_lite import Component, types
 
 class MyPage(Component):
     template = """
@@ -298,7 +298,7 @@ urlpatterns = [
 This is the HTML into which a fragment will be loaded using vanilla JS.
 
 ```djc_py title="[root]/components/demo.py"
-from django_components import Component, types
+from django_components_lite import Component, types
 
 class MyPage(Component):
     template = """

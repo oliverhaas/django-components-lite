@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>django_components_lite sample projects</title>
+    {% component_css_dependencies %}
+</head>
+<body>
+    {% component "calendar" date=date %}{% endcomponent %}
+    {% component "greeting" name='Joe' %}
+        {% fill "message" %}
+            Howdy?
+        {% endfill %}
+    {% endcomponent %}
+    {% component_js_dependencies %}
+</body>
+</html>

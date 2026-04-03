@@ -60,14 +60,14 @@ repos:
       - id: mypy
         name: mypy
         language: system
-        entry: uv run mypy django_components/
+        entry: uv run mypy django_components_lite/
         pass_filenames: false
         always_run: true
         stages: [pre-push]
       - id: ty
         name: ty
         language: system
-        entry: uv run ty check django_components/
+        entry: uv run ty check django_components_lite/
         pass_filenames: false
         always_run: true
         stages: [pre-push]

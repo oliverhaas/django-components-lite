@@ -14,7 +14,7 @@ from django.test import Client
 from django.urls import path
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components import (
+from django_components_lite import (
     Component,
     ComponentRegistry,
     all_components,
@@ -22,8 +22,8 @@ from django_components import (
     register,
     types,
 )
-from django_components.testing import djc_test
-from django_components.urls import urlpatterns as dc_urlpatterns
+from django_components_lite.testing import djc_test
+from django_components_lite.urls import urlpatterns as dc_urlpatterns
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
 
@@ -310,7 +310,7 @@ class TestComponent:
                     ],
                     "OPTIONS": {
                         "builtins": [
-                            "django_components.templatetags.component_tags",
+                            "django_components_lite.templatetags.component_tags",
                         ],
                         "loaders": [
                             (
@@ -321,7 +321,7 @@ class TestComponent:
                                     # Including this is the same as APP_DIRS=True
                                     "django.template.loaders.app_directories.Loader",
                                     # Components loader
-                                    "django_components.template_loader.Loader",
+                                    "django_components_lite.template_loader.Loader",
                                 ],
                             ),
                         ],

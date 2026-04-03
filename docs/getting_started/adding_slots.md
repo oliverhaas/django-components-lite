@@ -158,13 +158,13 @@ the to `2024-12-14`, which is Saturday, our template from previous step would re
 
 The first instance rendered `2024-12-16`, while the rest rendered `2024-12-14`!
 
-Why? Remember that in the [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+Why? Remember that in the [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
 method of our Calendar component, we pre-process the date. If the date falls on Saturday or Sunday, we shift it to next Monday:
 
 ```python title="[project root]/components/calendar/calendar.py"
 from datetime import date
 
-from django_components import Component, register
+from django_components_lite import Component, register
 
 # If date is Sat or Sun, shift it to next Mon, so the date is always workweek.
 def to_workweek_date(d: date):

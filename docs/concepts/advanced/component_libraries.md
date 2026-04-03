@@ -24,7 +24,7 @@ For live examples, see the [Examples](../../examples/index.md).
     ```
 
 2.  Create custom [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#how-to-create-custom-template-tags-and-filters)
-    and [`ComponentRegistry`](django_components.component_registry.ComponentRegistry) instances in `mytags.py`
+    and [`ComponentRegistry`](django_components_lite.component_registry.ComponentRegistry) instances in `mytags.py`
 
     This will be the entrypoint for using the components inside Django templates.
 
@@ -33,31 +33,31 @@ For live examples, see the [Examples](../../examples/index.md).
 
     ```py
     from django.template import Library
-    from django_components import ComponentRegistry, RegistrySettings
+    from django_components_lite import ComponentRegistry, RegistrySettings
 
     register = library = django.template.Library()
     comp_registry = ComponentRegistry(
         library=library,
         settings=RegistrySettings(
             context_behavior="isolated",
-            tag_formatter="django_components.component_formatter",
+            tag_formatter="django_components_lite.component_formatter",
         ),
     )
     ```
 
     As you can see above, this is also the place where we configure how our components should behave,
-    using the [`settings`](django_components.component_registry.ComponentRegistry.settings) argument.
+    using the [`settings`](django_components_lite.component_registry.ComponentRegistry.settings) argument.
     If omitted, default settings are used.
 
-    For library authors, we recommend setting [`context_behavior`](django_components.app_settings.ComponentsSettings.context_behavior)
-    to [`"isolated"`](django_components.app_settings.ContextBehavior.ISOLATED), so that the state cannot leak into the components,
+    For library authors, we recommend setting [`context_behavior`](django_components_lite.app_settings.ComponentsSettings.context_behavior)
+    to [`"isolated"`](django_components_lite.app_settings.ContextBehavior.ISOLATED), so that the state cannot leak into the components,
     and so the components' behavior is configured solely through the inputs. This means that the components will be more predictable and easier to debug.
 
     Next, you can decide how will others use your components by setting the
-    [`tag_formatter`](django_components.app_settings.ComponentsSettings.tag_formatter)
+    [`tag_formatter`](django_components_lite.app_settings.ComponentsSettings.tag_formatter)
     options.
 
-    If omitted or set to `"django_components.component_formatter"`,
+    If omitted or set to `"django_components_lite.component_formatter"`,
     your components will be used like this:
 
     ```django
@@ -65,7 +65,7 @@ For live examples, see the [Examples](../../examples/index.md).
     {% endcomponent %}
     ```
 
-    Or you can use `"django_components.component_shorthand_formatter"`
+    Or you can use `"django_components_lite.component_shorthand_formatter"`
     to use components like so:
 
     ```django
@@ -102,7 +102,7 @@ For live examples, see the [Examples](../../examples/index.md).
 
     ```djc_py
     from typing import Optional
-    from django_components import Component, SlotInput, register, types
+    from django_components_lite import Component, SlotInput, register, types
 
     from myapp.templatetags.mytags import comp_registry
 
@@ -130,7 +130,7 @@ For live examples, see the [Examples](../../examples/index.md).
             }
 
         template: types.django_html = """
-            {# Load django_components template tags #}
+            {# Load django_components_lite template tags #}
             {% load component_tags %}
 
             <div {% html_attrs attrs class="my-menu" %}>
@@ -179,7 +179,7 @@ And that's it! The next step is to publish it.
 Once you are ready to share your library, you need to build
 a distribution and then publish it to PyPI.
 
-django_components uses the [`build`](https://build.pypa.io/en/stable/) utility to build a distribution:
+django_components_lite uses the [`build`](https://build.pypa.io/en/stable/) utility to build a distribution:
 
 ```bash
 python -m build --sdist --wheel --outdir dist/ .
@@ -206,7 +206,7 @@ After the package has been published, all that remains is to install it in other
 1. Install the package:
 
     ```bash
-    pip install myapp django_components
+    pip install myapp django_components_lite
     ```
 
 2. Add the package to `INSTALLED_APPS`
@@ -214,7 +214,7 @@ After the package has been published, all that remains is to install it in other
     ```py
     INSTALLED_APPS = [
         ...
-        "django_components",
+        "django_components_lite",
         "myapp",
     ]
     ```

@@ -7,7 +7,7 @@ A component in django-components can be as simple as a Django template and Pytho
 ```
 
 ```py title="calendar.py"
-from django_components import Component
+from django_components_lite import Component
 
 class Calendar(Component):
     template_file = "calendar.html"
@@ -35,7 +35,7 @@ document.querySelector(".calendar").onclick = function () {
 ```
 
 ```py title="calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -47,7 +47,7 @@ class Calendar(Component):
 Alternatively, you can "inline" HTML, JS, and CSS right into the component class:
 
 ```djc_py
-from django_components import Component
+from django_components_lite import Component
 
 class Calendar(Component):
     template = """
@@ -105,7 +105,7 @@ Inside `calendar.html`, write:
 ```
 
 In this example we've defined one template variable `date`. You can use any and as many variables as you like. These variables will be
-defined in the Python file in [`get_template_data()`](../../reference/api#django_components.Component.get_template_data)
+defined in the Python file in [`get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data)
 when creating an instance of this component.
 
 !!! note
@@ -116,14 +116,14 @@ when creating an instance of this component.
 
 ### 3. Create new Component in Python
 
-In `calendar.py`, create a subclass of [Component](../../reference/api#django_components.Component)
+In `calendar.py`, create a subclass of [Component](../../reference/api#django_components_lite.Component)
 to create a new component.
 
-To link the HTML template with our component, set [`template_file`](../../reference/api#django_components.Component.template_file)
+To link the HTML template with our component, set [`template_file`](../../reference/api#django_components_lite.Component.template_file)
 to the name of the HTML file.
 
 ```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component
+from django_components_lite import Component
 
 class Calendar(Component):
     template_file = "calendar.html"
@@ -135,20 +135,20 @@ class Calendar(Component):
 
     1. Relative to the component's python file (as seen above),
     2. Relative to any of the component directories as defined by
-    [`COMPONENTS.dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.dirs)
-    and/or [`COMPONENTS.app_dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.app_dirs)
+    [`COMPONENTS.dirs`](../../reference/settings#django_components_lite.app_settings.ComponentsSettings.dirs)
+    and/or [`COMPONENTS.app_dirs`](../../reference/settings#django_components_lite.app_settings.ComponentsSettings.app_dirs)
     (e.g. `[your apps]/components` dir and `[project root]/components`)
 
 ### 4. Define the template variables
 
 In `calendar.html`, we've used the variable `date`. So we need to define it for the template to work.
 
-This is done using [`Component.get_template_data()`](../../reference/api#django_components.Component.get_template_data).
+This is done using [`Component.get_template_data()`](../../reference/api#django_components_lite.Component.get_template_data).
 It's a function that returns a dictionary. The entries in this dictionary
 will become available within the template as variables, e.g. as `{{ date }}`.
 
 ```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component
+from django_components_lite import Component
 
 class Calendar(Component):
     template_file = "calendar.html"
@@ -159,7 +159,7 @@ class Calendar(Component):
         }
 ```
 
-Now, when we render the component with [`Component.render()`](../../reference/api#django_components.Component.render)
+Now, when we render the component with [`Component.render()`](../../reference/api#django_components_lite.Component.render)
 method:
 
 ```py

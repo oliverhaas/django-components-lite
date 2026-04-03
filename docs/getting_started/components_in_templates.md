@@ -15,14 +15,14 @@ By the end of this section, we want to be able to use our components in Django t
 
 ### 1. Register component
 
-First, however, we need to register our component class with [`ComponentRegistry`](../../reference/api#django_components.ComponentRegistry).
+First, however, we need to register our component class with [`ComponentRegistry`](../../reference/api#django_components_lite.ComponentRegistry).
 
-To register a component with a [`ComponentRegistry`](../../reference/api#django_components.ComponentRegistry),
-we will use the [`@register`](../../reference/api#django_components.register)
+To register a component with a [`ComponentRegistry`](../../reference/api#django_components_lite.ComponentRegistry),
+we will use the [`@register`](../../reference/api#django_components_lite.register)
 decorator, and give it a name under which the component will be accessible from within the template:
 
 ```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component, register  # <--- new
+from django_components_lite import Component, register  # <--- new
 
 @register("calendar")  # <--- new
 class Calendar(Component):
@@ -48,7 +48,7 @@ by calling `{% load component_tags %}` inside the template.
     In Django, template tags are managed by the `Library` instances. Whenever you include `{% load xxx %}`
     in your template, you are loading a `Library` instance into your template.
 
-    [`ComponentRegistry`](../../reference/api#django_components.ComponentRegistry) acts like a router
+    [`ComponentRegistry`](../../reference/api#django_components_lite.ComponentRegistry) acts like a router
     and connects the registered components with the associated `Library`.
 
     That way, when you include `{% load component_tags %}` in your template, you are able to "call" components
@@ -59,7 +59,7 @@ by calling `{% load component_tags %}` inside the template.
 
 !!! note
 
-    You can create custom [`ComponentRegistry`](../../reference/api#django_components.ComponentRegistry)
+    You can create custom [`ComponentRegistry`](../../reference/api#django_components_lite.ComponentRegistry)
     instances, which will use different `Library` instances.
     In that case you will have to load different libraries depending on which components you want to use:
 
@@ -163,7 +163,7 @@ and keeping your CSS and Javascript in the static directory.
 
     **How does django-components pick up registered components?**
 
-    Notice that it was enough to add [`@register`](../../reference/api#django_components.register) to the component.
+    Notice that it was enough to add [`@register`](../../reference/api#django_components_lite.register) to the component.
     We didn't need to import the component file anywhere to execute it.
 
     This is because django-components automatically imports all Python files found in the component directories

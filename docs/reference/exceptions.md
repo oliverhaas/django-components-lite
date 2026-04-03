@@ -3,15 +3,15 @@
 # Exceptions
 
 
-::: django_components.AlreadyRegistered
+::: django_components_lite.AlreadyRegistered
     options:
       show_if_no_docstring: true
 
-::: django_components.NotRegistered
+::: django_components_lite.NotRegistered
     options:
       show_if_no_docstring: true
 
-::: django_components.TagProtectedError
+::: django_components_lite.TagProtectedError
     options:
       show_if_no_docstring: true
 

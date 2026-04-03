@@ -9,8 +9,8 @@ from typing import NamedTuple
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 
-from django_components import Component, register
-from django_components import types as t
+from django_components_lite import Component, register
+from django_components_lite import types as t
 
 DESCRIPTION = "Dynamic tabs with AlpineJS."
 

@@ -1,4 +1,4 @@
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 DESCRIPTION = "Track component errors or success rates to send them to Sentry or other services."
 

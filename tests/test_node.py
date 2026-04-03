@@ -9,11 +9,11 @@ from django.template.base import TextNode, VariableNode
 from django.template.defaulttags import IfNode, LoremNode
 from django.template.exceptions import TemplateSyntaxError
 
-from django_components import Component, types
-from django_components.node import BaseNode
-from django_components.templatetags import component_tags
-from django_components.testing import djc_test
-from django_components.util.tag_parser import TagAttr
+from django_components_lite import Component, types
+from django_components_lite.node import BaseNode
+from django_components_lite.templatetags import component_tags
+from django_components_lite.testing import djc_test
+from django_components_lite.util.tag_parser import TagAttr
 
 from .testutils import setup_test_config
 

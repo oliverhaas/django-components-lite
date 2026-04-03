@@ -16,7 +16,7 @@ simply decorate the function as shown below:
 
 ```python
 import django
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 @djc_test
 def test_my_component():
@@ -32,7 +32,7 @@ When applied to a class, `djc_test` decorates each `test_` method, as well as al
 
 ```python
 import django
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 @djc_test
 class TestMyComponent:
@@ -48,7 +48,7 @@ This is equivalent to applying the decorator to both of the methods individually
 
 ```python
 import django
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 class TestMyComponent:
     @djc_test
@@ -73,7 +73,7 @@ before the `@djc_test` decorator:
 
 ```python
 import django
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 django.setup(...)
 
@@ -89,10 +89,10 @@ def test_my_component():
 
 ## Example: Parametrizing Context Behavior
 
-You can parametrize the [context behavior](../../../reference/settings#django_components.app_settings.ComponentsSettings.context_behavior) using [`djc_test`](../../../reference/testing_api#djc_test):
+You can parametrize the [context behavior](../../../reference/settings#django_components_lite.app_settings.ComponentsSettings.context_behavior) using [`djc_test`](../../../reference/testing_api#djc_test):
 
 ```python
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 @djc_test(
     # Settings applied to all cases

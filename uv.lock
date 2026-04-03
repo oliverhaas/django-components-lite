@@ -389,8 +389,8 @@ wheels = [
 ]
 
 [[package]]
-name = "django-components"
-version = "0.143.0"
+name = "django-components-lite"
+version = "0.1.0a1"
 source = { editable = "." }
 dependencies = [
     { name = "django" },

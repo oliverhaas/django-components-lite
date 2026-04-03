@@ -4,7 +4,7 @@ from typing import Any
 import griffe
 from mkdocs_util import get_mkdocstrings_plugin_handler_options, import_object, load_config
 
-from django_components.util.misc import get_import_path
+from django_components_lite.util.misc import get_import_path
 
 SOURCE_CODE_GIT_BRANCH = "master"
 
@@ -52,7 +52,7 @@ def _format_source_code_html(relative_filepath: Path, lineno: int | None) -> str
     branch_path = f"tree/{SOURCE_CODE_GIT_BRANCH}"
     lineno_hash = f"#L{lineno}" if lineno is not None else ""
     # Generate URL pointing to the source file like
-    # https://github.com/django-components/django-components/blob/master/src/django_components/components/dynamic.py#L8
+    # https://github.com/django-components/django-components/blob/master/src/django_components_lite/components/dynamic.py#L8
     url = f"{repo_url}/{branch_path}/{relative_filepath}{lineno_hash}"
 
     # Open in new tab

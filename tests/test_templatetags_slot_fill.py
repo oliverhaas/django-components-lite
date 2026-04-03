@@ -4,8 +4,8 @@ import pytest
 from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components import Component, Slot, register, registry, types
-from django_components.testing import djc_test
+from django_components_lite import Component, Slot, register, registry, types
+from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
 

@@ -1,7 +1,7 @@
 # ruff: noqa: S311
 import random
 
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 DESCRIPTION = "Dynamically render different component versions. Use for A/B testing, phased rollouts, etc."
 

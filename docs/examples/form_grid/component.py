@@ -1,6 +1,6 @@
 from typing import Any
 
-from django_components import Component, Slot, register, types
+from django_components_lite import Component, Slot, register, types
 
 DESCRIPTION = "Form that automatically arranges fields in a grid and generates labels."
 

@@ -2,8 +2,8 @@ import pytest
 from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components import registry, types
-from django_components.testing import djc_test
+from django_components_lite import registry, types
+from django_components_lite.testing import djc_test
 
 
 # Imported lazily, so we import components only once settings are set

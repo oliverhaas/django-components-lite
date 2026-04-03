@@ -2,9 +2,9 @@ import sys
 
 import pytest
 
-from django_components import AlreadyRegistered, registry
-from django_components.autodiscovery import autodiscover, import_libraries
-from django_components.testing import djc_test
+from django_components_lite import AlreadyRegistered, registry
+from django_components_lite.autodiscovery import autodiscover, import_libraries
+from django_components_lite.testing import djc_test
 
 from .testutils import setup_test_config
 
@@ -33,8 +33,8 @@ class TestAutodiscover:
         assert "tests.components.relative_file.relative_file" in modules
         assert "tests.test_app.components.app_lvl_comp.app_lvl_comp" in modules
         # REMOVED: Built-in components autodiscovery
-        # assert "django_components.components" in modules
-        # assert "django_components.components.dynamic" in modules
+        # assert "django_components_lite.components" in modules
+        # assert "django_components_lite.components.dynamic" in modules
 
         all_components = registry.all().copy()
         assert "single_file_component" in all_components

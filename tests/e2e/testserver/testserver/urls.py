@@ -18,7 +18,7 @@ from testserver.views import (
 )
 
 urlpatterns = [
-    path("", include("django_components.urls")),
+    path("", include("django_components_lite.urls")),
     # Empty response with status 200 to notify other systems when the server has started
     path("poll/", lambda *_args, **_kwargs: HttpResponse("")),
     # Test views

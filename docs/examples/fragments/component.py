@@ -1,4 +1,4 @@
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 DESCRIPTION = "Use HTML fragments (partials) with HTMX, AlpineJS, or plain JS."
 

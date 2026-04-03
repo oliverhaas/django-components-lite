@@ -1,8 +1,8 @@
 import pytest
 from django.template import Context, Template
 
-from django_components import registry, types
-from django_components.testing import djc_test
+from django_components_lite import registry, types
+from django_components_lite.testing import djc_test
 
 
 def _import_components():

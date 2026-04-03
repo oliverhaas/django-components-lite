@@ -4,9 +4,9 @@ from django.http import HttpRequest
 from django.template import Context, RequestContext, Template
 from pytest_django.asserts import assertHTMLEqual, assertInHTML
 
-from django_components import Component, register, registry, types
-from django_components.testing import djc_test
-from django_components.util.misc import gen_id
+from django_components_lite import Component, register, registry, types
+from django_components_lite.testing import djc_test
+from django_components_lite.util.misc import gen_id
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
 
@@ -900,7 +900,7 @@ class TestContextProcessors:
                     "DIRS": ["tests/templates/", "tests/components/"],
                     "OPTIONS": {
                         "builtins": [
-                            "django_components.templatetags.component_tags",
+                            "django_components_lite.templatetags.component_tags",
                         ],
                         "context_processors": [
                             "tests.test_context.dummy_context_processor",

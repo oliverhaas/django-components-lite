@@ -65,12 +65,12 @@ and other tags:
 
 ### Registering components
 
-For a component to be renderable with the [`{% component %}`](../../../reference/template_tags#component) tag, it must be first registered with the [`@register()`](../../../reference/api/#django_components.register) decorator.
+For a component to be renderable with the [`{% component %}`](../../../reference/template_tags#component) tag, it must be first registered with the [`@register()`](../../../reference/api/#django_components_lite.register) decorator.
 
 For example, if you register a component under the name `"button"`:
 
 ```python
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("button")
 class Button(Component):
@@ -179,7 +179,7 @@ can access only the data that was explicitly passed to it:
 ```
 
 Alternatively, you can set all components to be isolated by default, by setting
-[`context_behavior`](../../../reference/settings#django_components.app_settings.ComponentsSettings.context_behavior)
+[`context_behavior`](../../../reference/settings#django_components_lite.app_settings.ComponentsSettings.context_behavior)
 to `"isolated"` in your settings:
 
 ```python
@@ -191,13 +191,13 @@ COMPONENTS = {
 
 ## `render()` method
 
-The [`Component.render()`](../../../reference/api/#django_components.Component.render) method renders a component to a string.
+The [`Component.render()`](../../../reference/api/#django_components_lite.Component.render) method renders a component to a string.
 
 This is the equivalent of calling the [`{% component %}`](../template_tags#component) tag.
 
 ```python
 from typing import Optional
-from django_components import Component, SlotInput
+from django_components_lite import Component, SlotInput
 
 class Button(Component):
     template_file = "button.html"
@@ -227,7 +227,7 @@ Button.render(
 )
 ```
 
-[`Component.render()`](../../../reference/api/#django_components.Component.render) accepts the following arguments:
+[`Component.render()`](../../../reference/api/#django_components_lite.Component.render) accepts the following arguments:
 
 - `args` - Positional arguments to pass to the component (as a list or tuple)
 - `kwargs` - Keyword arguments to pass to the component (as a dictionary)
@@ -238,23 +238,23 @@ Button.render(
 
 All arguments are optional. If not provided, they default to empty values or sensible defaults.
 
-See the API reference for [`Component.render()`](../../../reference/api/#django_components.Component.render)
+See the API reference for [`Component.render()`](../../../reference/api/#django_components_lite.Component.render)
 for more details on the arguments.
 
 ## `render_to_response()` method
 
-The [`Component.render_to_response()`](../../../reference/api/#django_components.Component.render_to_response)
-method works just like [`Component.render()`](../../../reference/api/#django_components.Component.render),
+The [`Component.render_to_response()`](../../../reference/api/#django_components_lite.Component.render_to_response)
+method works just like [`Component.render()`](../../../reference/api/#django_components_lite.Component.render),
 but wraps the result in an HTTP response.
 
-It accepts all the same arguments as [`Component.render()`](../../../reference/api/#django_components.Component.render).
+It accepts all the same arguments as [`Component.render()`](../../../reference/api/#django_components_lite.Component.render).
 
 Any extra arguments are passed to the [`HttpResponse`](https://docs.djangoproject.com/en/5.2/ref/request-response/#django.http.HttpResponse)
 constructor.
 
 ```python
 from typing import Optional
-from django_components import Component, SlotInput
+from django_components_lite import Component, SlotInput
 
 class Button(Component):
     template_file = "button.html"
@@ -303,15 +303,15 @@ def profile_view(request, user_id):
 
 ### Custom response classes
 
-By default, [`Component.render_to_response()`](../../../reference/api/#django_components.Component.render_to_response)
+By default, [`Component.render_to_response()`](../../../reference/api/#django_components_lite.Component.render_to_response)
 returns a standard Django [`HttpResponse`](https://docs.djangoproject.com/en/5.2/ref/request-response/#django.http.HttpResponse).
 
-You can customize this by setting the [`response_class`](../../../reference/api/#django_components.Component.response_class)
+You can customize this by setting the [`response_class`](../../../reference/api/#django_components_lite.Component.response_class)
 attribute on your component:
 
 ```python
 from django.http import HttpResponse
-from django_components import Component
+from django_components_lite import Component
 
 class MyHttpResponse(HttpResponse):
     ...
@@ -327,10 +327,10 @@ assert isinstance(response, MyHttpResponse)
 
 The rendered HTML may be used in different contexts (browser, email, etc), and each may need different handling of JS and CSS scripts.
 
-[`render()`](../../../reference/api/#django_components.Component.render) and [`render_to_response()`](../../../reference/api/#django_components.Component.render_to_response)
+[`render()`](../../../reference/api/#django_components_lite.Component.render) and [`render_to_response()`](../../../reference/api/#django_components_lite.Component.render_to_response)
 accept a `deps_strategy` parameter, which controls where and how the JS / CSS are inserted into the HTML.
 
-The `deps_strategy` parameter is ultimately passed to [`render_dependencies()`](../../../reference/api/#django_components.render_dependencies).
+The `deps_strategy` parameter is ultimately passed to [`render_dependencies()`](../../../reference/api/#django_components_lite.render_dependencies).
 
 Learn more about [Rendering JS / CSS](../../advanced/rendering_js_css).
 
@@ -357,7 +357,7 @@ There are six dependencies rendering strategies:
     - No extra script loaded.
 - [`ignore`](../../advanced/rendering_js_css#ignore)
     - HTML is left as-is. You can still process it with a different strategy later with
-      [`render_dependencies()`](../../../reference/api/#django_components.render_dependencies).
+      [`render_dependencies()`](../../../reference/api/#django_components_lite.render_dependencies).
     - Used for inserting rendered HTML into other components.
 
 !!! info
@@ -389,7 +389,7 @@ There are six dependencies rendering strategies:
 
 ## Passing context
 
-The [`render()`](../../../reference/api/#django_components.Component.render) and [`render_to_response()`](../../../reference/api/#django_components.Component.render_to_response) methods accept an optional `context` argument.
+The [`render()`](../../../reference/api/#django_components_lite.Component.render) and [`render_to_response()`](../../../reference/api/#django_components_lite.Component.render_to_response) methods accept an optional `context` argument.
 This sets the context within which the component is rendered.
 
 When a component is rendered within a template with the [`{% component %}`](../../../reference/template_tags#component)
@@ -397,7 +397,7 @@ tag, this will be automatically set to the
 [Context](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context)
 instance that is used for rendering the template.
 
-When you call [`Component.render()`](../../../reference/api/#django_components.Component.render) directly from Python,
+When you call [`Component.render()`](../../../reference/api/#django_components_lite.Component.render) directly from Python,
 there is no context object, so you can ignore this input most of the time.
 Instead, use `args`, `kwargs`, and `slots` to pass data to the component.
 
@@ -435,7 +435,7 @@ class Button(Component):
 !!! warning
 
     Whether the variables defined in `context` are actually available in the template depends on the
-    [context behavior mode](../../../reference/settings#django_components.app_settings.ComponentsSettings.context_behavior):
+    [context behavior mode](../../../reference/settings#django_components_lite.app_settings.ComponentsSettings.context_behavior):
 
     - In `"django"` context behavior mode, the template will have access to the keys of this context.
 
@@ -463,13 +463,13 @@ class Button(Component):
 
 ## Typing render methods
 
-Neither [`Component.render()`](../../../reference/api/#django_components.Component.render)
-nor [`Component.render_to_response()`](../../../reference/api/#django_components.Component.render_to_response)
+Neither [`Component.render()`](../../../reference/api/#django_components_lite.Component.render)
+nor [`Component.render_to_response()`](../../../reference/api/#django_components_lite.Component.render_to_response)
 are typed, due to limitations of Python's type system.
 
 ## Components as input
 
-django_components makes it possible to compose components in a "React-like" way,
+django_components_lite makes it possible to compose components in a "React-like" way,
 where you can render one component and use its output as input to another component:
 
 ```python
@@ -502,7 +502,7 @@ Read more about [Rendering JS / CSS](../../advanced/rendering_js_css).
 
 ## Dynamic components
 
-Django components defines a special "dynamic" component ([`DynamicComponent`](../../../reference/components#django_components.components.dynamic.DynamicComponent)).
+Django components defines a special "dynamic" component ([`DynamicComponent`](../../../reference/components#django_components_lite.components.dynamic.DynamicComponent)).
 
 Normally, you have to hard-code the component name in the template:
 
@@ -526,7 +526,7 @@ The args, kwargs, and slot fills are all passed down to the underlying component
 As with other components, the dynamic component can be rendered from Python:
 
 ```py
-from django_components import DynamicComponent
+from django_components_lite import DynamicComponent
 
 DynamicComponent.render(
     kwargs={
@@ -546,7 +546,7 @@ DynamicComponent.render(
 
 By default, the dynamic component is registered under the name `"dynamic"`. In case of a conflict,
 you can set the
-[`COMPONENTS.dynamic_component_name`](../../../reference/settings#django_components.app_settings.ComponentsSettings.dynamic_component_name)
+[`COMPONENTS.dynamic_component_name`](../../../reference/settings#django_components_lite.app_settings.ComponentsSettings.dynamic_component_name)
 setting to change the name used for the dynamic components.
 
 ```py

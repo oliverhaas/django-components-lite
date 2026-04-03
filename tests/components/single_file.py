@@ -2,7 +2,7 @@ from typing import Any
 
 from django.http import HttpResponse
 
-from django_components import Component, register, types
+from django_components_lite import Component, register, types
 
 
 @register("single_file_component")

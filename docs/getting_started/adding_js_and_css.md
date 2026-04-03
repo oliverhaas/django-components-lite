@@ -82,11 +82,11 @@ static file URL is prepended to the component's rendered HTML.
 
 Finally, we return to our Python component in `calendar.py` to tie this together.
 
-To link JS and CSS defined in other files, use [`js_file`](../../reference/api#django_components.Component.js_file)
-and [`css_file`](../../reference/api#django_components.Component.css_file) attributes:
+To link JS and CSS defined in other files, use [`js_file`](../../reference/api#django_components_lite.Component.js_file)
+and [`css_file`](../../reference/api#django_components_lite.Component.css_file) attributes:
 
 ```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component
+from django_components_lite import Component
 
 class Calendar(Component):
     template_file = "calendar.html"
@@ -108,8 +108,8 @@ automatically embed the associated JS and CSS.
 
     1. Relative to the Python component file (as seen above),
     2. Relative to any of the component directories as defined by
-    [`COMPONENTS.dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.dirs)
-    and/or [`COMPONENTS.app_dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.app_dirs)
+    [`COMPONENTS.dirs`](../../reference/settings#django_components_lite.app_settings.ComponentsSettings.dirs)
+    and/or [`COMPONENTS.app_dirs`](../../reference/settings#django_components_lite.app_settings.ComponentsSettings.app_dirs)
     (e.g. `[your apps]/components` dir and `[project root]/components`)
     3. Relative to any of the directories defined by `STATICFILES_DIRS`.
 

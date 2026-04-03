@@ -1,12 +1,12 @@
 # Component Analytics
 
-Use the [`Component.on_render_after()`](../../reference/api#django_components.Component.on_render_after) hook to track component analytics, such as capturing errors for a service like Sentry or other monitoring.
+Use the [`Component.on_render_after()`](../../reference/api#django_components_lite.Component.on_render_after) hook to track component analytics, such as capturing errors for a service like Sentry or other monitoring.
 
 ![Analytics example](./images/analytics.png)
 
 ## Error tracking components
 
-You can create a wrapper component that uses the [`Component.on_render_after()`](../../reference/api#django_components.Component.on_render_after) hook to inspect the `error` object. If an error occurred during the rendering of its children, you can capture and send it to your monitoring service.
+You can create a wrapper component that uses the [`Component.on_render_after()`](../../reference/api#django_components_lite.Component.on_render_after) hook to inspect the `error` object. If an error occurred during the rendering of its children, you can capture and send it to your monitoring service.
 
 ```django
 {% component "sentry_error_tracker" %}

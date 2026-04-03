@@ -3,7 +3,7 @@
 # Testing API
 
 
-::: django_components.testing.djc_test
+::: django_components_lite.testing.djc_test
     options:
       show_if_no_docstring: true
 

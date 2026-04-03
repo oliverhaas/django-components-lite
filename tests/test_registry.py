@@ -1,7 +1,7 @@
 import pytest
 from django.template import Library
 
-from django_components import (
+from django_components_lite import (
     AlreadyRegistered,
     Component,
     ComponentRegistry,
@@ -10,7 +10,7 @@ from django_components import (
     register,
     registry,
 )
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 from .testutils import setup_test_config
 

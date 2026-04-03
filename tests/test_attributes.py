@@ -5,9 +5,9 @@ from django.template import Context, Template
 from django.utils.safestring import SafeString, mark_safe
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components import Component, register, types
-from django_components.attributes import format_attributes, merge_attributes, parse_string_style
-from django_components.testing import djc_test
+from django_components_lite import Component, register, types
+from django_components_lite.attributes import format_attributes, merge_attributes, parse_string_style
+from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
 

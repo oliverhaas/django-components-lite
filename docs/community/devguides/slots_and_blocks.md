@@ -14,7 +14,7 @@
 
     And components that make use of `abc.html` via `include` or `extends`:
     ```djc_py
-    from django_components import Component, register
+    from django_components_lite import Component, register
 
     @register("my_comp_extends")
     class MyCompWithExtends(Component):

@@ -1,6 +1,6 @@
 # Migrating from safer_staticfiles
 
-This guide is for you if you're upgrating django_components to v0.100 or later
+This guide is for you if you're upgrating django_components_lite to v0.100 or later
 from older versions.
 
 In version 0.100, we changed how components' static JS and CSS files are handled.
@@ -8,7 +8,7 @@ See more in the ["Static files" section](https://github.com/django-components/dj
 
 Migration steps:
 
-1. Remove `django_components.safer_staticfiles` from `INSTALLED_APPS` in your `settings.py`,
+1. Remove `django_components_lite.safer_staticfiles` from `INSTALLED_APPS` in your `settings.py`,
    and replace it with `django.contrib.staticfiles`.
 
    Before:
@@ -18,8 +18,8 @@ Migration steps:
       "django.contrib.admin",
       ...
       # "django.contrib.staticfiles",  # <-- ADD
-      "django_components",
-      "django_components.safer_staticfiles",  # <-- REMOVE
+      "django_components_lite",
+      "django_components_lite.safer_staticfiles",  # <-- REMOVE
    ]
    ```
 
@@ -30,11 +30,11 @@ Migration steps:
       "django.contrib.admin",
       ...
       "django.contrib.staticfiles",
-      "django_components",
+      "django_components_lite",
    ]
    ```
 
-2. Add `STATICFILES_FINDERS` to `settings.py`, and add `django_components.finders.ComponentsFileSystemFinder`:
+2. Add `STATICFILES_FINDERS` to `settings.py`, and add `django_components_lite.finders.ComponentsFileSystemFinder`:
 
    ```py
    STATICFILES_FINDERS = [
@@ -42,7 +42,7 @@ Migration steps:
       "django.contrib.staticfiles.finders.FileSystemFinder",
       "django.contrib.staticfiles.finders.AppDirectoriesFinder",
       # Django components
-      "django_components.finders.ComponentsFileSystemFinder",  # <-- ADDED
+      "django_components_lite.finders.ComponentsFileSystemFinder",  # <-- ADDED
    ]
    ```
 

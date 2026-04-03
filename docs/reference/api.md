@@ -3,211 +3,211 @@
 # API
 
 
-::: django_components.BaseNode
+::: django_components_lite.BaseNode
     options:
       show_if_no_docstring: true
 
-::: django_components.CommandLiteralAction
+::: django_components_lite.CommandLiteralAction
     options:
       show_if_no_docstring: true
 
-::: django_components.Component
+::: django_components_lite.Component
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentCache
+::: django_components_lite.ComponentCache
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentDebugHighlight
+::: django_components_lite.ComponentDebugHighlight
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentDefaults
+::: django_components_lite.ComponentDefaults
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentExtension
+::: django_components_lite.ComponentExtension
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentFileEntry
+::: django_components_lite.ComponentFileEntry
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentInput
+::: django_components_lite.ComponentInput
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentMediaInput
+::: django_components_lite.ComponentMediaInput
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentMediaInputPath
+::: django_components_lite.ComponentMediaInputPath
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentNode
+::: django_components_lite.ComponentNode
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentRegistry
+::: django_components_lite.ComponentRegistry
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentVars
+::: django_components_lite.ComponentVars
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentView
+::: django_components_lite.ComponentView
     options:
       show_if_no_docstring: true
 
-::: django_components.ComponentsSettings
+::: django_components_lite.ComponentsSettings
     options:
       show_if_no_docstring: true
 
-::: django_components.ContextBehavior
+::: django_components_lite.ContextBehavior
     options:
       show_if_no_docstring: true
 
-::: django_components.Default
+::: django_components_lite.Default
     options:
       show_if_no_docstring: true
 
-::: django_components.DependenciesStrategy
+::: django_components_lite.DependenciesStrategy
     options:
       show_if_no_docstring: true
 
-::: django_components.Empty
+::: django_components_lite.Empty
     options:
       show_if_no_docstring: true
 
-::: django_components.ExtensionComponentConfig
+::: django_components_lite.ExtensionComponentConfig
     options:
       show_if_no_docstring: true
 
-::: django_components.FillNode
+::: django_components_lite.FillNode
     options:
       show_if_no_docstring: true
 
-::: django_components.OnRenderGenerator
+::: django_components_lite.OnRenderGenerator
     options:
       show_if_no_docstring: true
 
-::: django_components.ProvideNode
+::: django_components_lite.ProvideNode
     options:
       show_if_no_docstring: true
 
-::: django_components.RegistrySettings
+::: django_components_lite.RegistrySettings
     options:
       show_if_no_docstring: true
 
-::: django_components.Slot
+::: django_components_lite.Slot
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotContent
+::: django_components_lite.SlotContent
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotContext
+::: django_components_lite.SlotContext
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotFallback
+::: django_components_lite.SlotFallback
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotFunc
+::: django_components_lite.SlotFunc
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotInput
+::: django_components_lite.SlotInput
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotNode
+::: django_components_lite.SlotNode
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotRef
+::: django_components_lite.SlotRef
     options:
       show_if_no_docstring: true
 
-::: django_components.SlotResult
+::: django_components_lite.SlotResult
     options:
       show_if_no_docstring: true
 
-::: django_components.TagFormatterABC
+::: django_components_lite.TagFormatterABC
     options:
       show_if_no_docstring: true
 
-::: django_components.TagResult
+::: django_components_lite.TagResult
     options:
       show_if_no_docstring: true
 
-::: django_components.all_components
+::: django_components_lite.all_components
     options:
       show_if_no_docstring: true
 
-::: django_components.all_registries
+::: django_components_lite.all_registries
     options:
       show_if_no_docstring: true
 
-::: django_components.autodiscover
+::: django_components_lite.autodiscover
     options:
       show_if_no_docstring: true
 
-::: django_components.cached_template
+::: django_components_lite.cached_template
     options:
       show_if_no_docstring: true
 
-::: django_components.format_attributes
+::: django_components_lite.format_attributes
     options:
       show_if_no_docstring: true
 
-::: django_components.get_component_by_class_id
+::: django_components_lite.get_component_by_class_id
     options:
       show_if_no_docstring: true
 
-::: django_components.get_component_defaults
+::: django_components_lite.get_component_defaults
     options:
       show_if_no_docstring: true
 
-::: django_components.get_component_dirs
+::: django_components_lite.get_component_dirs
     options:
       show_if_no_docstring: true
 
-::: django_components.get_component_files
+::: django_components_lite.get_component_files
     options:
       show_if_no_docstring: true
 
-::: django_components.get_component_url
+::: django_components_lite.get_component_url
     options:
       show_if_no_docstring: true
 
-::: django_components.import_libraries
+::: django_components_lite.import_libraries
     options:
       show_if_no_docstring: true
 
-::: django_components.merge_attributes
+::: django_components_lite.merge_attributes
     options:
       show_if_no_docstring: true
 
-::: django_components.register
+::: django_components_lite.register
     options:
       show_if_no_docstring: true
 
-::: django_components.registry
+::: django_components_lite.registry
     options:
       show_if_no_docstring: true
 
-::: django_components.render_dependencies
+::: django_components_lite.render_dependencies
     options:
       show_if_no_docstring: true
 
-::: django_components.template_tag
+::: django_components_lite.template_tag
     options:
       show_if_no_docstring: true
 

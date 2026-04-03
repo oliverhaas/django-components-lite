@@ -11,10 +11,10 @@ from django.template.base import NodeList, TextNode
 from django.utils.safestring import mark_safe
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components import Component, register, types
-from django_components.component import ComponentNode
-from django_components.slots import FillNode, Slot, SlotContext, SlotFallback
-from django_components.testing import djc_test
+from django_components_lite import Component, register, types
+from django_components_lite.component import ComponentNode
+from django_components_lite.slots import FillNode, Slot, SlotContext, SlotFallback
+from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
 
@@ -679,7 +679,7 @@ class TestSlot:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     @pytest.mark.skip(reason="REMOVED: Inline template strings - use template_file only")
     def test_slot_call_outside_render_context(self, components_settings):
-        from django_components import Component, register
+        from django_components_lite import Component, register
 
         seen_slots = []
 

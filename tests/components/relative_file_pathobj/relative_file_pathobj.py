@@ -3,7 +3,7 @@ from typing import Any
 from django.templatetags.static import static
 from django.utils.html import format_html, html_safe
 
-from django_components import Component, register
+from django_components_lite import Component, register
 
 
 # Format as mentioned in https://github.com/django-components/django-components/issues/522#issuecomment-2173577094

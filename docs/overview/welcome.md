@@ -27,7 +27,7 @@ A component in django-components can be as simple as a Django template and Pytho
 ```
 
 ```py title="components/calendar/calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -56,7 +56,7 @@ document.querySelector(".calendar").onclick = () => {
 ```
 
 ```py title="components/calendar/calendar.py"
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -95,7 +95,7 @@ Read on to learn about all the exciting details and configuration possibilities!
 - HTML, CSS, and JS can be defined on the component class, or loaded from files.
 
 ```djc_py
-from django_components import Component
+from django_components_lite import Component
 
 @register("calendar")
 class Calendar(Component):
@@ -208,8 +208,8 @@ It extends Django's template tags syntax with:
 ```
 
 You too can define template tags with these features by using
-[`@template_tag()`](https://django-components.github.io/django-components/latest/reference/api/#django_components.template_tag)
-or [`BaseNode`](https://django-components.github.io/django-components/latest/reference/api/#django_components.BaseNode).
+[`@template_tag()`](https://django-components.github.io/django-components/latest/reference/api/#django_components_lite.template_tag)
+or [`BaseNode`](https://django-components.github.io/django-components/latest/reference/api/#django_components_lite.BaseNode).
 
 Read more on [Custom template tags](https://django-components.github.io/django-components/latest/concepts/advanced/template_tags/).
 
@@ -326,7 +326,7 @@ Read more about [HTML attributes](https://django-components.github.io/django-com
 - The decorator also serves as a stand-in for Django's [`@override_settings`](https://docs.djangoproject.com/en/5.2/topics/testing/tools/#django.test.override_settings).
 
 ```python
-from django_components.testing import djc_test
+from django_components_lite.testing import djc_test
 
 from components.my_table import MyTable
 

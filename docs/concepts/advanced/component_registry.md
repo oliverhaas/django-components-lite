@@ -5,7 +5,7 @@ manage (add or remove) components.
 As a reminder, we may have a component like this:
 
 ```python
-from django_components import Component, register
+from django_components_lite import Component, register
 
 @register("calendar")
 class Calendar(Component):
@@ -40,7 +40,7 @@ of Django's `Library`. And Libraries are inserted into Django template
 using the `{% load %}` tags.
 
 The `@register` decorator accepts an optional kwarg `registry`, which specifies, the `ComponentRegistry` to register components into.
-If omitted, the default `ComponentRegistry` instance defined in django_components is used.
+If omitted, the default `ComponentRegistry` instance defined in django_components_lite is used.
 
 ```py
 my_registry = ComponentRegistry()
@@ -52,7 +52,7 @@ class MyComponent(Component):
 
 The default `ComponentRegistry` is associated with the `Library` that
 you load when you call `{% load component_tags %}` inside your template, or when you
-add `django_components.templatetags.component_tags` to the template builtins.
+add `django_components_lite.templatetags.component_tags` to the template builtins.
 
 So when you register or unregister a component to/from a component registry,
 then behind the scenes the registry automatically adds/removes the component's
@@ -64,13 +64,13 @@ such as `{% component "my_comp" %}`.
 The default `ComponentRegistry` instance can be imported as:
 
 ```py
-from django_components import registry
+from django_components_lite import registry
 ```
 
 You can use the registry to manually add/remove/get components:
 
 ```py
-from django_components import registry
+from django_components_lite import registry
 
 # Register components
 registry.register("button", ButtonComponent)
@@ -96,11 +96,11 @@ If you are writing a component library to be shared with others, you may want to
 and register components onto a different `Library` instance than the default one.
 
 The `Library` instance can be set at instantiation of `ComponentRegistry`. If omitted,
-then the default Library instance from django_components is used.
+then the default Library instance from django_components_lite is used.
 
 ```py
 from django.template import Library
-from django_components import ComponentRegistry
+from django_components_lite import ComponentRegistry
 
 my_library = Library(...)
 my_registry = ComponentRegistry(library=my_library)
@@ -131,19 +131,19 @@ The registry accepts these settings:
 
 ```py
 from django.template import Library
-from django_components import ComponentRegistry, RegistrySettings
+from django_components_lite import ComponentRegistry, RegistrySettings
 
 register = library = django.template.Library()
 comp_registry = ComponentRegistry(
     library=library,
     settings=RegistrySettings(
         context_behavior="isolated",
-        tag_formatter="django_components.component_formatter",
+        tag_formatter="django_components_lite.component_formatter",
     ),
 )
 ```
 
-These settings are [the same as the ones you can set for django_components](#available-settings).
+These settings are [the same as the ones you can set for django_components_lite](#available-settings).
 
 In fact, when you set `COMPONENT.tag_formatter` or `COMPONENT.context_behavior`, these are forwarded to the default `ComponentRegistry`.
 

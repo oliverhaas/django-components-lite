@@ -2,8 +2,8 @@ from functools import wraps
 
 from django.template import Context, Template
 
-from django_components import Component, registry, types
-from django_components.testing import djc_test
+from django_components_lite import Component, registry, types
+from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
 

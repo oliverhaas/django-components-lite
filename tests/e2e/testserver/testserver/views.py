@@ -5,7 +5,7 @@ from django.template import Context, Template
 from testserver.components import FragComp, FragMedia
 
 if TYPE_CHECKING:
-    from django_components import types
+    from django_components_lite import types
 
 
 def single_component_view(_request):

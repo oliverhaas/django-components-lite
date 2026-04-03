@@ -39,10 +39,10 @@ jobs:
   publish:
     needs: [test]
     runs-on: ubuntu-latest
-    if: github.repository == 'django-components/django-components'
+    if: github.repository == 'oliverhaas/django-components-lite'
     environment:
       name: pypi
-      url: https://pypi.org/project/django_components/
+      url: https://pypi.org/project/django-components-lite/
     permissions:
       id-token: write
     steps:

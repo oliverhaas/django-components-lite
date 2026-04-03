@@ -1,6 +1,6 @@
 from typing import Any
 
-from django_components import Component, register
+from django_components_lite import Component, register
 
 
 # Used for testing the staticfiles finder in `test_staticfiles.py`
