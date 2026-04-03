@@ -30,7 +30,6 @@ from django.test import override_settings
 from django_components import ComponentsSettings
 from django_components.component import ALL_COMPONENTS, Component, component_node_subclasses_by_name
 from django_components.component_registry import ALL_REGISTRIES, ComponentRegistry
-from django_components.perfutil.provide import provide_cache
 from django_components.template import _reset_component_template_file_cache, loading_components
 
 if TYPE_CHECKING:
@@ -499,9 +498,6 @@ def _clear_djc_global_state(
     #
     # if component_media_cache:
     #     component_media_cache.clear()
-
-    if provide_cache:
-        provide_cache.clear()
 
     # Remove cached Node subclasses
     component_node_subclasses_by_name.clear()

@@ -27,10 +27,6 @@ from django.conf import settings
 
 from django_components.util.misc import default
 
-if TYPE_CHECKING:
-    from django_components.tag_formatter import TagFormatterABC
-
-
 T = TypeVar("T")
 
 
@@ -508,72 +504,6 @@ class ComponentsSettings(NamedTuple):
         See [Security notes](../overview/security_notes.md).
     """
 
-    tag_formatter: Optional[Union["TagFormatterABC", str]] = None
-    """
-    Configure what syntax is used inside Django templates to render components.
-    See the [available tag formatters](./tag_formatters.md).
-
-    Defaults to `"django_components.component_formatter"`.
-
-    Learn more about [Customizing component tags with TagFormatter](../concepts/advanced/tag_formatters.md).
-
-    Can be set either as direct reference:
-
-    ```python
-    from django_components import component_formatter
-
-    COMPONENTS = ComponentsSettings(
-        "tag_formatter": component_formatter
-    )
-    ```
-
-    Or as an import string;
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        "tag_formatter": "django_components.component_formatter"
-    )
-    ```
-
-    **Examples:**
-
-    - `"django_components.component_formatter"`
-
-        Set
-
-        ```python
-        COMPONENTS = ComponentsSettings(
-            "tag_formatter": "django_components.component_formatter"
-        )
-        ```
-
-        To write components like this:
-
-        ```django
-        {% component "button" href="..." %}
-            Click me!
-        {% endcomponent %}
-        ```
-
-    - `django_components.component_shorthand_formatter`
-
-        Set
-
-        ```python
-        COMPONENTS = ComponentsSettings(
-            "tag_formatter": "django_components.component_shorthand_formatter"
-        )
-        ```
-
-        To write components like this:
-
-        ```django
-        {% button href="..." %}
-            Click me!
-        {% endbutton %}
-        ```
-    """
-
     # TODO_V1 - remove
     template_cache_size: Optional[int] = None
     """
@@ -682,7 +612,6 @@ defaults = ComponentsSettings(
         # Python files
         ".py", ".pyc",
     ],
-    tag_formatter="django_components.component_formatter",
     template_cache_size=128,
 )
 # --endsnippet:defaults--
@@ -733,7 +662,6 @@ class InternalSettings:
             static_files_allowed=default(components_settings.static_files_allowed, defaults.static_files_allowed),
             static_files_forbidden=self._prepare_static_files_forbidden(components_settings),
             context_behavior=self._prepare_context_behavior(components_settings),
-            tag_formatter=default(components_settings.tag_formatter, defaults.tag_formatter),  # type: ignore[arg-type]
         )
 
     def _get_settings(self) -> ComponentsSettings:
@@ -825,10 +753,5 @@ class InternalSettings:
     @property
     def CONTEXT_BEHAVIOR(self) -> ContextBehavior:
         return ContextBehavior(self._get_settings().context_behavior)
-
-    @property
-    def TAG_FORMATTER(self) -> Union["TagFormatterABC", str]:
-        return self._get_settings().tag_formatter  # type: ignore[return-value]
-
 
 app_settings = InternalSettings()
