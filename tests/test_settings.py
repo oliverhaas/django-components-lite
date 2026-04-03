@@ -1,4 +1,4 @@
-from django_components.app_settings import ComponentsSettings, app_settings
+from django_components.app_settings import app_settings
 from django_components.testing import djc_test
 
 from .testutils import setup_test_config

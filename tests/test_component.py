@@ -3,31 +3,25 @@ Tests focusing on the Component class.
 For tests focusing on the `component` tag, see `test_templatetags_component.py`
 """
 
-import os
 import re
-from typing import Any, List, Literal, Optional
+from typing import Any
 
 import pytest
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.template import Context, RequestContext, Template, TemplateSyntaxError
-from django.template.base import TextNode
 from django.test import Client
 from django.urls import path
-from pytest_django.asserts import assertHTMLEqual, assertInHTML
+from pytest_django.asserts import assertHTMLEqual
 
 from django_components import (
     Component,
     ComponentRegistry,
-    Slot,
-    SlotInput,
     all_components,
     get_component_by_class_id,
     register,
-    registry,
     types,
 )
-from django_components.template import _get_component_template
 from django_components.testing import djc_test
 from django_components.urls import urlpatterns as dc_urlpatterns
 
@@ -67,6 +61,7 @@ class TestComponentLegacyApi:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
+
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
@@ -85,6 +80,7 @@ class TestComponentLegacyApi:
                 return {
                     "variable": variable,
                 }
+
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
@@ -180,6 +176,7 @@ class TestComponentLegacyApi:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
+
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
@@ -272,6 +269,7 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
+
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
@@ -289,6 +287,7 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
+
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
         assertHTMLEqual(
             rendered,
@@ -382,6 +381,7 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable", None),
                 }
+
         # Access fields on Component class
         assert SimpleComponent.template_name == "simple_template.html"
         assert SimpleComponent.template_file == "simple_template.html"
@@ -1173,7 +1173,6 @@ class TestComponentRender:
             match=re.escape("1 validation error for Kwargs\ndata1\n  Field required"),
         ):
             Root.render()
-
 
 
 @djc_test

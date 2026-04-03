@@ -1,5 +1,4 @@
 import re
-from typing import Dict
 
 import pytest
 from django.template import Context, Template, TemplateSyntaxError
@@ -750,7 +749,7 @@ class TestComponentSlotDefault:
         with pytest.raises(
             TemplateSyntaxError,
             match=re.escape(
-                "Illegal content passed to component 'test_comp'. Explicit 'fill' tags cannot occur alongside other text",  # noqa: E501
+                "Illegal content passed to component 'test_comp'. Explicit 'fill' tags cannot occur alongside other text",
             ),
         ):
             Template(template_str).render(Context({}))
@@ -2285,7 +2284,6 @@ class TestSlotBehavior:
         return Template(template_str)
 
     @djc_test(components_settings={})
-
     def test_slot_context__isolated(self):
         template = self.make_template()
         # {{ name }} should be "Jannete" everywhere
@@ -2331,7 +2329,7 @@ class TestSlotBehavior:
 class TestSlotInput:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_slots_accessible_when_python_render(self, components_settings):
-        seen_slots: Dict = {}
+        seen_slots: dict = {}
 
         @register("test")
         class SlottedComponent(Component):
@@ -2367,7 +2365,7 @@ class TestSlotInput:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_slots_normalized_as_slot_instances(self, components_settings):
-        seen_slots: Dict[str, Slot] = {}
+        seen_slots: dict[str, Slot] = {}
 
         @register("test")
         class SlottedComponent(Component):

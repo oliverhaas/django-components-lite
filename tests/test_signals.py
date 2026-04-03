@@ -16,7 +16,7 @@ def _get_templates_used_to_render(subject_template, render_context=None):
 
     templates_used = []
 
-    def receive_template_signal(sender, template, context, **_kwargs):  # noqa: ARG001
+    def receive_template_signal(sender, template, context, **_kwargs):
         templates_used.append(template.name)
 
     template_rendered.connect(receive_template_signal, dispatch_uid="test_method")

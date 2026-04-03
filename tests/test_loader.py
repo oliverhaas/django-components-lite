@@ -301,10 +301,10 @@ class TestFilepathToPythonModule:
     def test_prepares_path__str(self):
         base_path = str(settings.BASE_DIR)
 
-        the_path = os.path.join(base_path, "tests.py")  # noqa: PTH118
+        the_path = os.path.join(base_path, "tests.py")
         assert _filepath_to_python_module(the_path, base_path, None) == "tests"
 
-        the_path = os.path.join(base_path, "tests/components/relative_file/relative_file.py")  # noqa: PTH118
+        the_path = os.path.join(base_path, "tests/components/relative_file/relative_file.py")
         assert _filepath_to_python_module(the_path, base_path, None) == "tests.components.relative_file.relative_file"
 
     def test_prepares_path__path(self):

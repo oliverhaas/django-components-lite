@@ -57,7 +57,7 @@ The package provides custom Django management commands:
 ## Common Tasks
 
 ### Repository Structure
-- `src/django_components/` -- main package source code
+- `django_components/` -- main package source code
 - `tests/` -- comprehensive test suite with 1000+ tests
 - `sampleproject/` -- working Django project demonstrating component usage
 - `docs/` -- documentation source (uses mkdocs)
@@ -70,7 +70,7 @@ The package provides custom Django management commands:
 - Always check the sample project works after making changes to core functionality
 - Test component discovery by running `python manage.py components list` in the sample project
 - Verify component rendering by starting the sample project server and making requests
-- Check that import paths in `src/django_components/__init__.py` work correctly
+- Check that import paths in `django_components/__init__.py` work correctly
 
 ### CI/CD Information  
 - GitHub Actions workflow: `.github/workflows/tests.yml`
@@ -94,8 +94,8 @@ The package provides custom Django management commands:
 - All core functionality works without additional network access once dependencies are installed
 
 ### Development Workflow
-1. Install dependencies: `pip install -r requirements-dev.txt && pip install -e .`
-2. Make changes to source code in `src/django_components/`
+1. Install dependencies: `uv sync --group dev`
+2. Make changes to source code in `django_components/`
 3. Run tests: `python -m pytest tests/test_component.py` (or specific test files)
 4. Run linting: `ruff check .`
 5. Test sample project: `cd sampleproject && python manage.py runserver`

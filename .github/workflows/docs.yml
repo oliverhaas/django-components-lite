@@ -1,0 +1,145 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run in original repo (not in forks)
+    if: github.repository == 'django-components/django-components'
+    steps:
+
+      ##############################
+      # SETUP
+      ##############################
+
+      # Authenticate with git with the Github App that has permission
+      # to push to master, in order to push benchmark results.
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Configure git account
+        run: |
+          git config user.name components-release-bot
+          git config user.email "components-release-bot@users.noreply.github.com"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: |
+          uv sync --group docs
+          uv pip install -e .
+          # asv needs pip-based install for its own virtualenv management
+          uv pip install asv "virtualenv==20.35.3"
+
+      ###########################################
+      # RECORD BENCHMARK - ONLY ON TAG PUSH
+      ###########################################
+
+      - name: Run benchmarks for tag
+        if: github.ref_type == 'tag' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the master branch so we can run benchmarks on it
+          git remote add upstream https://github.com/${{ github.repository }}.git
+          git fetch origin master:master
+          git checkout master
+
+          # Get tag name
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "TAG: $TAG"
+
+          # TODO: REMOVE ONCE FIXED UPSTREAM
+          # Fix for https://github.com/airspeed-velocity/asv_runner/issues/45
+          echo "Creating virtual environment..."
+          asv setup -v || true
+          echo "Virtual environment created."
+          echo "Applying monkeypatch..."
+          find .asv/env -type f -path "*/site-packages/asv_runner/benchmarks/timeraw.py" | while read -r file; do
+              echo "" >> "$file"
+              cat "benchmarks/monkeypatch_asv_ci.txt" >> "$file"
+          done
+          echo "Monkeypatch applied."
+
+          echo "Preparing benchmarks profile..."
+          asv machine --yes --machine ci-linux
+          echo "Benchmarks profile DONE."
+
+          echo "Running benchmarks for tag ${TAG}..."
+          asv run master^! -v
+          echo "Benchmarks for tag ${TAG} DONE."
+
+          echo "Generating benchmarks site..."
+          asv publish
+          echo "Benchmarks site DONE."
+
+          echo "Staging and committing benchmark results..."
+          git add .asv/results/
+          git add docs/benchmarks/
+          git commit -m "Add benchmark results for ${TAG}"
+          echo "Benchmark results committed."
+
+          echo "Pushing benchmark results..."
+          git push origin master
+          echo "Benchmark results pushed to master."
+
+      ###########################################
+      # BUILD & RELEASE DOCS
+      ###########################################
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Build & deploy "dev" docs for a new commit to master
+        if: github.event_name == 'push' && github.ref_type != 'tag'
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+          git pull origin gh-pages
+          git checkout master
+
+          export SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          uv run mike deploy --push --update-aliases --title "dev (${SHORT_SHA})" dev
+
+      - name: Build & deploy docs for a new tag
+        if: github.ref_type == 'tag' && github.event_name == 'push'
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+          git pull origin gh-pages
+          git checkout master
+
+          uv run mike deploy --push --update-aliases ${{ github.ref_name }} latest
+          uv run mike set-default latest --push
