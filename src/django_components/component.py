@@ -44,14 +44,6 @@ from django_components.dependencies import (
     set_component_attrs_for_js_and_css,
 )
 from django_components.dependencies import render_dependencies as _render_dependencies
-from django_components.extension import (
-    OnComponentClassCreatedContext,
-    OnComponentClassDeletedContext,
-    OnComponentDataContext,
-    OnComponentInputContext,
-    OnComponentRenderedContext,
-    extensions,
-)
 from django_components.node import BaseNode
 from django_components.perfutil.component import (
     OnComponentRenderedResult,
@@ -575,14 +567,6 @@ class ComponentMeta(ComponentMediaMeta):
 
         return cls
 
-    # This runs when a Component class is being deleted
-    def __del__(cls) -> None:
-        # Skip if `extensions` was deleted before this registry
-        if not extensions:
-            return
-
-        comp_cls = cast("Type[Component]", cls)
-        extensions.on_component_class_deleted(OnComponentClassDeletedContext(comp_cls))
 
 
 # Internal data that's shared across the entire component tree
@@ -2371,15 +2355,11 @@ class Component(metaclass=ComponentMeta):
         # Run finalizer when component is garbage collected
         finalize(self, on_component_garbage_collected, self.id)
 
-        extensions._init_component_instance(self)
-
     def __init_subclass__(cls, **kwargs: Any) -> None:
         cls.class_id = hash_comp_cls(cls)
         comp_cls_id_mapping[cls.class_id] = cls
 
         ALL_COMPONENTS.append(cached_ref(cls))  # type: ignore[arg-type]
-        extensions._init_component_class(cls)
-        extensions.on_component_class_created(OnComponentClassCreatedContext(cls))
 
     ########################################
     # INSTANCE PROPERTIES
@@ -3437,24 +3417,6 @@ class Component(metaclass=ComponentMeta):
             node=node,
         )
 
-        # Allow plugins to modify or validate the inputs
-        result_override = extensions.on_component_input(
-            OnComponentInputContext(
-                component=component,
-                component_cls=comp_cls,
-                component_id=render_id,
-                args=args_list,
-                kwargs=kwargs_dict,
-                slots=slots_dict,
-                context=context,
-            ),
-        )
-
-        # The component rendering was short-circuited by an extension, skipping
-        # the rest of the rendering process. This may be for example a cached content.
-        if result_override is not None:
-            return result_override
-
         # If user doesn't specify `Args`, `Kwargs`, `Slots` types, then we pass them in as plain
         # dicts / lists.
         component.args = comp_cls.Args(*args_list) if comp_cls.Args is not None else args_list
@@ -3535,19 +3497,6 @@ class Component(metaclass=ComponentMeta):
         ######################################
 
         template_data, js_data, css_data = component._call_data_methods(args_list, kwargs_dict)
-
-        extensions.on_component_data(
-            OnComponentDataContext(
-                component=component,
-                component_cls=comp_cls,
-                component_id=render_id,
-                # TODO_V1 - Remove `context_data`
-                context_data=template_data,
-                template_data=template_data,
-                js_data=js_data,
-                css_data=css_data,
-            ),
-        )
 
         # Cache component's JS and CSS scripts, in case they have been evicted from the cache.
         cache_component_js(comp_cls, force=False)
@@ -3733,23 +3682,6 @@ class Component(metaclass=ComponentMeta):
                     js_input_hash=js_input_hash,
                     css_input_hash=css_input_hash,
                 )
-
-            # Allow extensions to either:
-            # - Override/modify the rendered HTML by returning new value
-            # - Raise an exception to discard the HTML and bubble up error
-            # - Or don't return anything (or return `None`) to use the original HTML / error
-            result = extensions.on_component_rendered(
-                OnComponentRenderedContext(
-                    component=component,
-                    component_cls=comp_cls,
-                    component_id=render_id,
-                    result=html,
-                    error=error,
-                ),
-            )
-
-            if result is not None:
-                html, error = result
 
             trace_component_msg(
                 "COMP_RENDER_END",

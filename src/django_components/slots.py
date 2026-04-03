@@ -31,7 +31,6 @@ from django.utils.safestring import SafeString, mark_safe
 
 from django_components.app_settings import ContextBehavior
 from django_components.context import _COMPONENT_CONTEXT_KEY, _INJECT_CONTEXT_KEY_PREFIX, COMPONENT_IS_NESTED_KEY
-from django_components.extension import OnSlotRenderedContext, extensions
 from django_components.node import BaseNode
 from django_components.perfutil.component import component_context_cache
 from django_components.util.exception import add_slot_to_error_message
@@ -947,21 +946,6 @@ class SlotNode(BaseNode):
                     # NOTE: While `{% fill %}` tag has to opt in for the `fallback` and `data` variables,
                     #       the render function ALWAYS receives them.
                     output = slot(data=kwargs, fallback=fallback, context=used_ctx)
-
-        # Allow plugins to post-process the slot's rendered output
-        output = extensions.on_slot_rendered(
-            OnSlotRenderedContext(
-                component=component,
-                component_cls=component.__class__,
-                component_id=component_id,
-                slot=slot,
-                slot_name=slot_name,
-                slot_node=self,
-                slot_is_required=is_required,
-                slot_is_default=is_default,
-                result=output,
-            ),
-        )
 
         trace_component_msg(
             "RENDER_SLOT_END",

@@ -8,7 +8,6 @@ from django.template.loader_tags import IncludeNode
 
 from django_components.context import _COMPONENT_CONTEXT_KEY, _STRATEGY_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY
 from django_components.dependencies import COMPONENT_COMMENT_REGEX, render_dependencies
-from django_components.extension import OnTemplateCompiledContext, OnTemplateLoadedContext, extensions
 from django_components.util.template_parser import parse_template
 
 
@@ -48,43 +47,19 @@ def monkeypatch_template_init(template_cls: Type[Template]) -> None:
         # If this Template instance was created by us when loading a template file for a component
         # with `load_component_template()`, then we do 2 things:
         #
-        # 1. Associate the Component class with the template by setting it on the `Origin` instance
-        #    (`template.origin.component_cls`). This way the `{% component%}` and `{% slot %}` tags
-        #    will know inside which Component class they were defined.
-        #
-        # 2. Apply `extensions.on_template_preprocess()` to the template, so extensions can modify
-        #    the template string before it's compiled into a nodelist.
+        # Associate the Component class with the template by setting it on the `Origin` instance
+        # (`template.origin.component_cls`). This way the `{% component%}` and `{% slot %}` tags
+        # will know inside which Component class they were defined.
         if get_component_from_origin(origin) is not None:
-            component_cls = get_component_from_origin(origin)
+            pass  # already set
         elif origin is not None and origin.template_name is not None:
             component_cls = get_component_by_template_file(origin.template_name)
             if component_cls is not None:
                 set_component_to_origin(origin, component_cls)
-        else:
-            component_cls = None
-
-        if component_cls is not None:
-            template_string = str(template_string)
-            template_string = extensions.on_template_loaded(
-                OnTemplateLoadedContext(
-                    component_cls=component_cls,
-                    content=template_string,
-                    origin=origin,
-                    name=name,
-                ),
-            )
 
         # Calling original `Template.__init__` should also compile the template into a Nodelist
         # via `Template.compile_nodelist()`.
         original_init(self, template_string, origin, name, *args, **kwargs)  # type: ignore[misc]
-
-        if component_cls is not None:
-            extensions.on_template_compiled(
-                OnTemplateCompiledContext(
-                    component_cls=component_cls,
-                    template=self,
-                ),
-            )
 
     template_cls.__init__ = __init__
 

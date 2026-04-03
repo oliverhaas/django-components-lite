@@ -19,7 +19,6 @@ class ComponentsConfig(AppConfig):
         from django_components.app_settings import app_settings
         from django_components.autodiscovery import autodiscover, import_libraries
         from django_components.component_registry import registry
-        from django_components.extension import extensions
         from django_components.util.django_monkeypatch import (
             monkeypatch_include_node,
             monkeypatch_inclusion_node,
@@ -67,8 +66,6 @@ class ComponentsConfig(AppConfig):
 
             base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 
-        # Let extensions process any components which may have been created before the app was ready
-        extensions._init_app()
 
 
 # See https://github.com/django-components/django-components/issues/586#issue-2472678136

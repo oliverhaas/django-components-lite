@@ -30,7 +30,6 @@ from django.test import override_settings
 from django_components import ComponentsSettings
 from django_components.component import ALL_COMPONENTS, Component, component_node_subclasses_by_name
 from django_components.component_registry import ALL_REGISTRIES, ComponentRegistry
-from django_components.extension import extensions
 from django_components.perfutil.provide import provide_cache
 from django_components.template import _reset_component_template_file_cache, loading_components
 
@@ -467,8 +466,6 @@ def _setup_djc_global_state(
     from django_components.app_settings import app_settings  # noqa: PLC0415
 
     app_settings._load_settings()
-    extensions._initialized = False
-    extensions._init_app()
 
 
 def _clear_djc_global_state(
@@ -567,9 +564,6 @@ def _clear_djc_global_state(
     for mod in LOADED_MODULES:
         sys.modules.pop(mod, None)
     LOADED_MODULES.clear()
-
-    # Clear extensions caches
-    extensions._route_to_url.clear()
 
     # Clear other djc state
     _reset_component_template_file_cache()

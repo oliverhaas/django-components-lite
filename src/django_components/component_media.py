@@ -32,7 +32,6 @@ from django.template import Template
 from django.utils.safestring import SafeData
 from typing_extensions import TypeGuard
 
-from django_components.extension import OnCssLoadedContext, OnJsLoadedContext, extensions
 from django_components.template import ensure_unique_template, load_component_template
 from django_components.util.loader import get_component_dirs, resolve_file
 from django_components.util.logger import logger
@@ -1133,23 +1132,6 @@ def _get_asset(
 
         # NOTE: Use explicit encoding for compat with Windows, see #1074
         content = Path(full_path).read_text(encoding="utf8")
-
-    # NOTE: `on_template_loaded()` is already applied inside `load_component_template()`
-    #       but we still need to call extension hooks for JS / CSS content (whether inlined or not).
-    if inlined_attr == "js":
-        content = extensions.on_js_loaded(
-            OnJsLoadedContext(
-                component_cls=comp_cls,
-                content=content,
-            ),
-        )
-    elif inlined_attr == "css":
-        content = extensions.on_css_loaded(
-            OnCssLoadedContext(
-                component_cls=comp_cls,
-                content=content,
-            ),
-        )
 
     return content, None
 

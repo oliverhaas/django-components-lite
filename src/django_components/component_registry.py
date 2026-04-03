@@ -6,13 +6,6 @@ from django.template import Library
 from django.template.base import Parser, Token
 
 from django_components.app_settings import ContextBehaviorType, app_settings
-from django_components.extension import (
-    OnComponentRegisteredContext,
-    OnComponentUnregisteredContext,
-    OnRegistryCreatedContext,
-    OnRegistryDeletedContext,
-    extensions,
-)
 from django_components.library import is_tag_protected, mark_protected_tags, register_tag
 from django_components.tag_formatter import TagFormatterABC, get_tag_formatter
 from django_components.util.weakref import cached_ref
@@ -247,23 +240,7 @@ class ComponentRegistry:
 
         ALL_REGISTRIES.append(cached_ref(self))
 
-        extensions.on_registry_created(
-            OnRegistryCreatedContext(
-                registry=self,
-            ),
-        )
-
     def __del__(self) -> None:
-        # Skip if `extensions` was deleted before this registry
-        if not extensions:
-            return
-
-        extensions.on_registry_deleted(
-            OnRegistryDeletedContext(
-                registry=self,
-            ),
-        )
-
         # Unregister all components when the registry is deleted
         self.clear()
 
@@ -361,14 +338,6 @@ class ComponentRegistry:
         # If the component class is deleted, unregister it from this registry.
         finalize(entry.cls, lambda: self.unregister(name) if name in self._registry else None)
 
-        extensions.on_component_registered(
-            OnComponentRegisteredContext(
-                registry=self,
-                name=name,
-                component_cls=entry.cls,
-            ),
-        )
-
     def unregister(self, name: str) -> None:
         """
         Unregister the [`Component`](./api.md#django_components.Component) class
@@ -421,14 +390,6 @@ class ComponentRegistry:
 
         entry = self._registry[name]
         del self._registry[name]
-
-        extensions.on_component_unregistered(
-            OnComponentUnregisteredContext(
-                registry=self,
-                name=name,
-                component_cls=entry.cls,
-            ),
-        )
 
     def get(self, name: str) -> Type["Component"]:
         """

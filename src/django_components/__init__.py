@@ -35,22 +35,6 @@ from django_components.component_registry import (
     all_registries,
 )
 from django_components.dependencies import DependenciesStrategy, render_dependencies
-from django_components.extension import (
-    ComponentExtension,
-    ExtensionComponentConfig,
-    OnComponentRegisteredContext,
-    OnComponentUnregisteredContext,
-    OnRegistryCreatedContext,
-    OnRegistryDeletedContext,
-    OnComponentClassCreatedContext,
-    OnComponentClassDeletedContext,
-    OnComponentInputContext,
-    OnComponentDataContext,
-    OnComponentRenderedContext,
-    OnSlotRenderedContext,
-    OnTemplateCompiledContext,
-    OnTemplateLoadedContext,
-)
 from django_components.library import TagProtectedError
 from django_components.node import BaseNode, template_tag
 # REMOVED: Provide/Inject system
@@ -95,7 +79,6 @@ __all__ = [
     "CommandSubcommand",
     "Component",
     "ComponentCommand",
-    "ComponentExtension",
     "ComponentFileEntry",
     "ComponentFormatter",
     "ComponentInput",
@@ -108,22 +91,9 @@ __all__ = [
     "ContextBehavior",
     "DependenciesStrategy",
     "Empty",
-    "ExtensionComponentConfig",
     "FillNode",
     "NotRegistered",
-    "OnComponentClassCreatedContext",
-    "OnComponentClassDeletedContext",
-    "OnComponentDataContext",
-    "OnComponentInputContext",
-    "OnComponentRegisteredContext",
-    "OnComponentRenderedContext",
-    "OnComponentUnregisteredContext",
-    "OnRegistryCreatedContext",
-    "OnRegistryDeletedContext",
     "OnRenderGenerator",
-    "OnSlotRenderedContext",
-    "OnTemplateCompiledContext",
-    "OnTemplateLoadedContext",
     # REMOVED: "ProvideNode",
     "RegistrySettings",
     "ShorthandComponentFormatter",
