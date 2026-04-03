@@ -1,6 +1,6 @@
 # ruff: noqa: ARG002, N804, N805
 import sys
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass
 from inspect import signature
 from types import MethodType
 from typing import (
@@ -63,7 +63,6 @@ from django_components.util.context import gen_context_processors_data, snapshot
 from django_components.util.exception import component_error_message
 from django_components.util.logger import trace_component_msg
 from django_components.util.misc import (
-    convert_class_to_namedtuple,
     default,
     gen_id,
     hash_comp_cls,
@@ -497,38 +496,6 @@ class ComponentMeta(ComponentMediaMeta):
             attrs["template_file"] = attrs.pop("template_name")
         attrs["template_name"] = ComponentTemplateNameDescriptor()
 
-        # Allow to define data classes (`Args`, `Kwargs`, `Slots`, `TemplateData`)
-        # without explicitly subclassing anything. In which case we make them into a subclass of `NamedTuple`.
-        # In other words:
-        # ```py
-        # class MyTable(Component):
-        #     class Kwargs(NamedTuple):
-        #         ...
-        # ```
-        # Can be simplified to:
-        # ```py
-        # class MyTable(Component):
-        #     class Kwargs:
-        #         ...
-        # ```
-        # NOTE: Using dataclasses with `slots=True` could be faster than using NamedTuple,
-        #       but in real world web pages that may load 1-2s, data access and instantiation
-        #       is only on the order of milliseconds, or about 0.1% of the overall time.
-        #       See https://github.com/django-components/django-components/pull/1467#discussion_r2449009201
-        for data_class_name in ["Args", "Kwargs", "Slots", "TemplateData"]:
-            data_class = attrs.get(data_class_name)
-            # Not a class
-            if data_class is None or not isinstance(data_class, type):
-                continue
-            # Is dataclass
-            if is_dataclass(data_class):
-                continue
-            # Has base class(es)
-            has_parents = data_class.__bases__ != (object,)
-            if has_parents:
-                continue
-            attrs[data_class_name] = convert_class_to_namedtuple(data_class)
-
         cls = cast("Type[Component]", super().__new__(mcs, name, bases, attrs))
 
         # If the component defined `template_file`, then associate this Component class
@@ -601,204 +568,8 @@ class Component(metaclass=ComponentMeta):
     # PUBLIC API (Configurable by users)
     # #####################################
 
-    Args: ClassVar[Optional[Type]] = None
-    """
-    Optional typing for positional arguments passed to the component.
 
-    If set and not `None`, then the `args` parameter of the data methods
-    ([`get_template_data()`](../api#django_components.Component.get_template_data))
-    will be the instance of this class:
 
-    ```py
-    from django_components import Component
-
-    class Table(Component):
-        class Args:
-            color: str
-            size: int
-
-        def get_template_data(self, args: Args, kwargs, slots, context):
-            assert isinstance(args, Table.Args)
-
-            return {
-                "color": args.color,
-                "size": args.size,
-            }
-    ```
-
-    Use `Args` to:
-
-    - Validate the input at runtime.
-    - Set type hints for the positional arguments for data methods like
-      [`get_template_data()`](../api#django_components.Component.get_template_data).
-    - Document the component inputs.
-
-    You can also use `Args` to validate the positional arguments for
-    [`Component.render()`](../api#django_components.Component.render):
-
-    ```py
-    Table.render(
-        args=Table.Args(color="red", size=10),
-    )
-    ```
-
-    If you do not specify any bases, the `Args` class will be automatically
-    converted to a `NamedTuple`:
-
-    `class Args:`  ->  `class Args(NamedTuple):`
-
-    If you explicitly set bases, the constructor of this class MUST accept positional arguments:
-
-    ```py
-    Args(*args)
-    ```
-
-    As such, a good starting point is to set this field to a subclass of
-    [`NamedTuple`](https://docs.python.org/3/library/typing.html#typing.NamedTuple).
-
-    Read more on [Typing and validation](../../concepts/fundamentals/typing_and_validation).
-    """
-
-    Kwargs: ClassVar[Optional[Type]] = None
-    """
-    Optional typing for keyword arguments passed to the component.
-
-    If set and not `None`, then the `kwargs` parameter of the data methods
-    ([`get_template_data()`](../api#django_components.Component.get_template_data))
-    will be the instance of this class:
-
-    ```py
-    from django_components import Component
-
-    class Table(Component):
-        class Kwargs:
-            color: str
-            size: int = 10
-
-        def get_template_data(self, args, kwargs: Kwargs, slots, context):
-            assert isinstance(kwargs, Table.Kwargs)
-
-            return {
-                "color": kwargs.color,
-                "size": kwargs.size,
-            }
-    ```
-
-    Use `Kwargs` to:
-
-    - Validate the input at runtime.
-    - Set type hints for the keyword arguments for data methods like
-      [`get_template_data()`](../api#django_components.Component.get_template_data).
-    - Set defaults for individual fields
-    - Document the component inputs.
-
-    You can also use `Kwargs` to validate the keyword arguments for
-    [`Component.render()`](../api#django_components.Component.render):
-
-    ```py
-    Table.render(
-        kwargs=Table.Kwargs(color="red", size=10),
-    )
-    ```
-
-    The defaults set on `Kwargs` will be merged with defaults from
-    [`Component.Defaults`](../api/#django_components.Component.Defaults) class.
-    `Kwargs` takes precendence. Read more about [Component defaults](../../concepts/fundamentals/component_defaults).
-
-    If you do not specify any bases, the `Kwargs` class will be automatically
-    converted to a `NamedTuple`:
-
-    `class Kwargs:`  ->  `class Kwargs(NamedTuple):`
-
-    If you explicitly set bases, the constructor of this class MUST accept keyword arguments:
-
-    ```py
-    Kwargs(**kwargs)
-    ```
-
-    As such, a good starting point is to set this field to a subclass of
-    [`NamedTuple`](https://docs.python.org/3/library/typing.html#typing.NamedTuple)
-    or a [dataclass](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
-
-    Read more on [Typing and validation](../../concepts/fundamentals/typing_and_validation).
-    """
-
-    Slots: ClassVar[Optional[Type]] = None
-    """
-    Optional typing for slots passed to the component.
-
-    If set and not `None`, then the `slots` parameter of the data methods
-    ([`get_template_data()`](../api#django_components.Component.get_template_data))
-    will be the instance of this class:
-
-    ```py
-    from django_components import Component, Slot, SlotInput
-
-    class Table(Component):
-        class Slots:
-            header: SlotInput
-            footer: Slot
-
-        def get_template_data(self, args, kwargs, slots: Slots, context):
-            assert isinstance(slots, Table.Slots)
-
-            return {
-                "header": slots.header,
-                "footer": slots.footer,
-            }
-    ```
-
-    Use `Slots` to:
-
-    - Validate the input at runtime.
-    - Set type hints for the slots for data methods like
-      [`get_template_data()`](../api#django_components.Component.get_template_data).
-    - Document the component inputs.
-
-    You can also use `Slots` to validate the slots for
-    [`Component.render()`](../api#django_components.Component.render):
-
-    ```py
-    Table.render(
-        slots=Table.Slots(
-            header="HELLO IM HEADER",
-            footer=Slot(lambda ctx: ...),
-        ),
-    )
-    ```
-
-    If you do not specify any bases, the `Slots` class will be automatically
-    converted to a `NamedTuple`:
-
-    `class Slots:`  ->  `class Slots(NamedTuple):`
-
-    If you explicitly set bases, the constructor of this class MUST accept keyword arguments:
-
-    ```py
-    Slots(**slots)
-    ```
-
-    As such, a good starting point is to set this field to a subclass of
-    [`NamedTuple`](https://docs.python.org/3/library/typing.html#typing.NamedTuple)
-    or a [dataclass](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
-
-    Read more on [Typing and validation](../../concepts/fundamentals/typing_and_validation).
-
-    !!! info
-
-        Components can receive slots as strings, functions, or instances of [`Slot`](../api#django_components.Slot).
-
-        Internally these are all normalized to instances of [`Slot`](../api#django_components.Slot).
-
-        Therefore, the `slots` dictionary available in data methods (like
-        [`get_template_data()`](../api#django_components.Component.get_template_data))
-        will always be a dictionary of [`Slot`](../api#django_components.Slot) instances.
-
-        To correctly type this dictionary, you should set the fields of `Slots` to
-        [`Slot`](../api#django_components.Slot) or [`SlotInput`](../api#django_components.SlotInput):
-
-        [`SlotInput`](../api#django_components.SlotInput) is a union of `Slot`, string, and function types.
-    """
 
     template_file: ClassVar[Optional[str]] = None
     """
@@ -1172,83 +943,6 @@ class Component(metaclass=ComponentMeta):
         """
         return None
 
-    TemplateData: ClassVar[Optional[Type]] = None
-    """
-    Optional typing for the data to be returned from
-    [`get_template_data()`](../api#django_components.Component.get_template_data).
-
-    If set and not `None`, then this class will be instantiated with the dictionary returned from
-    [`get_template_data()`](../api#django_components.Component.get_template_data) to validate the data.
-
-    Use `TemplateData` to:
-
-    - Validate the data returned from
-      [`get_template_data()`](../api#django_components.Component.get_template_data) at runtime.
-    - Set type hints for this data.
-    - Document the component data.
-
-    You can also return an instance of `TemplateData` directly from
-    [`get_template_data()`](../api#django_components.Component.get_template_data)
-    to get type hints:
-
-    ```py
-    from django_components import Component
-
-    class Table(Component):
-        class TemplateData:
-            color: str
-            size: int
-
-        def get_template_data(self, args, kwargs, slots, context):
-            return Table.TemplateData(
-                color=kwargs["color"],
-                size=kwargs["size"],
-            )
-    ```
-
-    The constructor of this class MUST accept keyword arguments:
-
-    ```py
-    TemplateData(**template_data)
-    ```
-
-    A good starting point is to set this field to a subclass of
-    [`NamedTuple`](https://docs.python.org/3/library/typing.html#typing.NamedTuple)
-    or a [dataclass](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
-
-    Read more on [Typing and validation](../../concepts/fundamentals/typing_and_validation).
-
-    !!! info
-
-        If you use a custom class for `TemplateData`, this class needs to be convertable to a dictionary.
-
-        You can implement either:
-
-        1. `_asdict()` method
-            ```py
-            class MyClass:
-                def __init__(self):
-                    self.x = 1
-                    self.y = 2
-
-                def _asdict(self):
-                    return {'x': self.x, 'y': self.y}
-            ```
-
-        2. Or make the class dict-like with `__iter__()` and `__getitem__()`
-            ```py
-            class MyClass:
-                def __init__(self):
-                    self.x = 1
-                    self.y = 2
-
-                def __iter__(self):
-                    return iter([('x', self.x), ('y', self.y)])
-
-                def __getitem__(self, key):
-                    return getattr(self, key)
-            ```
-    """
 
     js: Optional[str] = None
     """
@@ -2903,9 +2597,9 @@ class Component(metaclass=ComponentMeta):
 
         # If user doesn't specify `Args`, `Kwargs`, `Slots` types, then we pass them in as plain
         # dicts / lists.
-        component.args = comp_cls.Args(*args_list) if comp_cls.Args is not None else args_list
-        component.kwargs = comp_cls.Kwargs(**kwargs_dict) if comp_cls.Kwargs is not None else kwargs_dict
-        component.slots = comp_cls.Slots(**slots_dict) if comp_cls.Slots is not None else slots_dict
+        component.args = args_list
+        component.kwargs = kwargs_dict
+        component.slots = slots_dict
 
         ######################################
         # 2. Prepare component state
@@ -3239,9 +2933,6 @@ class Component(metaclass=ComponentMeta):
                 "Please remove one of them.",
             )
         template_data = new_template_data or legacy_template_data
-
-        if self.TemplateData is not None and not isinstance(template_data, self.TemplateData):
-            self.TemplateData(**template_data)
 
         return template_data
 

@@ -528,46 +528,6 @@ class TestComponentRenderAPI:
 
         assert called
 
-    def test_args_kwargs_slots__typed(self):
-        called = False
-
-        class TestComponent(Component):
-            template_file = "test_component/args-kwargs-slots--typed.html"
-
-            class Args:
-                variable: int
-                another: str
-
-            class Kwargs:
-                variable: str
-                another: int
-
-            class Slots:
-                my_slot: SlotInput
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal called
-                called = True
-
-                assert self.args == TestComponent.Args(123, "str")  # type: ignore[call-arg]
-                assert self.kwargs == TestComponent.Kwargs(variable="test", another=1)  # type: ignore[call-arg]
-                assert isinstance(self.slots, TestComponent.Slots)
-                assert isinstance(self.slots.my_slot, Slot)
-                assert self.slots.my_slot() == "MY_SLOT"
-
-                # Check that the instances are reused across multiple uses
-                assert self.args is self.args
-                assert self.kwargs is self.kwargs
-                assert self.slots is self.slots
-
-        TestComponent.render(
-            kwargs={"variable": "test", "another": 1},
-            args=(123, "str"),
-            slots={"my_slot": "MY_SLOT"},
-        )
-
-        assert called
-
     def test_args_kwargs_slots__available_outside_render(self):
         comp: Any = None
 
@@ -728,53 +688,6 @@ class TestComponentTemplateVars:
             """,
         )
 
-    def test_args_kwargs_slots__simple_typed(self):
-        class TestComponent(Component):
-            class Args:
-                variable: int
-                another: str
-
-            class Kwargs:
-                variable: str
-                another: int
-
-            class Slots:
-                my_slot: SlotInput
-
-            template: types.django_html = """
-                {% load component_tags %}
-                <div class="test-component">
-                    {# Test whole objects #}
-                    args: {{ component_vars.args|safe }}
-                    kwargs: {{ component_vars.kwargs|safe }}
-                    slots: {{ component_vars.slots|safe }}
-
-                    {# Test individual values #}
-                    arg: {{ component_vars.args.variable|safe }}
-                    kwarg: {{ component_vars.kwargs.variable|safe }}
-                    slot: {{ component_vars.slots.my_slot|safe }}
-                </div>
-            """
-
-        html = TestComponent.render(
-            args=[123, "str"],
-            kwargs={"variable": "test", "another": 1},
-            slots={"my_slot": "MY_SLOT"},
-        )
-        assertHTMLEqual(
-            html,
-            """
-            <div class="test-component">
-                args: Args(variable=123, another='str')
-                kwargs: Kwargs(variable='test', another=1)
-                slots: Slots(my_slot=<Slot component_name='TestComponent' slot_name='my_slot'>)
-                arg: 123
-                kwarg: test
-                slot: <Slot component_name='TestComponent' slot_name='my_slot'>
-            </div>
-            """,
-        )
-
     def test_args_kwargs_slots__nested_untyped(self):
         @register("wrapper")
         class Wrapper(Component):
@@ -818,68 +731,6 @@ class TestComponentTemplateVars:
                     args: [123, 'str']
                     kwargs: {'variable': 'test', 'another': 1}
                     slots: {'my_slot': <Slot component_name='TestComponent' slot_name='my_slot'>}
-                    arg: 123
-                    kwarg: test
-                    slot: <Slot component_name='TestComponent' slot_name='my_slot'>
-                </div>
-            </div>
-            """,
-        )
-
-    def test_args_kwargs_slots__nested_typed(self):
-        @register("wrapper")
-        class Wrapper(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                <div class="wrapper">
-                    {% slot "content" default %}
-                        <div class="test">DEFAULT</div>
-                    {% endslot %}
-                </div>
-            """
-
-        class TestComponent(Component):
-            class Args:
-                variable: int
-                another: str
-
-            class Kwargs:
-                variable: str
-                another: int
-
-            class Slots:
-                my_slot: SlotInput
-
-            template: types.django_html = """
-                {% load component_tags %}
-                <div class="test-component">
-                    {% component "wrapper" %}
-                        {# Test whole objects #}
-                        args: {{ component_vars.args|safe }}
-                        kwargs: {{ component_vars.kwargs|safe }}
-                        slots: {{ component_vars.slots|safe }}
-
-                        {# Test individual values #}
-                        arg: {{ component_vars.args.variable|safe }}
-                        kwarg: {{ component_vars.kwargs.variable|safe }}
-                        slot: {{ component_vars.slots.my_slot|safe }}
-                    {% endcomponent %}
-                </div>
-            """
-
-        html = TestComponent.render(
-            args=[123, "str"],
-            kwargs={"variable": "test", "another": 1},
-            slots={"my_slot": "MY_SLOT"},
-        )
-        assertHTMLEqual(
-            html,
-            """
-            <div class="test-component">
-                <div class="wrapper">
-                    args: Args(variable=123, another='str')
-                    kwargs: Kwargs(variable='test', another=1)
-                    slots: Slots(my_slot=<Slot component_name='TestComponent' slot_name='my_slot'>)
                     arg: 123
                     kwarg: test
                     slot: <Slot component_name='TestComponent' slot_name='my_slot'>
