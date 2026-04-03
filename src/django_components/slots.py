@@ -29,7 +29,6 @@ from django.template.exceptions import TemplateSyntaxError
 from django.utils.html import conditional_escape
 from django.utils.safestring import SafeString, mark_safe
 
-from django_components.app_settings import ContextBehavior
 from django_components.context import _COMPONENT_CONTEXT_KEY, _INJECT_CONTEXT_KEY_PREFIX, COMPONENT_IS_NESTED_KEY
 from django_components.node import BaseNode
 from django_components.perfutil.component import component_context_cache
@@ -766,87 +765,6 @@ class SlotNode(BaseNode):
         #
         # In this case, we need to find the context that was used to render the component,
         # and use the fills from that context.
-        if (
-            component.registry.settings.context_behavior == ContextBehavior.DJANGO
-            and outer_context is None
-            and (slot_name not in slot_fills)
-        ):
-            # When we have nested components with fills, the context layers are added in
-            # the following order:
-            # Page -> SubComponent -> NestedComponent -> ChildComponent
-            #
-            # Then, if ChildComponent defines a `{% slot %}` tag, its `{% fill %}` will be defined
-            # within the context of its parent, NestedComponent. The context is updated as follows:
-            # Page -> SubComponent -> NestedComponent -> ChildComponent -> NestedComponent
-            #
-            # And if, WITHIN THAT `{% fill %}`, there is another `{% slot %}` tag, its `{% fill %}`
-            # will be defined within the context of its parent, SubComponent. The context becomes:
-            # Page -> SubComponent -> NestedComponent -> ChildComponent -> NestedComponent -> SubComponent
-            #
-            # If that top-level `{% fill %}` defines a `{% component %}`, and the component accepts a `{% fill %}`,
-            # we'd go one down inside the component, and then one up outside of it inside the `{% fill %}`.
-            # Page -> SubComponent -> NestedComponent -> ChildComponent -> NestedComponent -> SubComponent ->
-            # -> CompA -> SubComponent
-            #
-            # So, given a context of nested components like this, we need to find which component was parent
-            # of the current component, and use the fills from that component.
-            #
-            # In the Context, the components are identified by their ID, NOT by their name, as in the example above.
-            # So the path is more like this:
-            # a1b2c3 -> ax3c89 -> hui3q2 -> kok92a -> a1b2c3 -> kok92a -> hui3q2 -> d4e5f6 -> hui3q2
-            #
-            # We're at the right-most `hui3q2` (index 8), and we want to find `ax3c89` (index 1).
-            # To achieve that, we first find the left-most `hui3q2` (index 2), and then find the `ax3c89`
-            # in the list of dicts before it (index 1).
-            curr_index = get_index(
-                context.dicts,
-                lambda d: _COMPONENT_CONTEXT_KEY in d and d[_COMPONENT_CONTEXT_KEY] == component_id,
-            )
-            parent_index = get_last_index(context.dicts[:curr_index], lambda d: _COMPONENT_CONTEXT_KEY in d)
-
-            # NOTE: There's an edge case when our component `hui3q2` appears at the start of the stack:
-            # hui3q2 -> ax3c89 -> ... -> hui3q2
-            #
-            # Looking left finds nothing. In this case, look for the first component layer to the right.
-            if parent_index is None and curr_index + 1 < len(context.dicts):
-                parent_index = get_index(
-                    context.dicts[curr_index + 1 :],
-                    lambda d: _COMPONENT_CONTEXT_KEY in d,
-                )
-                if parent_index is not None:
-                    parent_index = parent_index + curr_index + 1
-
-            trace_component_msg(
-                "SLOT_PARENT_INDEX",
-                component_name=component_name,
-                component_id=component_id,
-                slot_name=name,
-                component_path=component_path,
-                extra=(
-                    f"Parent index: {parent_index}, Current index: {curr_index}, "
-                    f"Context stack: {[d.get(_COMPONENT_CONTEXT_KEY) for d in context.dicts]}"
-                ),
-            )
-            if parent_index is not None:
-                ctx_id_with_fills = context.dicts[parent_index][_COMPONENT_CONTEXT_KEY]
-                ctx_with_fills = component_context_cache[ctx_id_with_fills]
-                parent_component = ctx_with_fills.component()
-                if parent_component is None:
-                    raise RuntimeError(
-                        f"Component with id '{component_id}' was garbage collected before its slots could be rendered."
-                    )
-                slot_fills = parent_component.raw_slots
-
-                # Add trace message when slot_fills are overwritten
-                trace_component_msg(
-                    "SLOT_FILLS_OVERWRITTEN",
-                    component_name=component_name,
-                    component_id=component_id,
-                    slot_name=slot_name,
-                    component_path=component_path,
-                    extra=f"Slot fills overwritten in django mode. New fills: {slot_fills}",
-                )
-
         if fill_name in slot_fills:
             slot_is_filled = True
             slot = slot_fills[fill_name]
@@ -904,16 +822,6 @@ class SlotNode(BaseNode):
         # {% endcomponent %}
         # ```
         #
-        # Hence, even in the "django" mode, we MUST use slots of the context of the parent component.
-        if (
-            component.registry.settings.context_behavior == ContextBehavior.DJANGO
-            and outer_context is not None
-            and _COMPONENT_CONTEXT_KEY in outer_context
-        ):
-            extra_context[_COMPONENT_CONTEXT_KEY] = outer_context[_COMPONENT_CONTEXT_KEY]
-            # This ensures that the ComponentVars API (e.g. `{{ component_vars.is_filled }}`) is accessible in the fill
-            extra_context["component_vars"] = outer_context["component_vars"]
-
         # Irrespective of which context we use ("root" context or the one passed to this
         # render function), pass down the keys used by inject/provide feature. This makes it
         # possible to pass the provided values down through slots, e.g.:
@@ -972,12 +880,9 @@ class SlotNode(BaseNode):
         if not slot_is_filled:
             return context
 
-        registry_settings = component.registry.settings
-        if registry_settings.context_behavior == ContextBehavior.DJANGO:
-            return context
-        if registry_settings.context_behavior == ContextBehavior.ISOLATED:
-            return outer_context if outer_context is not None else Context()
-        raise ValueError(f"Unknown value for context_behavior: '{registry_settings.context_behavior}'")
+        # Filled slots use the outer (caller's) context — isolated behavior,
+        # matching Django's inclusion_tag convention.
+        return outer_context if outer_context is not None else Context()
 
 
 class FillNode(BaseNode):

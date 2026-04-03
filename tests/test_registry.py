@@ -6,7 +6,6 @@ from django_components import (
     AlreadyRegistered,
     Component,
     ComponentRegistry,
-    ContextBehavior,
     NotRegistered,
     RegistrySettings,
     TagProtectedError,

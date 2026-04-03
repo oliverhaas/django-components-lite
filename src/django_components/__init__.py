@@ -2,7 +2,7 @@
 
 # Public API
 # isort: off
-from django_components.app_settings import ContextBehavior, ComponentsSettings
+from django_components.app_settings import ComponentsSettings
 from django_components.attributes import format_attributes, merge_attributes
 from django_components.autodiscovery import autodiscover, import_libraries
 from django_components.component import (
@@ -55,7 +55,6 @@ __all__ = [
     "ComponentRegistry",
     "ComponentVars",
     "ComponentsSettings",
-    "ContextBehavior",
     "DependenciesStrategy",
     "Empty",
     "FillNode",

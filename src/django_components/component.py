@@ -27,7 +27,6 @@ from django.template.context import Context, RequestContext
 from django.template.loader_tags import BLOCK_CONTEXT_KEY, BlockContext
 from django.test.signals import template_rendered
 
-from django_components.app_settings import ContextBehavior
 from django_components.component_media import resolve_component_files
 from django_components.component_registry import ComponentRegistry
 from django_components.component_registry import registry as registry_
@@ -79,7 +78,6 @@ from django_components.component_registry import registry as registry  # noqa: P
 if TYPE_CHECKING:
     from django.views import View
 
-COMP_ONLY_FLAG = "only"
 
 
 # NOTE: `ReferenceType` is NOT a generic pre-3.9
@@ -2589,7 +2587,7 @@ class ComponentNode(BaseNode):
 
     tag = "component"
     end_tag = "endcomponent"
-    allowed_flags = (COMP_ONLY_FLAG,)
+    allowed_flags = ()
 
     def __init__(
         self,
@@ -2671,11 +2669,9 @@ class ComponentNode(BaseNode):
 
         slot_fills = resolve_fills(context, self, self.name)
 
-        # Prevent outer context from leaking into the template of the component
-        if self.flags[COMP_ONLY_FLAG] or self.registry.settings.context_behavior == ContextBehavior.ISOLATED:
-            inner_context = make_isolated_context_copy(context)
-        else:
-            inner_context = context
+        # Components use isolated context — template only sees get_template_data() output,
+        # like Django's inclusion_tag behavior.
+        inner_context = make_isolated_context_copy(context)
 
         output = component_cls._render_with_error_trace(
             context=inner_context,

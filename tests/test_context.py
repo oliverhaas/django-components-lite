@@ -324,10 +324,9 @@ class TestParentArgs:
         parametrize=(
             ["components_settings", "first_val", "second_val"],
             [
-                [{"context_behavior": "django"}, "passed_in", "passed_in"],
-                [{"context_behavior": "isolated"}, "passed_in", ""],
+                [{}, "passed_in", ""],
             ],
-            ["django", "isolated"],
+            ["isolated"],
         ),
     )
     def test_parent_args_available_in_slots(self, components_settings, first_val, second_val):
@@ -473,10 +472,9 @@ class TestComponentsCanAccessOuterContext:
         parametrize=(
             ["components_settings", "expected_value"],
             [
-                [{"context_behavior": "django"}, "outer_value"],
-                [{"context_behavior": "isolated"}, ""],
+                [{}, ""],
             ],
-            ["django", "isolated"],
+            ["isolated"],
         ),
     )
     def test_simple_component_can_use_outer_context(self, components_settings, expected_value):
@@ -502,7 +500,7 @@ class TestIsolatedContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: types.django_html = """
             {% load component_tags %}
-            {% component 'simple_component' variable=variable only %}{% endcomponent %}
+            {% component 'simple_component' variable=variable %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -513,7 +511,7 @@ class TestIsolatedContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: types.django_html = """
             {% load component_tags %}
-            {% component 'simple_component' only %}{% endcomponent %}
+            {% component 'simple_component' %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -522,7 +520,7 @@ class TestIsolatedContext:
 
 @djc_test
 class TestIsolatedContextSetting:
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_tag_includes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -535,7 +533,7 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" in rendered
 
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_tag_excludes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -548,7 +546,7 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" not in rendered
 
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_includes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -562,7 +560,7 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" in rendered
 
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test
     def test_component_excludes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -985,7 +983,7 @@ class TestOuterContextProperty:
 
         template_str: types.django_html = """
             {% load component_tags %}
-            {% component 'outer_context_component' only %}{% endcomponent %}
+            {% component 'outer_context_component' %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()

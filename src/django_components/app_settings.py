@@ -30,105 +30,6 @@ from django_components.util.misc import default
 T = TypeVar("T")
 
 
-ContextBehaviorType = Literal["django", "isolated"]
-
-
-class ContextBehavior(str, Enum):
-    """
-    Configure how (and whether) the context is passed to the component fills
-    and what variables are available inside the [`{% fill %}`](./template_tags.md#fill) tags.
-
-    Also see [Component context and scope](../concepts/advanced/component_context_scope.md#context-behavior).
-
-    **Options:**
-
-    - `django`: With this setting, component fills behave as usual Django tags.
-    - `isolated`: This setting makes the component fills behave similar to Vue or React.
-    """
-
-    DJANGO = "django"
-    """
-    With this setting, component fills behave as usual Django tags.
-    That is, they enrich the context, and pass it along.
-
-    1. Component fills use the context of the component they are within.
-    2. Variables from [`Component.get_template_data()`](./api.md#django_components.Component.get_template_data)
-    are available to the component fill.
-
-    **Example:**
-
-    Given this template
-    ```django
-    {% with cheese="feta" %}
-      {% component 'my_comp' %}
-        {{ my_var }}  # my_var
-        {{ cheese }}  # cheese
-      {% endcomponent %}
-    {% endwith %}
-    ```
-
-    and this context returned from the `Component.get_template_data()` method
-    ```python
-    { "my_var": 123 }
-    ```
-
-    Then if component "my_comp" defines context
-    ```python
-    { "my_var": 456 }
-    ```
-
-    Then this will render:
-    ```django
-    456   # my_var
-    feta  # cheese
-    ```
-
-    Because "my_comp" overrides the variable "my_var",
-    so `{{ my_var }}` equals `456`.
-
-    And variable "cheese" will equal `feta`, because the fill CAN access
-    the current context.
-    """
-
-    ISOLATED = "isolated"
-    """
-    This setting makes the component fills behave similar to Vue or React, where
-    the fills use EXCLUSIVELY the context variables defined in
-    [`Component.get_template_data()`](./api.md#django_components.Component.get_template_data).
-
-    **Example:**
-
-    Given this template
-    ```django
-    {% with cheese="feta" %}
-      {% component 'my_comp' %}
-        {{ my_var }}  # my_var
-        {{ cheese }}  # cheese
-      {% endcomponent %}
-    {% endwith %}
-    ```
-
-    and this context returned from the `get_template_data()` method
-    ```python
-    { "my_var": 123 }
-    ```
-
-    Then if component "my_comp" defines context
-    ```python
-    { "my_var": 456 }
-    ```
-
-    Then this will render:
-    ```django
-    123   # my_var
-          # cheese
-    ```
-
-    Because both variables "my_var" and "cheese" are taken from the root context.
-    Since "cheese" is not defined in root context, it's empty.
-    """
-
-
 # This is the source of truth for the settings that are available. If the documentation
 # or the defaults do NOT match this, they should be updated.
 class ComponentsSettings(NamedTuple):
@@ -230,33 +131,6 @@ class ComponentsSettings(NamedTuple):
         cache="my_cache",
     )
     ```
-    """
-
-    context_behavior: Optional[ContextBehaviorType] = None
-    """
-    Configure whether, inside a component template, you can use variables from the outside
-    ([`"django"`](./api.md#django_components.ContextBehavior.DJANGO))
-    or not ([`"isolated"`](./api.md#django_components.ContextBehavior.ISOLATED)).
-    This also affects what variables are available inside the [`{% fill %}`](./template_tags.md#fill)
-    tags.
-
-    Also see [Component context and scope](../concepts/advanced/component_context_scope.md#context-behavior).
-
-    Defaults to `"django"`.
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        context_behavior="isolated",
-    )
-    ```
-
-    > NOTE: `context_behavior` and `slot_context_behavior` options were merged in v0.70.
-    >
-    > If you are migrating from BEFORE v0.67, set `context_behavior` to `"django"`.
-    > From v0.67 to v0.78 (incl) the default value was `"isolated"`.
-    >
-    > For v0.79 and later, the default is again `"django"`. See the rationale for change
-    > [here](https://github.com/django-components/django-components/issues/498).
     """
 
     # TODO_v1 - remove. Users should use extension defaults instead.
@@ -585,7 +459,6 @@ class Dynamic(Generic[T]):
 defaults = ComponentsSettings(
     autodiscover=True,
     cache=None,
-    context_behavior=ContextBehavior.DJANGO.value,  # "django" | "isolated"
     # Root-level "components" dirs, e.g. `/path/to/proj/components/`
     dirs=Dynamic(lambda: [Path(settings.BASE_DIR) / "components"]),  # type: ignore[arg-type]
     # App-level "components" dirs, e.g. `[app]/components/`
@@ -661,7 +534,6 @@ class InternalSettings:
             template_cache_size=default(components_settings.template_cache_size, defaults.template_cache_size),
             static_files_allowed=default(components_settings.static_files_allowed, defaults.static_files_allowed),
             static_files_forbidden=self._prepare_static_files_forbidden(components_settings),
-            context_behavior=self._prepare_context_behavior(components_settings),
         )
 
     def _get_settings(self) -> ComponentsSettings:
@@ -684,19 +556,6 @@ class InternalSettings:
             val = new_settings.forbidden_static_files
 
         return default(val, cast("List[Union[str, re.Pattern]]", defaults.static_files_forbidden))
-
-    def _prepare_context_behavior(self, new_settings: ComponentsSettings) -> Literal["django", "isolated"]:
-        raw_value = cast(
-            "Literal['django', 'isolated']",
-            default(new_settings.context_behavior, defaults.context_behavior),
-        )
-        try:
-            ContextBehavior(raw_value)
-        except ValueError as err:
-            valid_values = [behavior.value for behavior in ContextBehavior]
-            raise ValueError(f"Invalid context behavior: {raw_value}. Valid options are {valid_values}") from err
-
-        return raw_value
 
     @property
     def AUTODISCOVER(self) -> bool:
@@ -749,9 +608,5 @@ class InternalSettings:
     @property
     def STATIC_FILES_FORBIDDEN(self) -> Sequence[Union[str, re.Pattern]]:
         return self._get_settings().static_files_forbidden  # type: ignore[return-value]
-
-    @property
-    def CONTEXT_BEHAVIOR(self) -> ContextBehavior:
-        return ContextBehavior(self._get_settings().context_behavior)
 
 app_settings = InternalSettings()

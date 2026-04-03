@@ -128,17 +128,7 @@ class TestComponentSlot:
         )
 
     # NOTE: Second arg is the expected output of `{{ variable }}`
-    @djc_test(
-        parametrize=(
-            ["components_settings", "expected"],
-            [
-                [{"context_behavior": "django"}, "test456"],
-                [{"context_behavior": "isolated"}, ""],
-            ],
-            ["django", "isolated"],
-        ),
-    )
-    def test_slotted_template_with_context_var(self, components_settings, expected):
+    def test_slotted_template_with_context_var(self):
         @register("test1")
         class SlottedComponentWithContext(Component):
             template: types.django_html = """
@@ -171,10 +161,10 @@ class TestComponentSlot:
 
         assertHTMLEqual(
             rendered,
-            f"""
+            """
             <custom-template>
                 <header>Default header</header>
-                <main>test123 - {expected} </main>
+                <main>test123 - </main>
                 <footer>test321</footer>
             </custom-template>
         """,
@@ -282,7 +272,7 @@ class TestComponentSlot:
             template.render(Context())
 
     # NOTE: This is relevant only for the "isolated" mode
-    @djc_test(components_settings={"context_behavior": "isolated"})
+    @djc_test(components_settings={})
     def test_slots_of_top_level_comps_can_access_full_outer_ctx(self):
         class SlottedComponent(Component):
             template: types.django_html = """
@@ -2056,20 +2046,7 @@ class TestDuplicateSlot:
 
         return CalendarComponent
 
-    # NOTE: Second arg is the input for the "name" component kwarg
-    @djc_test(
-        parametrize=(
-            ["components_settings", "input"],
-            [
-                # In "django" mode, we MUST pass name as arg through the component
-                [{"context_behavior": "django"}, "Jannete"],
-                # In "isolated" mode, the fill is already using top-level's context, so we pass nothing
-                [{"context_behavior": "isolated"}, None],
-            ],
-            ["django", "isolated"],
-        ),
-    )
-    def test_duplicate_slots(self, components_settings, input):  # noqa: A002
+    def test_duplicate_slots(self):
         registry.register(name="duplicate_slot", component=self._gen_duplicate_slot_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
@@ -2086,7 +2063,7 @@ class TestDuplicateSlot:
         """
         self.template = Template(template_str)
 
-        rendered = self.template.render(Context({"name": "Jannete", "comp_input": input}))
+        rendered = self.template.render(Context({"name": "Jannete", "comp_input": None}))
         assertHTMLEqual(
             rendered,
             """
@@ -2307,48 +2284,8 @@ class TestSlotBehavior:
         """
         return Template(template_str)
 
-    @djc_test(components_settings={"context_behavior": "django"})
-    def test_slot_context__django(self):
-        template = self.make_template()
-        # {{ name }} should be neither Jannete not empty, because overriden everywhere
-        rendered = template.render(Context({"day": "Monday", "name": "Jannete"}))
-        assertHTMLEqual(
-            rendered,
-            """
-            <custom-template>
-                <header>Name: Igor</header>
-                <main>Day: Monday</main>
-                <footer>
-                    <custom-template>
-                        <header>Name2: Joe2</header>
-                        <main>Day2: Monday</main>
-                        <footer>Default footer</footer>
-                    </custom-template>
-                </footer>
-            </custom-template>
-            """,
-        )
+    @djc_test(components_settings={})
 
-        # {{ name }} should be effectively the same as before, because overriden everywhere
-        rendered2 = template.render(Context({"day": "Monday"}))
-        assertHTMLEqual(
-            rendered2,
-            """
-            <custom-template>
-                <header>Name: Igor</header>
-                <main>Day: Monday</main>
-                <footer>
-                    <custom-template>
-                        <header>Name2: Joe2</header>
-                        <main>Day2: Monday</main>
-                        <footer>Default footer</footer>
-                    </custom-template>
-                </footer>
-            </custom-template>
-            """,
-        )
-
-    @djc_test(components_settings={"context_behavior": "isolated"})
     def test_slot_context__isolated(self):
         template = self.make_template()
         # {{ name }} should be "Jannete" everywhere
