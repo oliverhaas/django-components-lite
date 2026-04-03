@@ -9,7 +9,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    Generator,
     List,
     Mapping,
     NamedTuple,
@@ -19,9 +18,10 @@ from typing import (
     Union,
     cast,
 )
-from weakref import ReferenceType, WeakKeyDictionary, WeakValueDictionary, finalize, ref
+from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 
 from django.http import HttpRequest, HttpResponse
+from django.utils.safestring import mark_safe
 from django.template.base import NodeList, Parser, Template, Token
 from django.template.context import Context, RequestContext
 from django.template.loader_tags import BLOCK_CONTEXT_KEY, BlockContext
@@ -35,12 +35,7 @@ from django_components.constants import COMP_ID_PREFIX
 from django_components.context import _COMPONENT_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY, make_isolated_context_copy
 from django_components.dependencies import DependenciesStrategy, build_dependency_tags
 from django_components.node import BaseNode
-from django_components.perfutil.component import (
-    OnComponentRenderedResult,
-    component_context_cache,
-    component_instance_cache,
-    component_post_render,
-)
+from django_components.perfutil.component import component_context_cache
 # REMOVED: Provide/Inject system
 # from django_components.provide import get_injected_context_var
 
@@ -92,88 +87,10 @@ if sys.version_info >= (3, 9):
     AllComponents = List[ReferenceType[Type["Component"]]]
     CompHashMapping = WeakValueDictionary[str, Type["Component"]]
     ComponentRef = ReferenceType["Component"]
-    StartedGenerators = WeakKeyDictionary["OnRenderGenerator", bool]
 else:
     AllComponents = List[ReferenceType]
     CompHashMapping = WeakValueDictionary
     ComponentRef = ReferenceType
-    StartedGenerators = WeakKeyDictionary
-
-
-OnRenderGenerator = Generator[
-    Optional[Union[SlotResult, Callable[[], SlotResult]]],
-    Tuple[Optional[SlotResult], Optional[Exception]],
-    Optional[SlotResult],
-]
-"""
-This is the signature of the [`Component.on_render()`](../api/#django_components.Component.on_render)
-method if it yields (and thus returns a generator).
-
-When `on_render()` is a generator then it:
-
-- Yields a rendered template (string or `None`) or a lambda function to be called later.
-
-- Receives back a tuple of `(final_output, error)`.
-
-    The final output is the rendered template that now has all its children rendered too.
-    May be `None` if you yielded `None` earlier.
-
-    The error is `None` if the rendering was successful. Otherwise the error is set
-    and the output is `None`.
-
-- Can yield multiple times within the same method for complex rendering scenarios
-
-- At the end it may return a new string to override the final rendered output.
-
-**Example:**
-
-```py
-from django_components import Component, OnRenderGenerator
-
-class MyTable(Component):
-    def on_render(
-        self,
-        context: Context,
-        template: Optional[Template],
-    ) -> OnRenderGenerator:
-        # Do something BEFORE rendering template
-        # Same as `Component.on_render_before()`
-        context["hello"] = "world"
-
-        # Yield a function that renders the template
-        # to receive fully-rendered template or error.
-        html, error = yield lambda: template.render(context)
-
-        # Do something AFTER rendering template, or post-process
-        # the rendered template.
-        # Same as `Component.on_render_after()`
-        if html is not None:
-            return html + "<p>Hello</p>"
-```
-
-**Multiple yields example:**
-
-```py
-class MyTable(Component):
-    def on_render(self, context, template) -> OnRenderGenerator:
-        # First yield
-        with context.push({"mode": "header"}):
-            header_html, header_error = yield lambda: template.render(context)
-
-        # Second yield
-        with context.push({"mode": "body"}):
-            body_html, body_error = yield lambda: template.render(context)
-
-        # Third yield
-        footer_html, footer_error = yield "Footer content"
-
-        # Process all results
-        if header_error or body_error or footer_error:
-            return "Error occurred during rendering"
-
-        return f"{header_html}\n{body_html}\n{footer_html}"
-```
-"""
 
 
 # Keep track of all the Component classes created, so we can clean up after tests
@@ -540,25 +457,6 @@ class ComponentMeta(type):
 
 
 
-# Internal data that's shared across the entire component tree
-@dataclass
-class ComponentTreeContext:
-    # HTML attributes that are passed from parent to child components
-    component_attrs: Dict[str, List[str]]
-    # When we render a component, the root component, together with all the nested Components,
-    # shares these dictionaries for storing callbacks.
-    # These callbacks are called from within `component_post_render`
-    on_component_intermediate_callbacks: Dict[str, Callable[[Optional[str]], Optional[str]]]
-    on_component_rendered_callbacks: Dict[
-        str,
-        Callable[[Optional[str], Optional[Exception]], OnComponentRenderedResult],
-    ]
-    # Track which generators have been started. We need this info because the input to
-    # `Generator.send()` changes when calling it the first time vs subsequent times.
-    # Moreover, we can't simply store this directly on the generator object themselves
-    # (e.g. `generator.started = True`), because generator object does not allow setting
-    # extra attributes.
-    started_generators: StartedGenerators
 
 
 # Internal data that are made available within the component's template
@@ -569,7 +467,6 @@ class ComponentContext:
     template_name: Optional[str]
     default_slot: Optional[str]
     outer_context: Optional[Context]
-    tree: ComponentTreeContext
 
 
 def on_component_garbage_collected(component_id: str) -> None:
@@ -1112,144 +1009,9 @@ class Component(metaclass=ComponentMeta):
 
         """
 
-    def on_render(self, context: Context, template: Optional[Template]) -> Union[SlotResult, OnRenderGenerator, None]:
+    def on_render(self, context: Context, template: Optional[Template]) -> Optional[str]:
         """
-        This method does the actual rendering.
-
-        Read more about this hook in [Component hooks](../../concepts/advanced/hooks/#on_render).
-
-        You can override this method to:
-
-        - Change what template gets rendered
-        - Modify the context
-        - Modify the rendered output after it has been rendered
-        - Handle errors
-
-        The default implementation renders the component's
-        [Template](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Template)
-        with the given
-        [Context](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context).
-
-        ```py
-        class MyTable(Component):
-            def on_render(self, context, template):
-                if template is None:
-                    return None
-                else:
-                    return template.render(context)
-        ```
-
-        The `template` argument is `None` if the component has no template.
-
-        **Modifying rendered template**
-
-        To change what gets rendered, you can:
-
-        - Render a different template
-        - Render a component
-        - Return a different string or SafeString
-
-        ```py
-        class MyTable(Component):
-            def on_render(self, context, template):
-                return "Hello"
-        ```
-
-        **Post-processing rendered template**
-
-        To access the final output, you can `yield` the result instead of returning it.
-
-        This will return a tuple of (rendered HTML, error). The error is `None` if the rendering succeeded.
-
-        ```py
-        class MyTable(Component):
-            def on_render(self, context, template):
-                html, error = yield lambda: template.render(context)
-
-                if error is None:
-                    # The rendering succeeded
-                    return html
-                else:
-                    # The rendering failed
-                    print(f"Error: {error}")
-        ```
-
-        At this point you can do 3 things:
-
-        1. Return a new HTML
-
-            The new HTML will be used as the final output.
-
-            If the original template raised an error, it will be ignored.
-
-            ```py
-            class MyTable(Component):
-                def on_render(self, context, template):
-                    html, error = yield lambda: template.render(context)
-
-                    return "NEW HTML"
-            ```
-
-        2. Raise a new exception
-
-            The new exception is what will bubble up from the component.
-
-            The original HTML and original error will be ignored.
-
-            ```py
-            class MyTable(Component):
-                def on_render(self, context, template):
-                    html, error = yield lambda: template.render(context)
-
-                    raise Exception("Error message")
-            ```
-
-        3. Return nothing (or `None`) to handle the result as usual
-
-            If you don't raise an exception, and neither return a new HTML,
-            then original HTML / error will be used:
-
-            - If rendering succeeded, the original HTML will be used as the final output.
-            - If rendering failed, the original error will be propagated.
-
-            ```py
-            class MyTable(Component):
-                def on_render(self, context, template):
-                    html, error = yield lambda: template.render(context)
-
-                    if error is not None:
-                        # The rendering failed
-                        print(f"Error: {error}")
-            ```
-
-        **Multiple yields**
-
-        You can yield multiple times within the same `on_render` method. This is useful for complex rendering scenarios
-        where you need to render different templates or handle multiple rendering operations:
-
-        ```py
-        class MyTable(Component):
-            def on_render(self, context, template):
-                # First yield - render with one context
-                with context.push({"mode": "header"}):
-                    header_html, header_error = yield lambda: template.render(context)
-
-                # Second yield - render with different context
-                with context.push({"mode": "body"}):
-                    body_html, body_error = yield lambda: template.render(context)
-
-                # Third yield - render a string directly
-                footer_html, footer_error = yield "Footer content"
-
-                # Process all results and return final output
-                if header_error or body_error or footer_error:
-                    return "Error occurred during rendering"
-
-                return f"{header_html}{body_html}{footer_html}"
-        ```
-
-        Each yield operation is independent and returns its own `(html, error)` tuple,
-        allowing you to handle each rendering result separately.
+        Render the component. Override to customize rendering.
         """
         if template is None:
             return None
@@ -2446,8 +2208,6 @@ class Component(metaclass=ComponentMeta):
                     node=node,
                 )
             except Exception as e:
-                # Clean up if rendering fails
-                component_instance_cache.pop(render_id, None)
                 raise e from None
 
     @classmethod
@@ -2541,15 +2301,8 @@ class Component(metaclass=ComponentMeta):
         parent_id, parent_comp_ctx = _get_parent_component_context(context)
         if parent_comp_ctx is not None:
             component_path = [*parent_comp_ctx.component_path, component_name]
-            component_tree_context = parent_comp_ctx.tree
         else:
             component_path = [component_name]
-            component_tree_context = ComponentTreeContext(
-                component_attrs={},
-                on_component_intermediate_callbacks={},
-                on_component_rendered_callbacks={},
-                started_generators=WeakKeyDictionary(),
-            )
 
         trace_component_msg(
             "COMP_PREP_START",
@@ -2579,7 +2332,6 @@ class Component(metaclass=ComponentMeta):
             default_slot=None,
             # NOTE: This is only a SNAPSHOT of the outer context.
             outer_context=snapshot_context(outer_context) if outer_context is not None else None,
-            tree=component_tree_context,
         )
 
         # Instead of passing the ComponentContext directly through the Context, the entry on the Context
@@ -2676,19 +2428,7 @@ class Component(metaclass=ComponentMeta):
 
         ######################################
         # 5. Render component
-        #
-        # NOTE: To support infinite recursion, we don't directly call `Template.render()`.
-        #       Instead, we defer rendering of the component - we prepare a generator function
-        #       that will be called when the rendering process reaches this component.
         ######################################
-
-        trace_component_msg(
-            "COMP_RENDER_START",
-            component_name=component.name,
-            component_id=component.id,
-            slot_name=None,
-            component_path=component_path,
-        )
 
         component.on_render_before(context_snapshot, template)
 
@@ -2696,149 +2436,34 @@ class Component(metaclass=ComponentMeta):
         if template is not None:
             template_rendered.send(sender=template, template=template, context=context_snapshot)
 
-        # Instead of rendering component at the time we come across the `{% component %}` tag
-        # in the template, we defer rendering in order to scalably handle deeply nested components.
-        #
-        # See `_make_renderer_generator()` for more details.
-        renderer_generator = component._make_renderer_generator(
-            template=template,
-            context=context_snapshot,
-            component_path=component_path,
-        )
+        # Render the component synchronously
+        html: Optional[str] = None
+        error: Optional[Exception] = None
+        try:
+            html = component.on_render(context_snapshot, template)
+        except Exception as e:  # noqa: BLE001
+            error = e
 
-        # This callback is called with the value that was yielded from `Component.on_render()`.
-        # It may be called multiple times for the same component, e.g. if `Component.on_render()`
-        # contains multiple `yield` keywords.
-        def on_component_intermediate(html_content: Optional[str]) -> Optional[str]:
-            return html_content
+        # Post-render hook
+        try:
+            maybe_output = component.on_render_after(context_snapshot, template, html, error)
+            if maybe_output is not None:
+                html = maybe_output
+                error = None
+        except Exception as new_error:  # noqa: BLE001
+            error = new_error
+            html = None
 
-        component_tree_context.on_component_intermediate_callbacks[render_id] = on_component_intermediate
+        if error is not None:
+            raise error
 
-        # `on_component_rendered` is triggered when a component is rendered.
-        # The component's parent(s) may not be fully rendered yet.
-        #
-        # NOTE: Inside `on_component_rendered`, we access the component indirectly via `component_instance_cache`.
-        # This is so that the function does not directly hold a strong reference to the component instance,
-        # so that the component instance can be garbage collected.
-        component_instance_cache[render_id] = component
+        # Prepend <link>/<script> tags for this component's JS/CSS files
+        if html is not None:
+            dep_tags = build_dependency_tags(comp_cls)
+            if dep_tags:
+                html = dep_tags + "\n" + html
 
-        # NOTE: This is called only once for a single component instance.
-        def on_component_rendered(
-            html: Optional[str],
-            error: Optional[Exception],
-        ) -> OnComponentRenderedResult:
-            # NOTE: We expect `on_component_rendered` to be called only once,
-            #       so we can release the strong reference to the component instance.
-            #       This way, the component instance will persist only if the user keeps a reference to it.
-            component = component_instance_cache.pop(render_id, None)
-            if component is None:
-                raise RuntimeError("Component has been garbage collected")
-
-            # Allow the user to either:
-            # - Override/modify the rendered HTML by returning new value
-            # - Raise an exception to discard the HTML and bubble up error
-            # - Or don't return anything (or return `None`) to use the original HTML / error
-            try:
-                maybe_output = component.on_render_after(context_snapshot, template, html, error)
-                if maybe_output is not None:
-                    html = maybe_output
-                    error = None
-            except Exception as new_error:  # noqa: BLE001
-                error = new_error
-                html = None
-
-            # Prepend <link>/<script> tags for this component's JS/CSS files
-            if html is not None:
-                dep_tags = build_dependency_tags(comp_cls)
-                if dep_tags:
-                    html = dep_tags + "\n" + html
-
-            trace_component_msg(
-                "COMP_RENDER_END",
-                component_name=component_name,
-                component_id=render_id,
-                slot_name=None,
-                component_path=component_path,
-            )
-
-            return html, error
-
-        component_tree_context.on_component_rendered_callbacks[render_id] = on_component_rendered
-
-        return component_post_render(
-            renderer=renderer_generator,
-            render_id=render_id,
-            component_name=component_name,
-            parent_render_id=parent_id,
-            component_tree_context=component_tree_context,
-            on_component_tree_rendered=lambda html: html,
-        )
-
-    # Convert `Component.on_render()` to a generator function.
-    #
-    # By encapsulating components' output as a generator, we can render components top-down,
-    # starting from root component, and moving down.
-    #
-    # This allows us to pass HTML attributes from parent to children.
-    # Because by the time we get to a child component, its parent was already rendered.
-    #
-    # This whole setup makes it possible for multiple components to resolve to the same HTML element.
-    # E.g. if CompA renders CompB, and CompB renders a <div>, then the <div> element will have
-    # IDs of both CompA and CompB.
-    # ```html
-    # <div djc-id-a1b3cf djc-id-f3d3cf>...</div>
-    # ```
-    def _make_renderer_generator(
-        self,
-        template: Optional[Template],
-        context: Context,
-        component_path: List[str],
-    ) -> Optional[OnRenderGenerator]:
-        component = self
-
-        # Convert the component's HTML to a generator function.
-        #
-        # To access the *final* output (with all its children rendered) from within `Component.on_render()`,
-        # users may convert it to a generator by including a `yield` keyword. If they do so, the part of code
-        # AFTER the yield will be called once when the component's HTML is fully rendered.
-        #
-        # ```
-        # class MyTable(Component):
-        #     def on_render(self, context, template):
-        #         html, error = yield lamba: template.render(context)
-        #         return html + "<p>Hello</p>"
-        # ```
-        #
-        # However, the way Python works is that when you call a function that contains `yield` keyword,
-        # the function is NOT executed immediately. Instead it returns a generator object.
-        #
-        # On the other hand, if it's a regular function, the function is executed immediately.
-        #
-        # We must be careful not to execute the function immediately, because that will cause the
-        # entire component tree to be rendered recursively. Instead we want to defer the execution
-        # and render nested components via a flat stack, as done in `perfutils/component.py`.
-        # That allows us to create component trees of any depth, without hitting recursion limits.
-        #
-        # So we create a wrapper generator function that we KNOW is a generator when called.
-        def inner_generator() -> OnRenderGenerator:
-            # NOTE: May raise
-            html_content_or_generator = component.on_render(context, template)
-            # If we DIDN'T raise an exception
-            if html_content_or_generator is None:
-                return None
-            # Generator function (with `yield`) - yield multiple times with the result
-            elif is_generator(html_content_or_generator):
-                generator = cast("OnRenderGenerator", html_content_or_generator)
-                result = yield from generator
-                # If the generator had a return statement, `result` will contain that value.
-                # So we pass the return value through.
-                return result
-            # String (or other unknown type) - yield once with the result
-            else:
-                yield html_content_or_generator
-                return None
-
-        return inner_generator()
+        return mark_safe(html) if html is not None else ""
 
     def _call_data_methods(
         self,

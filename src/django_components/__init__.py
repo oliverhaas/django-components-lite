@@ -10,7 +10,6 @@ from django_components.component import (
     ComponentInput,
     ComponentNode,
     ComponentVars,
-    OnRenderGenerator,
     all_components,
     get_component_by_class_id,
 )
@@ -61,7 +60,6 @@ __all__ = [
     "Empty",
     "FillNode",
     "NotRegistered",
-    "OnRenderGenerator",
     "RegistrySettings",
     "Slot",
     "SlotContent",
