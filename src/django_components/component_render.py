@@ -31,7 +31,7 @@ from django_components.extension import (
     OnComponentRenderedContext,
     extensions,
 )
-from django_components.perfutil.provide import register_provide_reference
+from django_components.provide import register_provide_reference
 from django_components.template import prepare_component_template
 from django_components.util.context import snapshot_context
 from django_components.util.exception import set_component_error_message, with_component_error_message

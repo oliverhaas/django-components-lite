@@ -36,7 +36,7 @@ from django_components.extensions.debug_highlight import ComponentDebugHighlight
 from django_components.extensions.defaults import ComponentDefaults
 from django_components.extensions.view import ComponentView, ViewFn
 from django_components.node import BaseNode
-from django_components.perfutil.provide import unlink_component_from_provide_on_gc
+from django_components.provide import unlink_component_from_provide_on_gc
 from django_components.provide import get_injected_context_var
 from django_components.slots import (
     Slot,

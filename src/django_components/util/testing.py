@@ -23,7 +23,7 @@ from django_components import ComponentsSettings
 from django_components.component import ALL_COMPONENTS, Component, component_node_subclasses_by_name
 from django_components.component_registry import ALL_REGISTRIES, ComponentRegistry
 from django_components.extension import extensions
-from django_components.perfutil.provide import provide_cache
+from django_components.provide import provide_cache
 from django_components.template import _reset_component_template_file_cache, loading_components
 
 if TYPE_CHECKING:
