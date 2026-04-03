@@ -5,7 +5,8 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 
-from django_components import CommandArg, CommandArgGroup, ComponentCommand, ComponentExtension
+from django_components import ComponentExtension
+from django_components.util.command import CommandArg, CommandArgGroup, ComponentCommand
 from django_components.testing import djc_test
 
 from .testutils import setup_test_config

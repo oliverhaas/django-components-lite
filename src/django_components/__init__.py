@@ -7,15 +7,6 @@ from django_components.app_settings import ContextBehavior, ComponentsSettings
 from django_components.attributes import format_attributes, merge_attributes
 from django_components.autodiscovery import autodiscover, import_libraries
 from django_components.dependencies import Dependency, DependencyKind, Script, Style
-from django_components.util.command import (
-    CommandArg,
-    CommandArgGroup,
-    CommandHandler,
-    CommandLiteralAction,
-    CommandParserInput,
-    CommandSubcommand,
-    ComponentCommand,
-)
 from django_components.component import (
     Component,
     ComponentInput,
@@ -86,7 +77,6 @@ from django_components.tag_formatter import (
 from django_components.template import cached_template
 import django_components.types as types  # noqa: PLR0402
 from django_components.util.loader import ComponentFileEntry, get_component_dirs, get_component_files
-from django_components.util.routing import URLRoute, URLRouteHandler
 from django_components.util.types import Empty
 
 # NOTE: Import built-in components last to avoid circular imports
@@ -98,15 +88,8 @@ from django_components.components import DynamicComponent, ErrorFallback
 __all__ = [
     "AlreadyRegistered",
     "BaseNode",
-    "CommandArg",
-    "CommandArgGroup",
-    "CommandHandler",
-    "CommandLiteralAction",
-    "CommandParserInput",
-    "CommandSubcommand",
     "Component",
     "ComponentCache",
-    "ComponentCommand",
     "ComponentDebugHighlight",
     "ComponentDefaults",
     "ComponentExtension",
@@ -165,8 +148,6 @@ __all__ = [
     "TagFormatterABC",
     "TagProtectedError",
     "TagResult",
-    "URLRoute",
-    "URLRouteHandler",
     "all_components",
     "all_registries",
     "autodiscover",
