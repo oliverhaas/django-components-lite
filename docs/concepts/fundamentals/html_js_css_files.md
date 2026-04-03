@@ -50,10 +50,7 @@ Single component can have many secondary files. There is no special behavior for
 
 You can use these for third-party libraries, or for shared CSS / JS files.
 
-Read more about [Secondary JS / CSS files](secondary_js_css_files.md).
-
-To modify how JS/CSS is rendered into `<script>`, `<style>`, or `<link>` tags (e.g. add attributes,
-reorder, or inject scripts), see [Modifying JS / CSS scripts](../advanced/rendering_js_css.md#modifying-js-css-scripts).
+Read more about [Secondary JS / CSS files](../secondary_js_css_files).
 
 !!! warning
 
@@ -77,7 +74,7 @@ reorder, or inject scripts), see [Modifying JS / CSS scripts](../advanced/render
 Components use Django's template system to define their HTML.
 This means that you can use [Django's template syntax](https://docs.djangoproject.com/en/5.2/ref/templates/language/) to define your HTML.
 
-Inside the template, you can access the data returned from the [`get_template_data()`](../../reference/api.md#django_components.Component.get_template_data) method.
+Inside the template, you can access the data returned from the [`get_template_data()`](../../../reference/api/#django_components.Component.get_template_data) method.
 
 You can define the HTML directly in your Python code using the [`template`](../../reference/api.md#django_components.Component.template) attribute:
 
@@ -136,7 +133,7 @@ By default, the component's template is rendered as-is.
 
 ```py
 class Table(Component):
-    def on_render(self, context: Context, template: Template | None):
+    def on_render(self, context: Context, template: Optional[Template]):
         if template is not None:
             return template.render(context)
 ```
@@ -173,7 +170,7 @@ class Table(Component):
 !!! warning
 
     If you do not wrap the templates as Components,
-    there is a risk that some [extensions](../advanced/extensions.md) will not work as expected.
+    there is a risk that some [extensions](../../advanced/extensions) will not work as expected.
 
     ```py
     new_template = Template("""
@@ -196,7 +193,7 @@ class Table(Component):
 ### Template-less components
 
 Since you can use [`Component.on_render()`](../../reference/api.md#django_components.Component.on_render)
-to render _other_ components, there is no need to define a template for the component.
+to render *other* components, there is no need to define a template for the component.
 
 So even an empty component like this is valid:
 
@@ -209,7 +206,7 @@ These "template-less" components can be useful as base classes for other compone
 
 ### HTML processing
 
-Django Components expects the rendered template to be a valid HTML. This is needed to enable features like [CSS / JS variables](html_js_css_variables.md).
+Django Components expects the rendered template to be a valid HTML. This is needed to enable features like [CSS / JS variables](../html_js_css_variables).
 
 Here is how the HTML is post-processed:
 
@@ -225,7 +222,7 @@ Here is how the HTML is post-processed:
     </div>
     ```
 
-2. **Insert CSS ID**: If the component defines CSS variables through [`get_css_data()`](../../reference/api.md#django_components.Component.get_css_data), the root elements also receive a `data-djc-css-xxxxxx` attribute. This attribute links the element to its specific CSS variables.
+2. **Insert CSS ID**: If the component defines CSS variables through [`get_css_data()`](../../../reference/api/#django_components.Component.get_css_data), the root elements also receive a `data-djc-css-xxxxxx` attribute. This attribute links the element to its specific CSS variables.
 
     ```html
     <!-- Output HTML -->
@@ -234,7 +231,7 @@ Here is how the HTML is post-processed:
     </div>
     ```
 
-3. **Insert JS and CSS**: After the HTML is rendered, Django Components handles inserting JS and CSS dependencies into the page based on the [dependencies rendering strategy](rendering_components.md#dependencies-rendering) (document, fragment, or inline).
+3. **Insert JS and CSS**: After the HTML is rendered, Django Components handles inserting JS and CSS dependencies into the page based on the [dependencies rendering strategy](../rendering_components/#dependencies-rendering) (document, fragment, or inline).
 
     For example, if your component contains the
     [`{% component_js_dependencies %}`](../../reference/template_tags.md#component_js_dependencies)
@@ -242,7 +239,7 @@ Here is how the HTML is post-processed:
     [`{% component_css_dependencies %}`](../../reference/template_tags.md#component_css_dependencies)
     tags, or the `<head>` and `<body>` elements, the JS and CSS scripts will be inserted into the HTML.
 
-    For more information on how JS and CSS dependencies are rendered, see [Rendering JS / CSS](../advanced/rendering_js_css.md).
+    For more information on how JS and CSS dependencies are rendered, see [Rendering JS / CSS](../../advanced/rendering_js_css).
 
 ## JS
 
@@ -321,9 +318,9 @@ class Button(Component):
 
 ## File paths
 
-Compared to the [secondary JS / CSS files](secondary_js_css_files.md), the definition of file paths for the main HTML / JS / CSS files is quite simple - just strings, without any lists, objects, or globs.
+Compared to the [secondary JS / CSS files](../secondary_js_css_files), the definition of file paths for the main HTML / JS / CSS files is quite simple - just strings, without any lists, objects, or globs.
 
-However, similar to the secondary JS / CSS files, you can specify the file paths [relative to the component's directory](secondary_js_css_files.md/#relative-to-component).
+However, similar to the secondary JS / CSS files, you can specify the file paths [relative to the component's directory](../secondary_js_css_files/#relative-to-component).
 
 So if you have a directory with following files:
 
@@ -367,7 +364,7 @@ to resolve the path relative to the component directories, as set in
 or
 [`COMPONENTS.app_dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.app_dirs).
 
-Read more about [file path resolution](secondary_js_css_files.md/#relative-to-component).
+Read more about [file path resolution](../secondary_js_css_files/#relative-to-component).
 
 ## Access component definition
 

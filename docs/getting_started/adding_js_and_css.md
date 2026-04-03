@@ -47,13 +47,13 @@ Be sure to prefix your rules with unique CSS class like `calendar`, so the CSS d
 
 !!! note
 
-    Use `CssScope` extension to automatically scope your CSS, so you won't have to worry
+    Soon, django-components will automatically scope your CSS by default, so you won't have to worry
     about CSS class clashes.
 
 This CSS will be inserted into the page as an inlined `<style>` tag, at the position defined by
-[`{% component_css_dependencies %}`](../reference/template_tags.md#component_css_dependencies),
+[`{% component_css_dependencies %}`](../../reference/template_tags#component_css_dependencies),
 or at the end of the inside the `<head>` tag
-(See [Default JS / CSS locations](../concepts/advanced/rendering_js_css.md#default-js-css-locations)).
+(See [Default JS / CSS locations](../../concepts/advanced/rendering_js_css#default-js-css-locations)).
 
 So in your HTML, you may see something like this:
 
@@ -103,8 +103,8 @@ This makes all variables defined only be defined inside this component and not a
     (except for JS defined with `<script type="module">`).
 
 Similarly to CSS, JS will be inserted into the page as an inlined `<script>` tag, at the position defined by
-[`{% component_js_dependencies %}`](../reference/template_tags.md#component_js_dependencies),
-or at the end of the inside the `<body>` tag (See [Default JS / CSS locations](../concepts/advanced/rendering_js_css.md#default-js-css-locations)).
+[`{% component_js_dependencies %}`](../../reference/template_tags#component_js_dependencies),
+or at the end of the inside the `<body>` tag (See [Default JS / CSS locations](../../concepts/advanced/rendering_js_css#default-js-css-locations)).
 
 So in your HTML, you may see something like this:
 
@@ -174,8 +174,8 @@ So in your HTML, you may see something like this:
 
 Finally, we return to our Python component in `calendar.py` to tie this together.
 
-To link JS and CSS defined in other files, use [`js_file`](../reference/api.md#django_components.Component.js_file)
-and [`css_file`](../reference/api.md#django_components.Component.css_file) attributes:
+To link JS and CSS defined in other files, use [`js_file`](../../reference/api#django_components.Component.js_file)
+and [`css_file`](../../reference/api#django_components.Component.css_file) attributes:
 
 ```python title="[project root]/components/calendar/calendar.py"
 from django_components import Component
@@ -200,102 +200,42 @@ automatically embed the associated JS and CSS.
 
     1. Relative to the Python component file (as seen above),
     2. Relative to any of the component directories as defined by
-    [`COMPONENTS.dirs`](../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
-    and/or [`COMPONENTS.app_dirs`](../reference/settings.md#django_components.app_settings.ComponentsSettings.app_dirs)
+    [`COMPONENTS.dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.dirs)
+    and/or [`COMPONENTS.app_dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.app_dirs)
     (e.g. `[your apps]/components` dir and `[project root]/components`)
     3. Relative to any of the directories defined by `STATICFILES_DIRS`.
 
-!!! info "Special role of `css` and `js`"
+<!-- TODO: UPDATE AFTER AT LEAST ONE IMPLEMENTED
+!!! info
 
-    The "primary" JS and CSS you that specify via `js/css` and `js_file/css_file` have special role in many of django-components' features:
+    Special role of `css` and `js`:
 
+    The "primary" JS and CSS you that specify via `js/css` and `js_file/css_file` have special role in many of django-components'
+    features:
+    - CSS scoping [a la Vue](https://vuejs.org/api/sfc-css-features.html#scoped-css)
     - CSS variables from Python are available
     - JS variables from Python are available
-    - CSS scoping [a la Vue](https://vuejs.org/api/sfc-css-features.html#scoped-css)
+    - JS can pass a callback to special JS method `$onLoad()`, which will be called every time
+      a component is rendered on the page.
 
     This is not true for JS and CSS defined in `Media.js/css`, where the linked JS / CSS are rendered as is.
+-->
 
-### 5. JS variables
+### 5. Link additional JS and CSS to a component
 
-You can pass dynamic data from your Python component to your JavaScript using JS variables.
-This is done using the [`get_js_data()`](../reference/api.md#django_components.Component.get_js_data) method.
+Your components may depend on third-party packages or styling, or other shared logic.
+To load these additional dependencies, you can use a nested [`Media` class](../../reference/api#django_components.Component.Media).
 
-The dictionary returned from `get_js_data()` will be serialized to JSON and made available to your component's JavaScript code.
+This `Media` class behaves similarly to [Django's Media class](https://docs.djangoproject.com/en/5.2/topics/forms/media/#assets-as-a-static-definition),
+with a few differences:
 
-To access these variables in your JavaScript, use the special `$onComponent()` callback function. `$onComponent()` is called when the component's JavaScript is loaded.
+1. Our Media class accepts various formats for the JS and CSS files: either a single file, a list, or (CSS-only) a dictonary (see below).
+2. Individual JS / CSS files can be any of `str`, `bytes`, `Path`, [`SafeString`](https://dev.to/doridoro/django-safestring-afj), or a function.
+3. Individual JS / CSS files can be glob patterns, e.g. `*.js` or `styles/**/*.css`.
+4. If you set [`Media.extend`](../../reference/api/#django_components.ComponentMediaInput.extend) to a list,
+   it should be a list of [`Component`](../../reference/api/#django_components.Component) classes.
 
-`$onComponent()` is a special function that is only available within the component's JavaScript code ([`Component.js`](../reference/api.md#django_components.Component.js) or [`Component.js_file`](../reference/api.md#django_components.Component.js_file)).
-
-Let's update our calendar component to pass data to JavaScript:
-
-```python title="[project root]/components/calendar/calendar.py"
-from django_components import Component
-
-class Calendar(Component):
-    template_file = "calendar.html"
-    js_file = "calendar.js"
-    css_file = "calendar.css"
-
-    class Kwargs:
-        date: str = "1970-01-01"
-        theme: str = "light"
-        timezone: str = "UTC"
-
-    def get_template_data(self, args, kwargs: Kwargs, slots, context):
-        return {
-            "date": kwargs.date,
-        }
-
-    # New!
-    def get_js_data(self, args, kwargs: Kwargs, slots, context):
-        return {
-            "date": kwargs.date,
-            "timezone": kwargs.timezone,
-        }
-```
-
-Now update your JavaScript to use these variables. The callback receives the data from `get_js_data()`. Use it to update the DOM or pass it to your own logic:
-
-```js title="[project root]/components/calendar/calendar.js"
-$onComponent(({ date, timezone }, { els }) => {
-  console.log(`Calendar initialized for date: ${date}, timezone: ${timezone}`);
-
-  const containerEl = els[0];
-
-  // Use the variables to update the component's DOM
-  const dateEl = containerEl.querySelector(".calendar-date");
-  if (dateEl) {
-    dateEl.textContent = date;
-  }
-  const tzEl = containerEl.querySelector(".calendar-timezone");
-  if (tzEl) {
-    tzEl.textContent = timezone;
-  }
-});
-```
-
-When you render the component, django-components will automatically:
-
-1. Call `get_js_data()` to get the JS variables
-2. Serialize the data to JSON
-3. Register the data with the component's dependency manager
-4. Call `$onComponent()` callbacks with the appropriate data when the JavaScript loads
-
-Each component instance will receive its own JS variables based on the data returned from `get_js_data()`.
-
-[Learn more](../concepts/fundamentals/html_js_css_variables.md#js-variables) about JS variables.
-
-### 6. CSS variables
-
-You can pass dynamic data from your Python component to your CSS using CSS variables.
-This is done using the [`get_css_data()`](../reference/api.md#django_components.Component.get_css_data) method.
-
-The dictionary returned from `get_css_data()` will be converted to CSS variables where:
-
-- Keys become CSS variable names (prefixed with `--`)
-- Values are serialized to strings
-
-Let's update our calendar component to support different themes:
+[Learn more](../concepts/fundamentals/secondary_js_css_files.md) about using Media.
 
 ```python title="[project root]/components/calendar/calendar.py"
 from django_components import Component
@@ -305,73 +245,116 @@ class Calendar(Component):
     js_file = "calendar.js"
     css_file = "calendar.css"
 
-    class Kwargs:
-        date: str = "1970-01-01"
-        theme: str = "light"
+    class Media:   # <--- new
+        js = [
+            "path/to/shared.js",
+            "path/to/*.js",  # Or as a glob
+            "https://unpkg.com/alpinejs@3.14.7/dist/cdn.min.js",  # AlpineJS
+        ]
+        css = [
+            "path/to/shared.css",
+            "path/to/*.css",  # Or as a glob
+            "https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css",  # Tailwind
+        ]
 
-    def get_template_data(self, args, kwargs: Kwargs, slots, context):
+    def get_template_data(self, args, kwargs, slots, context):
         return {
-            "date": kwargs.date,
+            "date": "1970-01-01",
         }
+```
 
-    # New!
-    def get_css_data(self, args, kwargs: Kwargs, slots, context):
-        themes = {
-            "light": {
-                "bg_color": "#ffffff",
-                "text_color": "#333333",
-            },
-            "dark": {
-                "bg_color": "#242424",
-                "text_color": "#f1f1f1",
-            },
+!!! note
+
+    Same as with the "primary" JS and CSS, the file paths files can be either:
+
+    1. Relative to the Python component file (as seen above),
+    2. Relative to any of the component directories as defined by
+    [`COMPONENTS.dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.dirs)
+    and/or [`COMPONENTS.app_dirs`](../../reference/settings#django_components.app_settings.ComponentsSettings.app_dirs)
+    (e.g. `[your apps]/components` dir and `[project root]/components`)
+
+!!! info
+
+    The `Media` nested class is shaped based on [Django's Media class](https://docs.djangoproject.com/en/5.2/topics/forms/media/).
+
+    As such, django-components allows multiple formats to define the nested Media class:
+
+    ```py
+    # Single files
+    class Media:
+        js = "calendar.js"
+        css = "calendar.css"
+
+    # Lists of files
+    class Media:
+        js = ["calendar.js", "calendar2.js"]
+        css = ["calendar.css", "calendar2.css"]
+
+    # Dictionary of media types for CSS
+    class Media:
+        js = ["calendar.js", "calendar2.js"]
+        css = {
+          "all": ["calendar.css", "calendar2.css"],
         }
-        return themes.get(kwargs.theme, themes["light"])
-```
+    ```
 
-Now update your CSS to use these variables:
+    If you define a list of JS files, they will be executed one-by-one, left-to-right.
 
-```css title="[project root]/components/calendar/calendar.css"
-.calendar {
-  width: 200px;
-  background-color: var(--bg_color);
-  color: var(--text_color);
-}
-.calendar span {
-  font-weight: bold;
-}
-```
+#### Rules of execution of scripts in `Media.js`
 
-When you render the component, django-components will automatically:
+The scripts defined in `Media.js` still follow the rules outlined above:
 
-1. Call `get_css_data()` to get the CSS variables
-2. Generate a stylesheet with those variables scoped to this component instance
-3. Link the stylesheet to the component
+1. JS is executed in the order in which the components are found in the HTML.
+2. JS will be executed only once, even if there is multiple instances of the same component.
 
-```django
-{% component "calendar" date="2024-11-06" theme="dark" %}
-{% endcomponent %}
-```
+Additionally to `Media.js` applies that:
 
-This will render something like:
+1. JS in `Media.js` is executed **before** the component's primary JS.
+2. JS in `Media.js` is executed **in the same order** as it was defined.
+3. If there is multiple components that specify the same JS path or URL in `Media.js`,
+   this JS will be still loaded and executed only once.
+
+Putting all of this together, our `Calendar` component above would render HTML like so:
 
 ```html
-<div class="calendar" data-djc-css-a1b2c3>
-  Today's date is <span>2024-11-06</span>
-</div>
+<html>
+  <head>
+    ...
+    <!-- CSS from Media.css -->
+    <link href="/static/path/to/shared.css" media="all" rel="stylesheet" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      media="all"
+      rel="stylesheet"
+    />
+    <!-- CSS from Component.css_file -->
+    <style>
+      .calendar {
+        width: 200px;
+        background: pink;
+      }
+      .calendar span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    ...
+    <!-- JS from Media.js -->
+    <script src="/static/path/to/shared.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <!-- JS from Component.js_file -->
+    <script>
+      (function () {
+        document.querySelector(".calendar").onclick = () => {
+          alert("Clicked calendar!");
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
-
-With a corresponding stylesheet:
-
-```css
-[data-djc-css-a1b2c3] {
-  --bg_color: #242424;
-  --text_color: #f1f1f1;
-}
-```
-
-[Learn more](../concepts/fundamentals/html_js_css_variables.md#css-variables) about CSS variables.
 
 ---
 
-Next, [let's add third-party dependencies ➡️](adding_dependencies.md).
+Now that we have a fully-defined component, [next let's use it in a Django template ➡️](./components_in_templates.md).

@@ -34,6 +34,7 @@ See `parse_template()` for details.
 
 import re
 from functools import lru_cache
+from typing import List, Optional, Tuple
 
 from django.template.base import DebugLexer, Token, TokenType
 from django.template.exceptions import TemplateSyntaxError
@@ -60,20 +61,20 @@ from django.template.exceptions import TemplateSyntaxError
 #   2. We check them one-by-one, and if we find a broken token, we switch to our parser to fix it.
 #   3. Once the broken token is fixed, we find it's end position, and switch back to the Django lexer
 #      for the remaining text (step 1).
-def parse_template(text: str) -> list[Token]:
-    resolved_tokens: list[Token] = []
+def parse_template(text: str) -> List[Token]:
+    resolved_tokens: List[Token] = []
 
     index_start = 0
     index_end = len(text)
     lineno_offset = 0
 
     while index_start < index_end:
-        broken_token: Token | None = None
+        broken_token: Optional[Token] = None
         # Do fast tokenization with regex - This is about 50x faster than our custom tokenizer.
         # We use DebugLexer because we need to get the position of the tokens.
         # DebugLexer and Lexer have very similar speeds, Debug is about 33% slower.
         lexer = DebugLexer(text[index_start:index_end])
-        tokens: list[Token] = lexer.tokenize()
+        tokens: List[Token] = lexer.tokenize()
 
         for token in tokens:
             token.lineno += lineno_offset
@@ -105,7 +106,7 @@ def parse_template(text: str) -> list[Token]:
 def _detailed_tag_parser(text: str, lineno: int, start_index: int) -> Token:
     index = 0
     length = len(text)
-    result_content: list[str] = []
+    result_content: List[str] = []
 
     # Pre-compute common substrings
     QUOTE_CHARS = ("'", '"')  # noqa: N806
@@ -131,7 +132,7 @@ def _detailed_tag_parser(text: str, lineno: int, start_index: int) -> Token:
     # For the intuition, the original version is:
     #
     # ```py
-    # def take_until_any(stop_chars: tuple[str, ...], allow_escapes: bool = False) -> str:
+    # def take_until_any(stop_chars: Tuple[str, ...], allow_escapes: bool = False) -> str:
     #     nonlocal index
     #     start = index
     #     while index < length:
@@ -144,7 +145,7 @@ def _detailed_tag_parser(text: str, lineno: int, start_index: int) -> Token:
     #         index += 1
     #     return text[start:index]
     # ```
-    def take_until_any(stop_chars: tuple[str, ...], allow_escapes: bool = False) -> str:
+    def take_until_any(stop_chars: Tuple[str, ...], allow_escapes: bool = False) -> str:
         nonlocal index
 
         stop_chars_str = "".join(stop_chars)

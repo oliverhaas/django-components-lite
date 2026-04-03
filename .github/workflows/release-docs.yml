@@ -4,10 +4,10 @@ on:
   push:
     tags:
       # for versions 0.### (before 1.0.0)
-      - "0.[0-9]+"
+      - '0.[0-9]+'
       # after 1.0.0
-      - "[0-9]+.[0-9]+.[0-9]+"
-    branches:
+      - '[0-9]+.[0-9]+.[0-9]+'
+    branches: 
       - master
   workflow_dispatch:
 
@@ -15,13 +15,14 @@ jobs:
   docs:
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
-      contents: write # to let mkdocs write the new docs
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
+      contents: write  # to let mkdocs write the new docs
+      pages: write     # to deploy to Pages
+      id-token: write  # to verify the deployment originates from an appropriate source
     runs-on: ubuntu-latest
     # Only run in original repo (not in forks)
     if: github.repository == 'django-components/django-components'
     steps:
+
       ##############################
       # SETUP
       ##############################
@@ -36,7 +37,7 @@ jobs:
           private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
         with:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
@@ -46,22 +47,21 @@ jobs:
           git config user.name components-release-bot
           git config user.email "components-release-bot@users.noreply.github.com"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          uv sync --group docs
-          # NOTE: pin virtualenv to <20.31 until asv fixes it.
-          # See https://github.com/airspeed-velocity/asv/issues/1484
-          uv pip install --system pre-commit asv virtualenv==20.30
+            python -m pip install --upgrade pip wheel
+            # NOTE: pin virtualenv to <20.31 until asv fixes it.
+            # See https://github.com/airspeed-velocity/asv/issues/1484
+            python -m pip install -q pre-commit asv virtualenv==20.30
+            python -m pip install -r requirements-docs.txt
+            # Install django-components locally
+            python -m pip install -e .
 
       ###########################################
       # RECORD BENCHMARK - ONLY ON PUSH TO MASTER
@@ -73,10 +73,9 @@ jobs:
           # See https://github.com/github/docs/issues/21930
           # And https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
           # Get the master branch so we can run benchmarks on it
-          git remote add upstream https://github.com/$REPO.git
+          git remote add upstream https://github.com/${{ github.repository }}.git
           git fetch origin master:master
           git checkout master
 
@@ -95,7 +94,7 @@ jobs:
           # 1. First create the virtual environment, so that asv generates the directories where
           #    the monkeypatch can be applied.
           echo "Creating virtual environment..."
-          uv run asv setup -v || true
+          asv setup -v || true
           echo "Virtual environment created."
           # 2. Now let's apply the monkeypatch by appending it to the `timeraw.py` files.
           # First find all `timeraw.py` files
@@ -112,7 +111,7 @@ jobs:
           # We assume that the CI machine has a name that is unique and stable.
           # See https://github.com/airspeed-velocity/asv/issues/796#issuecomment-1188431794
           echo "Preparing benchmarks profile..."
-          uv run asv machine --yes --machine ci-linux
+          asv machine --yes --machine ci-linux
           echo "Benchmarks profile DONE."
 
           # Run benchmarks for the current tag
@@ -124,14 +123,14 @@ jobs:
           #       TO the start of the branch history.
           #       With it, we run benchmarks ONLY FOR the tag's commit.
           echo "Running benchmarks for tag ${TAG}..."
-          uv run asv run master^! -v
+          asv run master^! -v
           echo "Benchmarks for tag ${TAG} DONE."
 
           # Generate benchmarks site
           # This should save it in `docs/benchmarks/`, so we can then use it when
           # building docs site with `mkdocs`.
           echo "Generating benchmarks site..."
-          uv run asv publish
+          asv publish
           echo "Benchmarks site DONE."
 
           # Commit benchmark results
@@ -153,7 +152,7 @@ jobs:
       # Change git authentication to Github Actions, so the rest of the
       # workflow will have lower privileges.
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -163,12 +162,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
 
-      - name: Install dependencies
-        run: |
-          # Re-install dependencies after second checkout to ensure virtual environment is available.
-          # Use --frozen so uv does not update uv.lock; otherwise `git checkout gh-pages` may fail.
-          uv sync --frozen --group docs
-
       # Conditions make sure to select the right step, depending on the job trigger.
       # Only one of the steps below will run at a time. The others will be skipped.
 
@@ -177,13 +170,11 @@ jobs:
         run: |
           # TODO: Enable strict mode once docs are clean
           echo "Strict check of docs disabled."
-          # uv run mkdocs build --strict
+          # mkdocs build --strict
 
       - name: Build & deploy "dev" docs for a new commit to master
         if: github.event_name == 'push' && github.ref_type != 'tag'
         run: |
-          # Discard any local changes (e.g. to uv.lock) so checkout gh-pages succeeds
-          git restore uv.lock 2>/dev/null || true
           # Fetch and checkout gh-pages to ensure we have the latest version
           git fetch origin gh-pages
           git checkout gh-pages
@@ -191,20 +182,16 @@ jobs:
           git checkout master
 
           export SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
-          uv run mike deploy --push --update-aliases --title "dev (${SHORT_SHA})" dev
+          mike deploy --push --update-aliases --title "dev (${SHORT_SHA})" dev
 
       - name: Build & deploy docs for a new tag
         if: github.ref_type == 'tag' && github.event_name == 'push'
-        env:
-          REF_NAME: ${{ github.ref_name }}
         run: |
-          # Discard any local changes (e.g. to uv.lock) so checkout gh-pages succeeds
-          git restore uv.lock 2>/dev/null || true
           # Fetch and checkout gh-pages to ensure we have the latest version
           git fetch origin gh-pages
           git checkout gh-pages
           git pull origin gh-pages
           git checkout master
 
-          uv run mike deploy --push --update-aliases $REF_NAME latest
-          uv run mike set-default latest --push
+          mike deploy --push --update-aliases ${{ github.ref_name }} latest
+          mike set-default latest --push

@@ -1,19 +1,26 @@
 # ruff: noqa: PTH100, PTH118, PTH120, PTH207
 import glob
 import os
+import sys
 from collections import deque
-from collections.abc import Callable, Iterable, Sequence
 from copy import copy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
     Literal,
+    Optional,
     Protocol,
-    TypeAlias,
-    TypeGuard,
+    Sequence,
+    Tuple,
+    Type,
     TypeVar,
+    Union,
     cast,
 )
 from weakref import WeakKeyDictionary
@@ -23,8 +30,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.forms.widgets import Media as MediaCls
 from django.template import Template
 from django.utils.safestring import SafeData
+from typing_extensions import TypeGuard
 
-from django_components.dependencies import Script, Style
 from django_components.extension import OnCssLoadedContext, OnJsLoadedContext, extensions
 from django_components.template import ensure_unique_template, load_component_template
 from django_components.util.loader import get_component_dirs, resolve_file
@@ -57,49 +64,35 @@ class Unset:
 UNSET = Unset()
 
 
-ComponentMediaInputPath: TypeAlias = (
-    str
-    | bytes
-    | SafeData
-    | Path
-    | os.PathLike
-    | Script
-    | Style
-    | Callable[
-        [],
-        str | bytes | SafeData | Path | os.PathLike | Script | Style,
-    ]
-)
+ComponentMediaInputPath = Union[
+    str,
+    bytes,
+    SafeData,
+    Path,
+    os.PathLike,
+    Callable[[], Union[str, bytes, SafeData, Path, os.PathLike]],
+]
 """
-A type representing an entry in [Media.js](api.md#django_components.ComponentMediaInput.js)
-or [Media.css](api.md#django_components.ComponentMediaInput.css).
+A type representing an entry in [Media.js](../api#django_components.ComponentMediaInput.js)
+or [Media.css](../api#django_components.ComponentMediaInput.css).
 
-If an entry is a [SafeString](https://dev.to/doridoro/django-safestring-afj),
-a [Script](api.md#django_components.Script),
-a [Style](api.md#django_components.Style),
-or any object with `__html__` method, it is treated as
-a pre-rendered tag and output as-is. Otherwise, it's assumed to be a path to a file.
+If an entry is a [SafeString](https://dev.to/doridoro/django-safestring-afj) (or has `__html__` method),
+then entry is assumed to be a formatted HTML tag. Otherwise, it's assumed to be a path to a file.
 
 **Example:**
 
 ```py
-from django_components import Script, Style
-
-class MyComponent(Component):
+class MyComponent
     class Media:
         js = [
             "path/to/script.js",
             b"script.js",
             SafeString("<script src='path/to/script.js'></script>"),
-            Script(content="console.log('inline');"),
-            Script(url="/static/analytics.js", content=None),
         ]
         css = [
             Path("path/to/style.css"),
             lambda: "path/to/style.css",
             lambda: Path("path/to/style.css"),
-            Style(content=".x { color: red; }"),
-            Style(url="/static/print.css", content=None, attrs={"media": "print"}),
         ]
 ```
 """
@@ -114,7 +107,7 @@ class MyComponent(Component):
 # ```
 class ComponentMediaInput(Protocol):
     """
-    Defines JS and CSS media files associated with a [`Component`](api.md#django_components.Component).
+    Defines JS and CSS media files associated with a [`Component`](../api#django_components.Component).
 
     ```py
     class MyTable(Component):
@@ -133,15 +126,16 @@ class ComponentMediaInput(Protocol):
     ```
     """
 
-    css: (
-        ComponentMediaInputPath
-        | list[ComponentMediaInputPath]
-        | dict[str, ComponentMediaInputPath]
-        | dict[str, list[ComponentMediaInputPath]]
-        | None
-    ) = None
+    css: Optional[
+        Union[
+            ComponentMediaInputPath,
+            List[ComponentMediaInputPath],
+            Dict[str, ComponentMediaInputPath],
+            Dict[str, List[ComponentMediaInputPath]],
+        ]
+    ] = None
     """
-    CSS files associated with a [`Component`](api.md#django_components.Component).
+    CSS files associated with a [`Component`](../api#django_components.Component).
 
     - If a string, it's assumed to be a path to a CSS file.
 
@@ -152,7 +146,7 @@ class ComponentMediaInput(Protocol):
         - A list, each entry is assumed to be a path to a CSS file.
 
     Each entry can be a string, bytes, SafeString, PathLike, or a callable that returns one of the former
-    (see [`ComponentMediaInputPath`](api.md#django_components.ComponentMediaInputPath)).
+    (see [`ComponentMediaInputPath`](../api#django_components.ComponentMediaInputPath)).
 
     Examples:
     ```py
@@ -186,16 +180,16 @@ class ComponentMediaInput(Protocol):
     ```
     """
 
-    js: ComponentMediaInputPath | list[ComponentMediaInputPath] | None = None
+    js: Optional[Union[ComponentMediaInputPath, List[ComponentMediaInputPath]]] = None
     """
-    JS files associated with a [`Component`](api.md#django_components.Component).
+    JS files associated with a [`Component`](../api#django_components.Component).
 
     - If a string, it's assumed to be a path to a JS file.
 
     - If a list, each entry is assumed to be a path to a JS file.
 
     Each entry can be a string, bytes, SafeString, PathLike, or a callable that returns one of the former
-    (see [`ComponentMediaInputPath`](api.md#django_components.ComponentMediaInputPath)).
+    (see [`ComponentMediaInputPath`](../api#django_components.ComponentMediaInputPath)).
 
     Examples:
     ```py
@@ -217,7 +211,7 @@ class ComponentMediaInput(Protocol):
     ```
     """
 
-    extend: bool | list[type["Component"]] = True
+    extend: Union[bool, List[Type["Component"]]] = True
     """
     Configures whether the component should inherit the media files from the parent component.
 
@@ -225,7 +219,7 @@ class ComponentMediaInput(Protocol):
     - If `False`, the component does not inherit the media files from the parent component.
     - If a list of components classes, the component inherits the media files ONLY from these specified components.
 
-    Read more in [Media inheritance](../concepts/fundamentals/secondary_js_css_files.md#media-inheritance) section.
+    Read more in [Media inheritance](../../concepts/fundamentals/secondary_js_css_files/#media-inheritance) section.
 
     **Example:**
 
@@ -266,19 +260,18 @@ class ComponentMediaInput(Protocol):
 
 @dataclass
 class ComponentMedia:
-    comp_cls: type["Component"]
-    resolved_template: bool = False
-    resolved_files: bool = False
-    resolved_relative_paths: bool = False
-    Media: type[ComponentMediaInput] | Unset | None = UNSET
-    template: str | Unset | None = UNSET
-    template_file: str | Unset | None = UNSET
-    js: str | Unset | None = UNSET
-    js_file: str | Unset | None = UNSET
-    css: str | Unset | None = UNSET
-    css_file: str | Unset | None = UNSET
+    comp_cls: Type["Component"]
+    resolved: bool = False
+    resolved_relative_files: bool = False
+    Media: Union[Type[ComponentMediaInput], Unset, None] = UNSET
+    template: Union[str, Unset, None] = UNSET
+    template_file: Union[str, Unset, None] = UNSET
+    js: Union[str, Unset, None] = UNSET
+    js_file: Union[str, Unset, None] = UNSET
+    css: Union[str, Unset, None] = UNSET
+    css_file: Union[str, Unset, None] = UNSET
     # Template instance that was loaded for this component
-    _template: Template | Unset | None = UNSET
+    _template: Union[Template, Unset, None] = UNSET
 
     def __post_init__(self) -> None:
         for inlined_attr in ("template", "js", "css"):
@@ -310,9 +303,8 @@ class ComponentMedia:
     # Return ComponentMedia to its original state before the media was resolved
     def reset(self) -> None:
         self.__dict__.update(self._original.__dict__)
-        self.resolved_template = False
-        self.resolved_files = False
-        self.resolved_relative_paths = False
+        self.resolved = False
+        self.resolved_relative_files = False
 
 
 # This metaclass is all about one thing - lazily resolving the media files.
@@ -341,13 +333,13 @@ class ComponentMedia:
 #    resolved yet.
 # 4. Any further access to the media-related attributes will return the resolved values.
 class ComponentMediaMeta(type):
-    def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
+    def __new__(mcs, name: str, bases: Tuple[Type, ...], attrs: Dict[str, Any]) -> Type:
         # Normalize the various forms of Media inputs we allow
         if "Media" in attrs:
             _normalize_media(attrs["Media"])
 
         cls = super().__new__(mcs, name, bases, attrs)
-        comp_cls = cast("type[Component]", cls)
+        comp_cls = cast("Type[Component]", cls)
 
         _setup_lazy_media_resolve(comp_cls, attrs)
 
@@ -360,23 +352,20 @@ class ComponentMediaMeta(type):
     #
     # Because we lazily resolve the media, there's a possibility that the user may try to set some media fields
     # after the media fields were already resolved. This is currently not supported, and we do the resolution
-    # only once. However, we do not explictly prevent setting the media fields - user can still do whatever they want.
+    # only once.
     #
-    # Thus, we print a warning when user sets the media fields after these fields were resolved.
+    # Thus, we print a warning when user sets the media fields after they were resolved.
     def __setattr__(cls, name: str, value: Any) -> None:
         if name in COMP_MEDIA_LAZY_ATTRS:
-            comp_media: ComponentMedia | None = getattr(cls, "_component_media", None)
-            if comp_media is not None:
-                is_resolved = comp_media.resolved_template or comp_media.resolved_files
-                if is_resolved:
-                    print(  # noqa: T201
-                        f"WARNING: Setting attribute '{name}' on component '{cls.__name__}' after the media files were"
-                        " already resolved. This may lead to unexpected behavior.",
-                    )
+            comp_media: Optional[ComponentMedia] = getattr(cls, "_component_media", None)
+            if comp_media is not None and comp_media.resolved:
+                print(  # noqa: T201
+                    f"WARNING: Setting attribute '{name}' on component '{cls.__name__}' after the media files were"
+                    " already resolved. This may lead to unexpected behavior.",
+                )
 
         # NOTE: When a metaclass specifies a `__setattr__` method, this overrides the normal behavior of
         #       setting an attribute on the class with Descriptors. So we need to call the normal behavior explicitly.
-        #       Below is the original behaviour.
         # NOTE 2: `__dict__` is used to access the class attributes directly, without triggering the descriptors.
         desc = cls.__dict__.get(name, None)
         if hasattr(desc, "__set__"):
@@ -386,17 +375,13 @@ class ComponentMediaMeta(type):
 
 
 # This sets up the lazy resolution of the media attributes.
-def _setup_lazy_media_resolve(comp_cls: type["Component"], attrs: dict[str, Any]) -> None:
+def _setup_lazy_media_resolve(comp_cls: Type["Component"], attrs: Dict[str, Any]) -> None:
     # Collect all the original values of the lazy attributes, so we can access them from the getter
     comp_cls._component_media = ComponentMedia(
         comp_cls=comp_cls,
-        resolved_template=False,
-        resolved_files=False,
-        resolved_relative_paths=False,
+        resolved=False,
         # NOTE: We take the values from `attrs` so we consider only the values that were set on THIS class,
         #       and not the values that were inherited from the parent classes.
-        # NOTE 2: We differentiate between `None` and `UNSET`, so that users can set `None` to
-        #       override parent class's value.
         Media=attrs.get("Media", UNSET),
         template=attrs.get("template", UNSET),
         template_file=attrs.get("template_file", UNSET),
@@ -421,7 +406,7 @@ def _setup_lazy_media_resolve(comp_cls: type["Component"], attrs: dict[str, Any]
             self._attr_name = name
 
         # `__get__` runs when a class/instance attribute is being accessed
-        def __get__(self, instance: "Component | None", cls: type["Component"]) -> Any:
+        def __get__(self, instance: Optional["Component"], cls: Type["Component"]) -> Any:
             return get_comp_media_attr(self._attr_name)
 
     for attr in COMP_MEDIA_LAZY_ATTRS:
@@ -432,22 +417,13 @@ def _setup_lazy_media_resolve(comp_cls: type["Component"], attrs: dict[str, Any]
 # then simply accessing `_component_media.js` will NOT get the values from parent classes.
 #
 # So this function is like `getattr`, but for searching for values inside `_component_media`.
-def _get_comp_cls_attr(comp_cls: type["Component"], attr: str) -> Any:
+def _get_comp_cls_attr(comp_cls: Type["Component"], attr: str) -> Any:
     for base in comp_cls.mro():
-        comp_media: ComponentMedia | None = getattr(base, "_component_media", None)
+        comp_media: Optional[ComponentMedia] = getattr(base, "_component_media", None)
         if comp_media is None:
             continue
-        # Resolve only the specific asset type being accessed
-        if attr in ("js", "js_file", "css", "css_file"):
-            if not comp_media.resolved_files:
-                _load_media(base, comp_media, asset_type="non-template")
-        elif attr in ("template", "template_file", "_template"):
-            if not comp_media.resolved_template:
-                _load_media(base, comp_media, asset_type="template")
-        else:
-            # NOTE: "media" was already handled in `get_comp_media_attr`
-            # so this should never happen.
-            raise ValueError(f"Invalid attribute: {attr}")
+        if not comp_media.resolved:
+            _resolve_media(base, comp_media)
 
         # NOTE: We differentiate between `None` and `UNSET`, so that users can set `None` to
         #       override parent class's value and set it to `None`.
@@ -480,10 +456,13 @@ def _get_comp_cls_attr(comp_cls: type["Component"], attr: str) -> Any:
 
 
 # NOTE: We use weakref to avoid issues with lingering references.
-media_cache: WeakKeyDictionary[type["Component"], MediaCls] = WeakKeyDictionary()
+if sys.version_info >= (3, 9):
+    media_cache: WeakKeyDictionary[Type["Component"], MediaCls] = WeakKeyDictionary()
+else:
+    media_cache: WeakKeyDictionary = WeakKeyDictionary()
 
 
-def _get_comp_cls_media(comp_cls: type["Component"]) -> Any:
+def _get_comp_cls_media(comp_cls: Type["Component"]) -> Any:
     # Component's `media` attribute is a special case, because it should inherit all the JS/CSS files
     # from the parent classes. So we need to walk up the MRO and merge all the Media classes.
     #
@@ -512,11 +491,9 @@ def _get_comp_cls_media(comp_cls: type["Component"]) -> Any:
         if curr_cls in media_cache:
             continue
 
-        comp_media: ComponentMedia | None = getattr(curr_cls, "_component_media", None)
-        if comp_media is not None and not comp_media.resolved_relative_paths:
-            # NOTE: By using `asset_type=None`, we will only resolve relative file paths,
-            # but we will not load the files.
-            _load_media(curr_cls, comp_media, asset_type=None)
+        comp_media: Optional[ComponentMedia] = getattr(curr_cls, "_component_media", None)
+        if comp_media is not None and not comp_media.resolved:
+            _resolve_media(curr_cls, comp_media)
 
         # Prepare base classes
         # NOTE: If the `Component.Media` class is explicitly set to `None`, then we should not inherit
@@ -583,11 +560,7 @@ def _get_comp_cls_media(comp_cls: type["Component"]) -> Any:
     return media_cache[comp_cls]
 
 
-def _load_media(
-    comp_cls: type["Component"],
-    comp_media: ComponentMedia,
-    asset_type: Literal["template", "non-template"] | None = None,
-) -> None:
+def _resolve_media(comp_cls: Type["Component"], comp_media: ComponentMedia) -> None:
     """
     Resolve the media files associated with the component.
 
@@ -626,72 +599,62 @@ def _load_media(
             assert isinstance(self.media, MyMedia)
     ```
     """
-    # Skip base Component class
-    if get_import_path(comp_cls) == "django_components.component.Component":
+    if comp_media.resolved:
         return
 
-    if asset_type == "template":
-        # Retry if _template is still UNSET (race condition)
-        if comp_media.resolved_template and comp_media._template is not UNSET:
-            return
-        comp_media.resolved_template = True
-    elif asset_type == "non-template":
-        if comp_media.resolved_files:
-            return
-        comp_media.resolved_files = True
+    comp_media.resolved = True
+
+    # Do not resolve if this is a base class
+    if get_import_path(comp_cls) == "django_components.component.Component":
+        return
 
     comp_dirs = get_component_dirs()
 
     # Once the inputs are normalized, attempt to resolve the HTML/JS/CSS filepaths
     # as relative to the directory where the component class is defined.
-    # This is done for both template AND non-template files together.
-    _resolve_component_relative_paths(comp_cls, comp_media, comp_dirs=comp_dirs)
+    _resolve_component_relative_files(comp_cls, comp_media, comp_dirs=comp_dirs)
 
-    # Loading/resolving template
-    if asset_type == "template":
-        # If the component defined `template_file`, `js_file` or `css_file`, instead of `template`/`js`/`css`,
-        # we resolve them now.
-        # Effectively, even if the Component class defined `js_file` (or others), at "runtime" the `js` attribute
-        # will be set to the content of the file.
-        # So users can access `Component.js` even if they defined `Component.js_file`.
-        template_str, template_obj = _get_asset(
-            comp_cls,
-            comp_media,
-            inlined_attr="template",
-            file_attr="template_file",
-            comp_dirs=comp_dirs,
-        )
-        comp_media.template = template_str
+    # If the component defined `template_file`, `js_file` or `css_file`, instead of `template`/`js`/`css`,
+    # we resolve them now.
+    # Effectively, even if the Component class defined `js_file` (or others), at "runtime" the `js` attribute
+    # will be set to the content of the file.
+    # So users can access `Component.js` even if they defined `Component.js_file`.
+    template_str, template_obj = _get_asset(
+        comp_cls,
+        comp_media,
+        inlined_attr="template",
+        file_attr="template_file",
+        comp_dirs=comp_dirs,
+    )
+    comp_media.template = template_str
 
-        # If `Component.template` or `Component.template_file` were explicitly set on this class,
-        # then Template instance was already created.
-        #
-        # Otherwise, search for Template instance in parent classes, and make a copy of it.
-        if not isinstance(template_obj, Unset):
-            comp_media._template = template_obj
+    js_str, _ = _get_asset(comp_cls, comp_media, inlined_attr="js", file_attr="js_file", comp_dirs=comp_dirs)
+    comp_media.js = js_str
+
+    css_str, _ = _get_asset(comp_cls, comp_media, inlined_attr="css", file_attr="css_file", comp_dirs=comp_dirs)
+    comp_media.css = css_str
+
+    # If `Component.template` or `Component.template_file` were explicitly set on this class,
+    # then Template instance was already created.
+    #
+    # Otherwise, search for Template instance in parent classes, and make a copy of it.
+    if not isinstance(template_obj, Unset):
+        comp_media._template = template_obj
+    else:
+        parent_template = _get_comp_cls_attr(comp_cls, "_template")
+
+        # One of base classes has set `template` or `template_file` to `None`,
+        # or none of the base classes had set `template` or `template_file`
+        if parent_template is None:
+            comp_media._template = parent_template
+
+        # One of base classes has set `template` or `template_file` to string.
+        # Make a copy of the Template instance.
         else:
-            parent_template = _get_comp_cls_attr(comp_cls, "_template")
-
-            # One of base classes has set `template` or `template_file` to `None`,
-            # or none of the base classes had set `template` or `template_file`
-            if parent_template is None:
-                comp_media._template = parent_template
-
-            # One of base classes has set `template` or `template_file` to string.
-            # Make a copy of the Template instance.
-            else:
-                comp_media._template = ensure_unique_template(comp_cls, parent_template)
-
-    # Loading/resolving non-template files
-    elif asset_type == "non-template":
-        js_str, _ = _get_asset(comp_cls, comp_media, inlined_attr="js", file_attr="js_file", comp_dirs=comp_dirs)
-        comp_media.js = js_str
-
-        css_str, _ = _get_asset(comp_cls, comp_media, inlined_attr="css", file_attr="css_file", comp_dirs=comp_dirs)
-        comp_media.css = css_str
+            comp_media._template = ensure_unique_template(comp_cls, parent_template)
 
 
-def _normalize_media(media: type[ComponentMediaInput]) -> None:
+def _normalize_media(media: Type[ComponentMediaInput]) -> None:
     """
     Resolve the `Media` class associated with the component.
 
@@ -779,7 +742,7 @@ def _normalize_media(media: type[ComponentMediaInput]) -> None:
     _map_media_filepaths(media, _normalize_media_filepath)
 
 
-def _map_media_filepaths(media: type[ComponentMediaInput], map_fn: Callable[[Sequence[Any]], Iterable[Any]]) -> None:
+def _map_media_filepaths(media: Type[ComponentMediaInput], map_fn: Callable[[Sequence[Any]], Iterable[Any]]) -> None:
     if hasattr(media, "css") and media.css:
         if not isinstance(media.css, dict):
             raise ValueError(f"Media.css must be a dict, got {type(media.css)}")
@@ -789,7 +752,7 @@ def _map_media_filepaths(media: type[ComponentMediaInput], map_fn: Callable[[Seq
 
     if hasattr(media, "js") and media.js:
         if not isinstance(media.js, (list, tuple)):
-            raise ValueError(f"Media.js must be a list, got {type(media.js)}")
+            raise ValueError(f"Media.css must be a list, got {type(media.css)}")
 
         media.js = list(map_fn(media.js))
 
@@ -815,14 +778,14 @@ def _is_media_filepath(filepath: Any) -> bool:
     return isinstance(filepath, str)
 
 
-def _normalize_media_filepath(filepaths: Sequence[ComponentMediaInputPath]) -> list[str | SafeData]:
-    normalized: list[str | SafeData] = []
+def _normalize_media_filepath(filepaths: Sequence[ComponentMediaInputPath]) -> List[Union[str, SafeData]]:
+    normalized: List[Union[str, SafeData]] = []
     for filepath in filepaths:
         if callable(filepath):
             filepath = filepath()  # noqa: PLW2901
 
         if isinstance(filepath, SafeData) or hasattr(filepath, "__html__"):
-            normalized.append(cast("SafeData", filepath))
+            normalized.append(filepath)
             continue
 
         if isinstance(filepath, (Path, os.PathLike)) or hasattr(filepath, "__fspath__"):
@@ -844,20 +807,20 @@ def _normalize_media_filepath(filepaths: Sequence[ComponentMediaInputPath]) -> l
     return normalized
 
 
-def _resolve_component_relative_paths(
-    comp_cls: type["Component"],
+def _resolve_component_relative_files(
+    comp_cls: Type["Component"],
     comp_media: ComponentMedia,
-    comp_dirs: list[Path],
+    comp_dirs: List[Path],
 ) -> None:
     """
     Check if component's HTML, JS and CSS files refer to files in the same directory
-    as the component class. If so, modify the attributes so the Django's Media class
+    as the component class. If so, modify the attributes so the class Django's rendering
     will pick up these files correctly.
     """
-    if comp_media.resolved_relative_paths:
+    if comp_media.resolved_relative_files:
         return
 
-    comp_media.resolved_relative_paths = True
+    comp_media.resolved_relative_files = True
 
     # First check if we even need to resolve anything. If the class doesn't define any
     # HTML/JS/CSS files, just skip.
@@ -904,9 +867,9 @@ def _resolve_component_relative_paths(
     # If yes, modify the path to refer to the relative file.
     # If not, don't modify anything.
     def resolve_relative_media_file(
-        filepath: str | SafeData,
+        filepath: Union[str, SafeData],
         allow_glob: bool,
-    ) -> list[str | SafeData]:
+    ) -> List[Union[str, SafeData]]:
         resolved_filepaths, has_matched = resolve_media_file(
             filepath,
             allow_glob,
@@ -931,9 +894,9 @@ def _resolve_component_relative_paths(
     # If yes, modify the path to refer to the globbed files.
     # If not, don't modify anything.
     def resolve_static_media_file(
-        filepath: str | SafeData,
+        filepath: Union[str, SafeData],
         allow_glob: bool,
-    ) -> list[str | SafeData]:
+    ) -> List[Union[str, SafeData]]:
         resolved_filepaths, _ = resolve_media_file(
             filepath,
             allow_glob,
@@ -973,11 +936,11 @@ def _resolve_component_relative_paths(
 # If yes, modify the path to refer to the relative file.
 # If not, don't modify anything.
 def resolve_media_file(
-    filepath: str | SafeData,
+    filepath: Union[str, SafeData],
     allow_glob: bool,
     static_files_dir: str,
     media_root_dir: str,
-) -> tuple[list[str | SafeData], bool]:
+) -> Tuple[List[Union[str, SafeData]], bool]:
     # If filepath is NOT a string, then return as is
     if not isinstance(filepath, str):
         return [filepath], False
@@ -1007,7 +970,7 @@ def resolve_media_file(
     if not matched_abs_filepaths:
         return [filepath], False
 
-    resolved_filepaths: list[str | SafeData] = []
+    resolved_filepaths: List[str] = []
     for matched_filepath_abs in matched_abs_filepaths:
         # Derive the path from matched `COMPONENTS.dirs` to the media file.
         # NOTE: The paths to resources need to use POSIX (forward slashes) for Django to work
@@ -1020,9 +983,9 @@ def resolve_media_file(
 
 
 def _find_component_dir_containing_file(
-    component_dirs: Sequence[str | Path],
+    component_dirs: Sequence[Union[str, Path]],
     target_file_path: str,
-) -> str | Path | None:
+) -> Optional[Union[str, Path]]:
     """
     From all directories that may contain components (such as those defined in `COMPONENTS.dirs`),
     find the one that's the parent to the given file.
@@ -1038,12 +1001,12 @@ def _find_component_dir_containing_file(
 
 
 def _get_asset(
-    comp_cls: type["Component"],
+    comp_cls: Type["Component"],
     comp_media: ComponentMedia,
     inlined_attr: Literal["template", "js", "css"],
     file_attr: Literal["template_file", "js_file", "css_file"],
-    comp_dirs: list[Path],
-) -> tuple[str | Unset | None, Template | Unset | None]:  # tuple of (content, Template)
+    comp_dirs: List[Path],
+) -> Tuple[Union[str, Unset, None], Union[Template, Unset, None]]:  # Tuple of (content, Template)
     """
     In case of Component's JS or CSS, one can either define that as "inlined" or as a file.
 
@@ -1191,5 +1154,5 @@ def _get_asset(
     return content, None
 
 
-def is_set(value: T | Unset | None) -> TypeGuard[T]:
+def is_set(value: Union[T, Unset, None]) -> TypeGuard[T]:
     return value is not None and value is not UNSET

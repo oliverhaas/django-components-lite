@@ -24,7 +24,7 @@ For live examples, see the [Examples](../../examples/index.md).
     ```
 
 2.  Create custom [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#how-to-create-custom-template-tags-and-filters)
-    and [`ComponentRegistry`](../../reference/api.md#django_components.ComponentRegistry) instances in `mytags.py`
+    and [`ComponentRegistry`](django_components.component_registry.ComponentRegistry) instances in `mytags.py`
 
     This will be the entrypoint for using the components inside Django templates.
 
@@ -46,15 +46,15 @@ For live examples, see the [Examples](../../examples/index.md).
     ```
 
     As you can see above, this is also the place where we configure how our components should behave,
-    using the [`settings`](../../reference/api.md#django_components.ComponentRegistry.settings) argument.
+    using the [`settings`](django_components.component_registry.ComponentRegistry.settings) argument.
     If omitted, default settings are used.
 
-    For library authors, we recommend setting [`context_behavior`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.context_behavior)
-    to [`"isolated"`](../../reference/api.md#django_components.ContextBehavior.ISOLATED), so that the state cannot leak into the components,
+    For library authors, we recommend setting [`context_behavior`](django_components.app_settings.ComponentsSettings.context_behavior)
+    to [`"isolated"`](django_components.app_settings.ContextBehavior.ISOLATED), so that the state cannot leak into the components,
     and so the components' behavior is configured solely through the inputs. This means that the components will be more predictable and easier to debug.
 
     Next, you can decide how will others use your components by setting the
-    [`tag_formatter`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.tag_formatter)
+    [`tag_formatter`](django_components.app_settings.ComponentsSettings.tag_formatter)
     options.
 
     If omitted or set to `"django_components.component_formatter"`,
@@ -73,7 +73,7 @@ For live examples, see the [Examples](../../examples/index.md).
     {% endtable %}
     ```
 
-    Or you can define a [custom TagFormatter](tag_formatters.md).
+    Or you can define a [custom TagFormatter](#tagformatter).
 
     Either way, these settings will be scoped only to your components. So, in the user code,
     there may be components side-by-side that use different formatters:
@@ -90,17 +90,18 @@ For live examples, see the [Examples](../../examples/index.md).
     {% endcomponent %}
     ```
 
-3.  Write your components and register them with your instance of [`ComponentRegistry`](../../reference/api.md#django_components.ComponentRegistry)
+3.  Write your components and register them with your instance of [`ComponentRegistry`](../../reference/api#ComponentRegistry)
 
     There's one difference when you are writing components that are to be shared, and that's
     that the components must be explicitly registered with your instance of
-    [`ComponentRegistry`](../../reference/api.md#django_components.ComponentRegistry) from the previous step.
+    [`ComponentRegistry`](../../reference/api#ComponentRegistry) from the previous step.
 
     For better user experience, you can also define the types for the args, kwargs, slots and data.
 
     It's also a good idea to have a common prefix for your components, so they can be easily distinguished from users' components. In the example below, we use the prefix `my_` / `My`.
 
     ```djc_py
+    from typing import Optional
     from django_components import Component, SlotInput, register, types
 
     from myapp.templatetags.mytags import comp_registry
@@ -115,12 +116,12 @@ For live examples, see the [Examples](../../examples/index.md).
             text: str
 
         class Kwargs:
-            vertical: bool | None = None
-            klass: str | None = None
-            style: str | None = None
+            vertical: Optional[bool] = None
+            klass: Optional[str] = None
+            style: Optional[str] = None
 
         class Slots:
-            default: SlotInput | None = None
+            default: Optional[SlotInput] = None
 
         def get_template_data(self, args: Args, kwargs: Kwargs, slots: Slots, context: Context):
             attrs = ...
@@ -142,7 +143,7 @@ For live examples, see the [Examples](../../examples/index.md).
 
 4.  Import the components in `apps.py`
 
-    Normally, users rely on [autodiscovery](../fundamentals/autodiscovery.md) and [`COMPONENTS.dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
+    Normally, users rely on [autodiscovery](../../concepts/autodiscovery) and [`COMPONENTS.dirs`](../../reference/settings#dirs)
     to load the component files.
 
     Since you, as the library author, are not in control of the file system, it is recommended to load the components manually.

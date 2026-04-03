@@ -4,51 +4,36 @@ import functools
 import subprocess
 import sys
 import time
-from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Literal, TypeAlias
 
-import pytest
 import requests
-from playwright.async_api import Browser, Playwright
+from playwright.async_api import async_playwright
 
 TEST_SERVER_PORT = "8000"
 TEST_SERVER_URL = f"http://127.0.0.1:{TEST_SERVER_PORT}"
 
 
-BROWSER_NAMES = ["chromium", "firefox", "webkit"]
-BrowserType: TypeAlias = Literal["chromium", "firefox", "webkit"]
+# NOTE: Ideally we'd use Django's setUpClass and tearDownClass methods
+#       to instantiate the browser instance only once. But didn't have luck with that.
+#       So instead we have to create a browser instance for each test.
+#
+#       Additionally, Django's documentation is lacking on async setUp and tearDown,
+#       so instead we use a decorator to run async code before/after each test.
+def with_playwright(test_func):
+    """Decorator that sets up and tears down Playwright browser instance."""
 
-
-async def _launch_browser(playwright: Playwright, browser_name: BrowserType) -> Browser:
-    if browser_name == "chromium":
-        browser = await playwright.chromium.launch()
-    elif browser_name == "firefox":
-        browser = await playwright.firefox.launch()
-    elif browser_name == "webkit":
-        browser = await playwright.webkit.launch()
-    else:
-        raise ValueError(f"Unknown browser: {browser_name}")
-    return browser
-
-
-def with_playwright(test_func: Callable[..., Any]) -> Callable[..., Any]:
-    """
-    Decorator that provides Playwright browser instance as a pytest fixture.
-
-    Tests decorated with this will automatically run across all major browsers:
-    Chromium, Firefox, and WebKit.
-
-    The browser instance is reused across all tests (session-scoped) for better performance.
-    """
-
-    # NOTE: Using `browser` and `browser_name` as fixtures means that the test will be run
-    #       once per browser type (chromium, firefox, webkit).
     @functools.wraps(test_func)
-    @pytest.mark.asyncio(scope="session")  # Needed to run the test in async mode
-    async def wrapper(self: Any, browser: Browser, browser_name: BrowserType, *args: Any, **kwargs: Any) -> Any:
+    async def wrapper(self, *args, **kwargs):
+        # Setup
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch()
+
         # Test
-        await test_func(self, *args, browser=browser, browser_name=browser_name, **kwargs)
+        await test_func(self, *args, **kwargs)
+
+        # Teardown
+        await self.browser.close()
+        await self.playwright.stop()
 
     return wrapper
 

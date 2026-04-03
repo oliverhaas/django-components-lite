@@ -2,11 +2,13 @@ Django-components supports all supported combinations versions of [Django](https
 
 | Python version | Django version |
 | -------------- | -------------- |
-| 3.10           | 4.2, 5.2       |
-| 3.11           | 4.2, 5.2       |
-| 3.12           | 4.2, 5.2, 6.0  |
-| 3.13           | 5.2, 6.0       |
-| 3.14           | 5.2, 6.0       |
+| 3.8            | 4.2            |
+| 3.9            | 4.2            |
+| 3.10           | 4.2, 5.1, 5.2  |
+| 3.11           | 4.2, 5.1, 5.2  |
+| 3.12           | 4.2, 5.1, 5.2  |
+| 3.13           | 5.1, 5.2       |
+| 3.14           | 5.2            |
 
 ### Operating systems
 
@@ -17,7 +19,7 @@ django-components is tested against Ubuntu and Windows, and should work on any o
     django-components uses Rust-based parsers for better performance.
 
     These sub-packages are built with [maturin](https://github.com/PyO3/maturin)
-    which supports a wide range of operating systems, architectures, and Python versions ([see the full list](https://pypi.org/project/djc-core/#files)).
+    which supports a wide range of operating systems, architectures, and Python versions ([see the full list](https://pypi.org/project/djc-core-html-parser/#files)).
     
     This should cover most of the cases.
 

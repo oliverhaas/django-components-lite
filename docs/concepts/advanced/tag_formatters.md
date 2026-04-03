@@ -14,7 +14,7 @@ Click me!
 {% component "button" href="..." disabled / %}
 ```
 
-You can change this behaviour in the settings under the [`COMPONENTS.tag_formatter`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.tag_formatter).
+You can change this behaviour in the settings under the [`COMPONENTS.tag_formatter`](#tag-formatter-setting).
 
 For example, if you set the tag formatter to
 
@@ -154,7 +154,7 @@ class ShorthandComponentFormatter(TagFormatterABC):
     #
     # The parser receives:
     # `['button', 'href="..."', 'disabled']`
-    def parse(self, tokens: list[str]) -> TagResult:
+    def parse(self, tokens: List[str]) -> TagResult:
         tokens = [*tokens]
         name = tokens.pop(0)
         return TagResult(

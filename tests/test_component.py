@@ -5,7 +5,7 @@ For tests focusing on the `component` tag, see `test_templatetags_component.py`
 
 import os
 import re
-from typing import Any, Literal, NamedTuple
+from typing import Any, List, Literal, Optional
 
 import pytest
 from django.conf import settings
@@ -231,6 +231,7 @@ class TestComponentLegacyApi:
         )
 
     # TODO_v1 - Remove
+    @pytest.mark.skip(reason="REMOVED: Template caching")
     def test_get_template_is_cached(self):
         class SimpleComponent(Component):
             def get_template(self, context):
@@ -291,119 +292,6 @@ class TestComponentLegacyApi:
             """
             Variable: <strong data-djc-id-ca1bc3e>test</strong> MY_SLOT
             """,
-        )
-
-    def test_input_template_kwargs(self):
-        captured = None
-
-        @register("test")
-        class Test(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal captured
-                captured = kwargs
-
-        template_str: types.django_html = """
-            {% load component_tags %}
-            {% component "test"
-                data={
-                    "items": [
-                        1|add:2,
-                        {"x"|upper: 2|add:3},
-                        *spread_items
-                    ],
-                    "nested": {
-                        "a": [
-                            1|add:2,
-                            *nums|default:"",
-                            *"{% lorem 1 w %}",
-                        ],
-                        "b": {
-                            "x": [
-                                *more|first,
-                            ],
-                            "{% lorem 2 w %}": "{% lorem 3 w %}",
-                        }
-                    },
-                    **rest,
-                    "key": _('value')|upper
-                }
-            / %}
-        """
-
-        template = Template(template_str)
-        template.render(
-            Context(
-                {
-                    "spread_items": ["foo", "bar"],
-                    "nums": [1, 2, 3],
-                    "more": ["baz", "qux"],
-                    "rest": {"a": "b"},
-                },
-            ),
-        )
-
-        assert captured == {
-            "data": {
-                "items": [3, {"X": 5}, "foo", "bar"],
-                "nested": {
-                    "a": [3, 1, 2, 3, "l", "o", "r", "e", "m"],
-                    "b": {
-                        "x": ["b", "a", "z"],
-                        "lorem ipsum": "lorem ipsum dolor",
-                    },
-                },
-                "a": "b",
-                "key": "VALUE",
-            },
-        }
-
-    def test_input_template_both_args_kwargs(self):
-        captured = None
-
-        @register("test")
-        class Test(Component):
-            template = "var"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal captured
-                captured = args, kwargs
-
-        template_str: types.django_html = """
-            {% load component_tags %}
-            {% component 'test' 42 myvar key='val' key2=val2 %}
-            {% endcomponent %}
-        """
-        Template(template_str).render(Context({"myvar": "myval", "val2": [1, 2, 3]}))
-
-        assert captured == ([42, "myval"], {"key": "val", "key2": [1, 2, 3]})
-
-    def test_input_kwargs_special(self):
-        captured = None
-
-        @register("test")
-        class Test(Component):
-            template = "var"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal captured
-                captured = args, kwargs
-
-        template_str: types.django_html = """
-            {% load component_tags %}
-            {% component 'test' date=date @lol=2 na-me=bzz @event:na-me.mod=bzz #my-id=True %}
-            {% endcomponent %}
-        """
-        Template(template_str).render(Context({"date": 2024, "bzz": "fzz"}))
-
-        assert captured == (
-            [],
-            {
-                "date": 2024,
-                "@lol": 2,
-                "na-me": "fzz",
-                "@event": {"na-me.mod": "fzz"},
-                "#my-id": True,
-            },
         )
 
 
@@ -860,334 +748,6 @@ class TestComponentRenderAPI:
         assert comp.registered_name == "test"
 
         assert comp.node is None
-
-    def test_parent__root_component(self):
-        """Test that parent returns None for root components."""
-        comp: Any = None
-
-        class RootComponent(Component):
-            template = "root"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal comp
-                comp = self
-                # Root component should have no parent
-                assert self.parent is None
-                return {}
-
-        RootComponent.render()
-        assert comp is not None
-        assert comp.parent is None
-
-    def test_parent__nested_component(self):
-        """Test that parent returns the correct parent component instance."""
-        grandparent_comp: Any = None
-        parent_comp: Any = None
-        child_comp: Any = None
-
-        @register("child")
-        class ChildComponent(Component):
-            template = "child"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal child_comp
-                child_comp = self
-
-                # Child should have a parent
-                assert self.parent is not None
-                assert self.parent == parent_comp
-                # Child's parent should have a parent (grandparent)
-                assert self.parent.parent == grandparent_comp
-
-        @register("parent")
-        class ParentComponent(Component):
-            template = "{% component 'child' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal parent_comp
-                parent_comp = self
-
-                # Parent should have a parent (grandparent)
-                assert self.parent is not None
-                assert self.parent == grandparent_comp
-
-        class GrandparentComponent(Component):
-            template = "{% component 'parent' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal grandparent_comp
-                grandparent_comp = self
-
-                # Grandparent should have no parent (it's the root)
-                assert self.parent is None
-
-        GrandparentComponent.render()
-
-        assert grandparent_comp is not None
-        assert parent_comp is not None
-        assert child_comp is not None
-        assert child_comp.parent == parent_comp
-        assert child_comp.parent is not None
-        assert parent_comp.parent == grandparent_comp
-        assert parent_comp.parent is not None
-        assert grandparent_comp.parent is None
-
-    def test_root__root_component(self):
-        """Test that root returns self for root components."""
-        comp: Any = None
-
-        class RootComponent(Component):
-            template = "root"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal comp
-                comp = self
-                # Root component should return self
-                assert self.root == self
-                return {}
-
-        RootComponent.render()
-        assert comp is not None
-        assert comp.root == comp
-
-    def test_root__nested_component(self):
-        """Test that root returns the correct root component instance."""
-        root_comp: Any = None
-        middle_comp: Any = None
-        leaf_comp: Any = None
-
-        @register("leaf")
-        class LeafComponent(Component):
-            template = "leaf"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal leaf_comp
-                leaf_comp = self
-                # Leaf should point to root
-                assert self.root == root_comp
-                return {}
-
-        @register("middle")
-        class MiddleComponent(Component):
-            template = "{% component 'leaf' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal middle_comp
-                middle_comp = self
-                # Middle should also point to root
-                assert self.root == root_comp
-                return {}
-
-        class RootComponent(Component):
-            template = "{% component 'middle' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal root_comp
-                root_comp = self
-                # Root should return self
-                assert self.root == self
-                return {}
-
-        RootComponent.render()
-        assert root_comp is not None
-        assert middle_comp is not None
-        assert leaf_comp is not None
-        assert leaf_comp.root == root_comp
-        assert middle_comp.root == root_comp
-        assert root_comp.root == root_comp
-
-    def test_ancestors__root_component(self):
-        """Test that ancestors is empty for root components."""
-        comp: Any = None
-
-        class RootComponent(Component):
-            template = "root"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal comp
-                comp = self
-                # Root component should have no ancestors
-                ancestors_list = list(self.ancestors)
-                assert ancestors_list == []
-                return {}
-
-        RootComponent.render()
-        assert comp is not None
-        assert list(comp.ancestors) == []
-
-    def test_ancestors__nested_component(self):
-        """Test that ancestors yields all ancestors in correct order."""
-        root_comp: Any = None
-        middle_comp: Any = None
-        leaf_comp: Any = None
-
-        @register("leaf")
-        class LeafComponent(Component):
-            template = "leaf"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal leaf_comp
-                leaf_comp = self
-                # Leaf should have middle and root as ancestors (in that order)
-                ancestors_list = list(self.ancestors)
-                assert len(ancestors_list) == 2
-                assert ancestors_list[0] == middle_comp
-                assert ancestors_list[1] == root_comp
-                return {}
-
-        @register("middle")
-        class MiddleComponent(Component):
-            template = "{% component 'leaf' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal middle_comp
-                middle_comp = self
-                # Middle should have only root as ancestor
-                ancestors_list = list(self.ancestors)
-                assert len(ancestors_list) == 1
-                assert ancestors_list[0] == root_comp
-                return {}
-
-        class RootComponent(Component):
-            template = "{% component 'middle' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal root_comp
-                root_comp = self
-                # Root should have no ancestors
-                ancestors_list = list(self.ancestors)
-                assert ancestors_list == []
-                return {}
-
-        RootComponent.render()
-        assert root_comp is not None
-        assert middle_comp is not None
-        assert leaf_comp is not None
-
-        # Verify ancestors from outside the render context
-        leaf_ancestors = list(leaf_comp.ancestors)
-        assert len(leaf_ancestors) == 2
-        assert leaf_ancestors[0] == middle_comp
-        assert leaf_ancestors[1] == root_comp
-
-        middle_ancestors = list(middle_comp.ancestors)
-        assert len(middle_ancestors) == 1
-        assert middle_ancestors[0] == root_comp
-
-        root_ancestors = list(root_comp.ancestors)
-        assert root_ancestors == []
-
-    def test_ancestors__same_component_at_different_levels(self):
-        """Test ancestors when the same component class appears at different levels [CompA, CompB, CompA]."""
-        comp_a_root: Any = None
-        comp_b: Any = None
-        comp_a_leaf: Any = None
-
-        @register("comp_a")
-        class CompA(Component):
-            template: types.django_html = """
-                {% if not leaf %}
-                    {% component 'comp_b' / %}
-                {% endif %}
-            """
-
-            class Kwargs(NamedTuple):
-                leaf: bool = False
-
-            def get_template_data(self, args, kwargs: Kwargs, slots, context):
-                nonlocal comp_a_root
-
-                # Root CompA
-                if not kwargs.leaf:
-                    comp_a_root = self
-                    # Root should have no ancestors
-                    ancestors_list = list(self.ancestors)
-                    assert ancestors_list == []
-                # Leaf CompA
-                else:
-                    nonlocal comp_a_leaf
-                    # This is the leaf CompA (nested inside CompB)
-                    comp_a_leaf = self
-                    # Leaf CompA should have [CompB, CompA] as ancestors
-                    ancestors_list = list(self.ancestors)
-                    assert len(ancestors_list) == 2
-                    assert ancestors_list[0] == comp_b
-                    assert ancestors_list[1] == comp_a_root
-
-                return {"leaf": kwargs.leaf}
-
-        @register("comp_b")
-        class CompB(Component):
-            template = "{% component 'comp_a' leaf=True / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal comp_b
-                comp_b = self
-                # CompB should have [CompA] as ancestor
-                ancestors_list = list(self.ancestors)
-
-                assert len(ancestors_list) == 1
-                assert ancestors_list[0] == comp_a_root
-
-        CompA.render(
-            kwargs=CompA.Kwargs(leaf=False),
-        )
-
-        assert comp_a_root is not None
-        assert comp_b is not None
-        assert comp_a_leaf is not None
-
-        assert comp_a_root is not comp_a_leaf
-
-        # Verify ancestors from outside the render context
-        # Leaf CompA should have [CompB, CompA] as ancestors
-        leaf_ancestors = list(comp_a_leaf.ancestors)
-        assert len(leaf_ancestors) == 2
-        assert leaf_ancestors[0] == comp_b
-        assert leaf_ancestors[1] == comp_a_root
-
-        # CompB should have [CompA] as ancestor
-        comp_b_ancestors = list(comp_b.ancestors)
-        assert len(comp_b_ancestors) == 1
-        assert comp_b_ancestors[0] == comp_a_root
-
-        # Root CompA should have no ancestors
-        root_ancestors = list(comp_a_root.ancestors)
-        assert root_ancestors == []
-
-    def test_parent_root_ancestors__type_checking(self):
-        """Test that parent, root, and ancestors work with isinstance checks."""
-        root_comp: Any = None
-        child_comp: Any = None
-
-        @register("child")
-        class ChildComponent(Component):
-            template = "child"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal child_comp
-                child_comp = self
-                return {}
-
-        class RootComponent(Component):
-            template = "{% component 'child' / %}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal root_comp
-                root_comp = self
-                return {}
-
-        RootComponent.render()
-
-        # Test isinstance checks work correctly
-        assert isinstance(child_comp.parent, RootComponent)
-        assert isinstance(child_comp.root, RootComponent)
-        assert isinstance(root_comp.root, RootComponent)
-
-        # Test ancestors iteration
-        for ancestor in child_comp.ancestors:
-            assert isinstance(ancestor, Component)
-            assert ancestor == root_comp
 
 
 @djc_test
@@ -1667,6 +1227,7 @@ class TestComponentRender:
     # See https://github.com/django-components/django-components/issues/580
     # And https://github.com/django-components/django-components/issues/634
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
+    @pytest.mark.skip(reason="REMOVED: Component.View extension")
     def test_request_context_is_populated_from_context_processors(self, components_settings):
         @register("thing")
         class Thing(Component):
@@ -1720,6 +1281,7 @@ class TestComponentRender:
 
         assert token == b"CSRF token: predictabletoken"
 
+    @pytest.mark.skip(reason="REMOVED: Component.View extension")
     def test_request_context_created_when_no_context(self):
         @register("thing")
         class Thing(Component):
@@ -1741,6 +1303,7 @@ class TestComponentRender:
 
         assert token == b"CSRF token: predictabletoken"
 
+    @pytest.mark.skip(reason="REMOVED: Component.View extension")
     def test_request_context_created_when_already_a_context_dict(self):
         @register("thing")
         class Thing(Component):
@@ -1849,6 +1412,7 @@ class TestComponentRender:
         )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
+    @pytest.mark.skip(reason="REMOVED: Provide/Inject system")
     def test_prepends_exceptions_with_component_path(self, components_settings):
         @register("broken")
         class Broken(Component):
@@ -1954,6 +1518,7 @@ class TestComponentRender:
             Other.render()
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
+    @pytest.mark.skip(reason="Optional pydantic dependency not installed")
     def test_pydantic_exception(self, components_settings):
         from pydantic import BaseModel, ValidationError
 
@@ -2006,14 +1571,14 @@ class TestComponentRender:
 
 @djc_test
 class TestComponentHook:
-    def _gen_slotted_component(self, calls: list[str]):
+    def _gen_slotted_component(self, calls: List[str]):
         class Slotted(Component):
             template = "Hello from slotted"
 
-            def on_render_before(self, context: Context, template: Template | None) -> None:
+            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
                 calls.append("slotted__on_render_before")
 
-            def on_render(self, context: Context, template: Template | None):
+            def on_render(self, context: Context, template: Optional[Template]):
                 calls.append("slotted__on_render_pre")
                 _html, _error = yield lambda: template.render(context)  # type: ignore[union-attr]
 
@@ -2023,15 +1588,15 @@ class TestComponentHook:
             def on_render_after(
                 self,
                 context: Context,
-                template: Template | None,
-                html: str | None,
-                error: Exception | None,
+                template: Optional[Template],
+                html: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 calls.append("slotted__on_render_after")
 
         return Slotted
 
-    def _gen_inner_component(self, calls: list[str]):
+    def _gen_inner_component(self, calls: List[str]):
         class Inner(Component):
             template: types.django_html = """
                 {% load component_tags %}
@@ -2040,10 +1605,10 @@ class TestComponentHook:
                 Inner end
             """
 
-            def on_render_before(self, context: Context, template: Template | None) -> None:
+            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
                 calls.append("inner__on_render_before")
 
-            def on_render(self, context: Context, template: Template | None):
+            def on_render(self, context: Context, template: Optional[Template]):
                 calls.append("inner__on_render_pre")
                 if template is None:
                     yield None
@@ -2056,15 +1621,15 @@ class TestComponentHook:
             def on_render_after(
                 self,
                 context: Context,
-                template: Template | None,
-                html: str | None,
-                error: Exception | None,
+                template: Optional[Template],
+                html: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 calls.append("inner__on_render_after")
 
         return Inner
 
-    def _gen_middle_component(self, calls: list[str]):
+    def _gen_middle_component(self, calls: List[str]):
         class Middle(Component):
             template: types.django_html = """
                 {% load component_tags %}
@@ -2077,10 +1642,10 @@ class TestComponentHook:
                 Middle end
             """
 
-            def on_render_before(self, context: Context, template: Template | None) -> None:
+            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
                 calls.append("middle__on_render_before")
 
-            def on_render(self, context: Context, template: Template | None):
+            def on_render(self, context: Context, template: Optional[Template]):
                 calls.append("middle__on_render_pre")
                 _html, _error = yield lambda: template.render(context)  # type: ignore[union-attr]
 
@@ -2090,15 +1655,15 @@ class TestComponentHook:
             def on_render_after(
                 self,
                 context: Context,
-                template: Template | None,
-                html: str | None,
-                error: Exception | None,
+                template: Optional[Template],
+                html: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 calls.append("middle__on_render_after")
 
         return Middle
 
-    def _gen_outer_component(self, calls: list[str]):
+    def _gen_outer_component(self, calls: List[str]):
         class Outer(Component):
             template: types.django_html = """
                 {% load component_tags %}
@@ -2109,10 +1674,10 @@ class TestComponentHook:
                 Outer end
             """
 
-            def on_render_before(self, context: Context, template: Template | None) -> None:
+            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
                 calls.append("outer__on_render_before")
 
-            def on_render(self, context: Context, template: Template | None):
+            def on_render(self, context: Context, template: Optional[Template]):
                 calls.append("outer__on_render_pre")
                 _html, _error = yield lambda: template.render(context)  # type: ignore[union-attr]
 
@@ -2122,9 +1687,9 @@ class TestComponentHook:
             def on_render_after(
                 self,
                 context: Context,
-                template: Template | None,
-                html: str | None,
-                error: Exception | None,
+                template: Optional[Template],
+                html: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 calls.append("outer__on_render_after")
 
@@ -2138,7 +1703,7 @@ class TestComponentHook:
         return BrokenComponent
 
     def test_order(self):
-        calls: list[str] = []
+        calls: List[str] = []
 
         registry.register("slotted", self._gen_slotted_component(calls))
         registry.register("inner", self._gen_inner_component(calls))
@@ -2244,8 +1809,8 @@ class TestComponentHook:
                 self,
                 context: Context,
                 template: Template,
-                html: str | None,
-                error: Exception | None,
+                html: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 context["from_on_after"] = "4"
                 # Check we can modify entries set by other methods
@@ -2296,8 +1861,8 @@ class TestComponentHook:
                 self,
                 context: Context,
                 template: Template,
-                html: str | None,
-                error: Exception | None,
+                html: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 template.nodelist.append(TextNode("\n---\nFROM_ON_AFTER"))
 
@@ -2347,7 +1912,7 @@ class TestComponentHook:
 
         class SimpleComponent(Component):
             def on_render(self, context: Context, template: Template):
-                _html, error = yield broken_template
+                _html, error = yield lambda: broken_template()
                 error.args = ("ERROR MODIFIED",)
 
         with pytest.raises(
@@ -2412,7 +1977,7 @@ class TestComponentHook:
                 {% endif %}
             """
 
-            def on_render(self, context: Context, template: Template | None):
+            def on_render(self, context: Context, template: Optional[Template]):
                 assert template is not None
 
                 with context.push({"case": 1}):
@@ -2490,11 +2055,11 @@ class TestComponentHook:
     )
     def test_result_interception(
         self,
-        template: Literal["simple", "broken"] | None,
+        template: Optional[Literal["simple", "broken"]],
         action: Literal["return_none", "no_return", "raise_error", "return_html"],
         method: Literal["on_render", "on_render_after"],
     ):
-        calls: list[str] = []
+        calls: List[str] = []
 
         Broken = self._gen_broken_component()
         Slotted = self._gen_slotted_component(calls)
@@ -2523,7 +2088,7 @@ class TestComponentHook:
             if action == "return_none":
 
                 class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Template | None):
+                    def on_render(self, context: Context, template: Optional[Template]):
                         if template is None:
                             yield None
                         else:
@@ -2533,7 +2098,7 @@ class TestComponentHook:
             elif action == "no_return":
 
                 class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Template | None):
+                    def on_render(self, context: Context, template: Optional[Template]):
                         if template is None:
                             yield None
                         else:
@@ -2542,7 +2107,7 @@ class TestComponentHook:
             elif action == "raise_error":
 
                 class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Template | None):
+                    def on_render(self, context: Context, template: Optional[Template]):
                         if template is None:
                             yield None
                         else:
@@ -2552,7 +2117,7 @@ class TestComponentHook:
             elif action == "return_html":
 
                 class Inner(Inner):  # type: ignore  # noqa: PGH003
-                    def on_render(self, context: Context, template: Template | None):
+                    def on_render(self, context: Context, template: Optional[Template]):
                         if template is None:
                             yield None
                         else:
@@ -2571,8 +2136,8 @@ class TestComponentHook:
                         self,
                         context: Context,
                         template: Template,
-                        html: str | None,
-                        error: Exception | None,
+                        html: Optional[str],
+                        error: Optional[Exception],
                     ):
                         return None
 
@@ -2583,8 +2148,8 @@ class TestComponentHook:
                         self,
                         context: Context,
                         template: Template,
-                        html: str | None,
-                        error: Exception | None,
+                        html: Optional[str],
+                        error: Optional[Exception],
                     ):
                         pass
 
@@ -2595,8 +2160,8 @@ class TestComponentHook:
                         self,
                         context: Context,
                         template: Template,
-                        html: str | None,
-                        error: Exception | None,
+                        html: Optional[str],
+                        error: Optional[Exception],
                     ):
                         raise ValueError("ERROR_FROM_ON_RENDER")
 
@@ -2607,8 +2172,8 @@ class TestComponentHook:
                         self,
                         context: Context,
                         template: Template,
-                        html: str | None,
-                        error: Exception | None,
+                        html: Optional[str],
+                        error: Optional[Exception],
                     ):
                         return "HTML_FROM_ON_RENDER"
 

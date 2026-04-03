@@ -4,7 +4,7 @@
 # - https://github.com/django-components/django-components/pull/999
 
 from pathlib import Path
-from typing import Literal, NamedTuple, TypeAlias
+from typing import Dict, Literal, NamedTuple, Optional, Union
 
 import django
 from django.conf import settings
@@ -61,7 +61,7 @@ else:
 #
 #####################################
 
-templates_cache: dict[int, Template] = {}
+templates_cache: Dict[int, Template] = {}
 
 
 def lazy_load_template(template: str) -> Template:
@@ -92,7 +92,7 @@ def gen_render_data():
     return data
 
 
-def render(data: dict):
+def render(data: Dict):
     # Render
     result = Button.render(
         context=Context(),
@@ -108,8 +108,8 @@ def render(data: dict):
 # THEME
 #####################################
 
-ThemeColor: TypeAlias = Literal["default", "error", "success", "alert", "info"]
-ThemeVariant: TypeAlias = Literal["primary", "secondary"]
+ThemeColor = Literal["default", "error", "success", "alert", "info"]
+ThemeVariant = Literal["primary", "secondary"]
 
 VARIANTS = ["primary", "secondary"]
 
@@ -220,9 +220,9 @@ theme = Theme(
 
 
 def get_styling_css(
-    variant: "ThemeVariant | None" = None,
-    color: "ThemeColor | None" = None,
-    disabled: bool | None = None,
+    variant: Optional["ThemeVariant"] = None,
+    color: Optional["ThemeColor"] = None,
+    disabled: Optional[bool] = None,
 ):
     """
     Dynamically access CSS styling classes for a specific variant and state.
@@ -263,13 +263,13 @@ class Button(Component):
         self,
         /,
         *,
-        href: str | None = None,
-        link: bool | None = None,
-        disabled: bool | None = False,
-        variant: "ThemeVariant | Literal['plain']" = "primary",
-        color: "ThemeColor | str" = "default",
-        type: str | None = "button",  # noqa: A002
-        attrs: dict | None = None,
+        href: Optional[str] = None,
+        link: Optional[bool] = None,
+        disabled: Optional[bool] = False,
+        variant: Union["ThemeVariant", Literal["plain"]] = "primary",
+        color: Union["ThemeColor", str] = "default",
+        type: Optional[str] = "button",  # noqa: A002
+        attrs: Optional[dict] = None,
     ):
         common_css = (
             "inline-flex w-full text-sm font-semibold"

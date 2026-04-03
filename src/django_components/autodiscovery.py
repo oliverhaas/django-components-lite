@@ -1,5 +1,5 @@
 import importlib
-from collections.abc import Callable
+from typing import Callable, List, Optional
 
 from django_components.util.loader import get_component_files
 from django_components.util.logger import logger
@@ -8,20 +8,20 @@ from django_components.util.testing import is_testing
 # In tests, we want to capture which modules have been loaded, so we can
 # clean them up between tests. But there's no need to track this in
 # production.
-LOADED_MODULES: list[str] = []
+LOADED_MODULES: List[str] = []
 
 
 def autodiscover(
-    map_module: Callable[[str], str] | None = None,
-) -> list[str]:
+    map_module: Optional[Callable[[str], str]] = None,
+) -> List[str]:
     """
     Search for all python files in
-    [`COMPONENTS.dirs`](settings.md#django_components.app_settings.ComponentsSettings.dirs)
+    [`COMPONENTS.dirs`](../settings#django_components.app_settings.ComponentsSettings.dirs)
     and
-    [`COMPONENTS.app_dirs`](settings.md#django_components.app_settings.ComponentsSettings.app_dirs)
+    [`COMPONENTS.app_dirs`](../settings#django_components.app_settings.ComponentsSettings.app_dirs)
     and import them.
 
-    See [Autodiscovery](../concepts/fundamentals/autodiscovery.md).
+    See [Autodiscovery](../../concepts/fundamentals/autodiscovery).
 
     NOTE: Subdirectories and files starting with an underscore `_` (except for `__init__.py` are ignored.
 
@@ -30,10 +30,10 @@ def autodiscover(
         This serves as an escape hatch for when you need to use this function in tests.
 
     Returns:
-        list[str]: A list of module paths of imported files.
+        List[str]: A list of module paths of imported files.
 
     To get the same list of modules that `autodiscover()` would return, but without importing them, use
-    [`get_component_files()`](api.md#django_components.get_component_files):
+    [`get_component_files()`](../api#django_components.get_component_files):
 
     ```python
     from django_components import get_component_files
@@ -48,21 +48,21 @@ def autodiscover(
 
 
 def import_libraries(
-    map_module: Callable[[str], str] | None = None,
-) -> list[str]:
+    map_module: Optional[Callable[[str], str]] = None,
+) -> List[str]:
     """
     Import modules set in
-    [`COMPONENTS.libraries`](settings.md#django_components.app_settings.ComponentsSettings.libraries)
+    [`COMPONENTS.libraries`](../settings#django_components.app_settings.ComponentsSettings.libraries)
     setting.
 
-    See [Autodiscovery](../concepts/fundamentals/autodiscovery.md).
+    See [Autodiscovery](../../concepts/fundamentals/autodiscovery).
 
     Args:
         map_module (Callable[[str], str], optional): Map the module paths with `map_module` function.\
         This serves as an escape hatch for when you need to use this function in tests.
 
     Returns:
-        list[str]: A list of module paths of imported files.
+        List[str]: A list of module paths of imported files.
 
     **Examples:**
 
@@ -89,10 +89,10 @@ def import_libraries(
 
 
 def _import_modules(
-    modules: list[str],
-    map_module: Callable[[str], str] | None = None,
-) -> list[str]:
-    imported_modules: list[str] = []
+    modules: List[str],
+    map_module: Optional[Callable[[str], str]] = None,
+) -> List[str]:
+    imported_modules: List[str] = []
     for module_name in modules:
         if map_module:
             module_name = map_module(module_name)  # noqa: PLW2901

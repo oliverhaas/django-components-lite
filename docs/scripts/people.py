@@ -10,9 +10,9 @@ import subprocess
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import requests
+import httpx
 import yaml  # type: ignore[import-untyped]
 from github import Github
 from pydantic import BaseModel, SecretStr
@@ -30,9 +30,6 @@ BOT_USERS = {
     "pre-commit-ci",
     "copilot-swe-agent",
 }
-
-# NOTE: Relative to project root
-PEOPLE_PAGE_PATH = Path("docs/community/people.yml")
 
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 
@@ -62,7 +59,7 @@ query Q($after: String) {
 class Settings(BaseSettings):
     github_token: SecretStr
     github_repository: str
-    timeout: int = 30
+    httpx_timeout: int = 30
     sleep_interval: int = 5
 
 
@@ -73,7 +70,7 @@ class Author(BaseModel):
 
 
 class PullRequestNode(BaseModel):
-    author: Author | None = None
+    author: Union[Author, None] = None
     title: str
     createdAt: datetime  # noqa: N815
     state: str
@@ -85,7 +82,7 @@ class PullRequestEdge(BaseModel):
 
 
 class PullRequests(BaseModel):
-    edges: list[PullRequestEdge]
+    edges: List[PullRequestEdge]
 
 
 class PRsRepository(BaseModel):
@@ -104,15 +101,15 @@ def get_graphql_response(
     *,
     settings: Settings,
     query: str,
-    after: str | None = None,
-) -> dict[str, Any]:
+    after: Optional[str] = None,
+) -> Dict[str, Any]:
     """Make a GraphQL request to GitHub API and return the response."""
     headers = {"Authorization": f"token {settings.github_token.get_secret_value()}"}
     variables = {"after": after}
-    response = requests.post(
+    response = httpx.post(
         GITHUB_GRAPHQL_URL,
         headers=headers,
-        timeout=settings.timeout,
+        timeout=settings.httpx_timeout,
         json={"query": query, "variables": variables, "operationName": "Q"},
     )
     if response.status_code != 200:
@@ -128,14 +125,14 @@ def get_graphql_response(
     return data
 
 
-def get_graphql_pr_edges(*, settings: Settings, after: str | None = None) -> list[PullRequestEdge]:
+def get_graphql_pr_edges(*, settings: Settings, after: Optional[str] = None) -> List[PullRequestEdge]:
     """Fetch pull request edges from GitHub GraphQL API."""
     data = get_graphql_response(settings=settings, query=GET_PRS_QUERY, after=after)
     graphql_response = PRsResponse.model_validate(data)
     return graphql_response.data.repository.pullRequests.edges
 
 
-def get_contributors(settings: Settings) -> tuple[Counter, dict[str, Author]]:
+def get_contributors(settings: Settings) -> Tuple[Counter, Dict[str, Author]]:
     """Analyze pull requests to identify contributors."""
     nodes = []
     edges = get_graphql_pr_edges(settings=settings)
@@ -147,7 +144,7 @@ def get_contributors(settings: Settings) -> tuple[Counter, dict[str, Author]]:
         edges = get_graphql_pr_edges(settings=settings, after=last_edge.cursor)
 
     contributors: Counter[str] = Counter()
-    authors: dict[str, Author] = {}
+    authors: Dict[str, Author] = {}
     for pr in nodes:
         author = pr.author
         if author and pr.state == "MERGED":
@@ -210,7 +207,8 @@ def main() -> None:
         "maintainers": maintainers,
         "contributors": contributors,
     }
-    updated = update_content(content_path=PEOPLE_PAGE_PATH, new_content=people)
+    people_path = Path("../community/people.yml")
+    updated = update_content(content_path=people_path, new_content=people)
 
     if not updated:
         logger.info("The data hasn't changed, finishing.")
@@ -223,9 +221,9 @@ def main() -> None:
     logger.info("Creating a new branch %s", branch_name)
     subprocess.run([git_exe, "git", "checkout", "-b", branch_name], check=True)
     logger.info("Adding updated file")
-    subprocess.run([git_exe, "git", "add", str(PEOPLE_PAGE_PATH)], check=True)
+    subprocess.run([git_exe, "git", "add", str(people_path)], check=True)
     logger.info("Committing updated file")
-    message = "👥 Update Django Components People - Experts"
+    message = "👥 Update FastAPI People - Experts"
     subprocess.run([git_exe, "git", "commit", "-m", message], check=True)
     logger.info("Pushing branch")
     subprocess.run([git_exe, "git", "push", "origin", branch_name], check=True)

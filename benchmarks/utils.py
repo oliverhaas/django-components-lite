@@ -1,10 +1,9 @@
 import os
 import sys
-from collections.abc import Callable
 from importlib.abc import Loader
 from importlib.util import module_from_spec, spec_from_loader
 from types import ModuleType
-from typing import Any
+from typing import Any, Callable, Dict, List, Optional
 
 
 # NOTE: benchmark_name constraints:
@@ -14,12 +13,12 @@ from typing import Any
 # See https://github.com/airspeed-velocity/asv/pull/1470
 def benchmark(
     *,
-    pretty_name: str | None = None,
-    timeout: int | None = None,
-    group_name: str | None = None,
-    params: dict[str, list[Any]] | None = None,
-    number: int | None = None,
-    min_run_count: int | None = None,
+    pretty_name: Optional[str] = None,
+    timeout: Optional[int] = None,
+    group_name: Optional[str] = None,
+    params: Optional[Dict[str, List[Any]]] = None,
+    number: Optional[int] = None,
+    min_run_count: Optional[int] = None,
     include_in_quick_benchmark: bool = False,
     **kwargs: Any,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:

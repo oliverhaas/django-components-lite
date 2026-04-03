@@ -1,8 +1,7 @@
-from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Protocol, TypeVar
+from typing import Any, Dict, Iterable, Optional, Protocol, Type, TypeVar
 
-TClass = TypeVar("TClass", bound=type[Any])
+TClass = TypeVar("TClass", bound=Type[Any])
 
 
 # Mark object as related to extension URLs so we can place these in
@@ -64,10 +63,10 @@ class URLRoute:
     """
 
     path: str
-    handler: URLRouteHandler | None = None
+    handler: Optional[URLRouteHandler] = None
     children: Iterable["URLRoute"] = field(default_factory=list)
-    name: str | None = None
-    extra: dict[str, Any] = field(default_factory=dict)
+    name: Optional[str] = None
+    extra: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.handler is not None and self.children:

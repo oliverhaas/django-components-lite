@@ -8,7 +8,6 @@ nav:
     - Recursion: ./recursion
     - A/B testing: ./ab_testing
     - Analytics: ./analytics
-    - Python Expressions: ./python_expressions
   - Components:
     - FormGrid: ./form_grid
     - Tabs (AlpineJS): ./tabs

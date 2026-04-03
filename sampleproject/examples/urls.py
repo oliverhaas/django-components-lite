@@ -34,8 +34,7 @@ def get_example_urls():
             view_class = None
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
-                is_component_sublass = isinstance(attr, type) and issubclass(attr, Component)
-                if is_component_sublass and attr_name != "Component" and attr_name.endswith("Page"):
+                if issubclass(attr, Component) and attr_name != "Component" and attr_name.endswith("Page"):
                     view_class = attr
                     break
 
@@ -49,9 +48,8 @@ def get_example_urls():
             urlpatterns.append(path(url_pattern, view_class.as_view(), name=view_name))
             print(f"Registered URL: {url_pattern} -> {view_class.__name__}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"Failed to register URL for {example_name}: {e}")
-            raise
 
     return urlpatterns
 

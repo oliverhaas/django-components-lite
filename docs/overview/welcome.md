@@ -7,8 +7,6 @@ in modern frontend frameworks like Vue or React.
 
 With `django-components` you can support Django projects small and large without leaving the Django ecosystem.
 
-`django-components` is tested across all major browsers - Chromium, Firefox, WebKit ✅.
-
 ## Sponsors
 
 <p align="center">
@@ -20,132 +18,67 @@ With `django-components` you can support Django projects small and large without
 
 ## Quickstart
 
-A component in django-components consists of HTML, JavaScript, and CSS:
+A component in django-components can be as simple as a Django template and Python code to declare the component:
 
-```python
-# components/product_card/product_card.py
-from django_components import Component, register
-
-@register("product_card")
-class ProductCard(Component):
-    template_file = "product_card.html"
-    js_file = "product_card.js"
-    css_file = "product_card.css"
-
-    class Kwargs:
-        product_id: int
-        show_price: bool = True
-        theme: str = "light"
-
-    def get_template_data(self, args, kwargs: Kwargs, slots, context):
-        product = Product.objects.get(id=kwargs.product_id)
-        return {
-            "product": product,
-            "show_price": kwargs.show_price,
-            "is_in_stock": product.stock_count > 0,
-        }
-
-    def get_js_data(self, args, kwargs: Kwargs, slots, context):
-        product = Product.objects.get(id=kwargs.product_id)
-        return {
-            "product_id": kwargs.product_id,
-            "price": float(product.price),
-            "api_endpoint": f"/api/products/{kwargs.product_id}/",
-        }
-
-    def get_css_data(self, args, kwargs: Kwargs, slots, context):
-        themes = {
-            "light": {
-                "card_bg": "#ffffff",
-                "text_color": "#333333",
-                "price_color": "#e63946",
-            },
-            "dark": {
-                "card_bg": "#242424",
-                "text_color": "#f1f1f1",
-                "price_color": "#ff6b6b",
-            },
-        }
-        theme_vars = themes.get(kwargs.theme, themes["light"])
-        return theme_vars
-```
-
-In your template:
-
-```htmldjango
-{# templates/product_card/product_card.html #}
-<div class="product-card" data-product-id="{{ product.id }}">
-    <img src="{{ product.image_url }}" alt="{{ product.name }}">
-    <h3>{{ product.name }}</h3>
-
-    {% if show_price %}
-        <p class="price">${{ product.price }}</p>
-    {% endif %}
-
-    {% if is_in_stock %}
-        <button class="add-to-cart">Add to Cart</button>
-    {% else %}
-        <p class="out-of-stock">Out of Stock</p>
-    {% endif %}
+```htmldjango title="components/calendar/calendar.html"
+<div class="calendar">
+  Today's date is <span>{{ date }}</span>
 </div>
 ```
 
-JavaScript:
+```py title="components/calendar/calendar.py"
+from django_components import Component, register
 
-```javascript
-// components/product_card/product_card.js
-// Access component JS variables in $onComponent callback
-$onComponent(({ product_id, price, api_endpoint }, ctx) => {
-  const containerEl = ctx.els[0];
-  containerEl.querySelector(".add-to-cart")
-    .addEventListener("click", () => {
-      fetch(api_endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "add_to_cart", price: price }),
-      });
-    });
-});
+@register("calendar")
+class Calendar(Component):
+    template_file = "calendar.html"
 ```
 
-CSS:
+Or a combination of Django template, Python, CSS, and Javascript:
 
-```css
-/* components/product_card/product_card.css */
-/* Access component CSS variables */
-.product-card {
-  background-color: var(--card_bg);
-  color: var(--text_color);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+```htmldjango title="components/calendar/calendar.html"
+<div class="calendar">
+  Today's date is <span>{{ date }}</span>
+</div>
+```
 
-.price {
-  color: var(--price_color);
-  font-weight: bold;
+```css title="components/calendar/calendar.css"
+.calendar {
+  width: 200px;
+  background: pink;
 }
+```
+
+```js title="components/calendar/calendar.js"
+document.querySelector(".calendar").onclick = () => {
+  alert("Clicked calendar!");
+};
+```
+
+```py title="components/calendar/calendar.py"
+from django_components import Component, register
+
+@register("calendar")
+class Calendar(Component):
+    template_file = "calendar.html"
+    js_file = "calendar.js"
+    css_file = "calendar.css"
+
+    def get_template_data(self, args, kwargs, slots, context):
+        return {"date": kwargs["date"]}
 ```
 
 Use the component like this:
 
 ```htmldjango
-{% component "product_card"
-  product_id=123
-  theme="dark"
-  show_price=True
-%}
-{% endcomponent %}
+{% component "calendar" date="2024-11-06" %}{% endcomponent %}
 ```
 
 And this is what gets rendered:
 
 ```html
-<div class="product-card" data-product-id="123" data-djc-css-a1b2c3>
-  <img src="/media/product.jpg" alt="Awesome Product" />
-  <h3>Awesome Product</h3>
-  <p class="price">$29.99</p>
-  <button class="add-to-cart">Add to Cart</button>
+<div class="calendar-component">
+  Today's date is <span>2024-11-06</span>
 </div>
 ```
 
@@ -199,44 +132,6 @@ class Calendar(Component):
         }
 ```
 
-### Extended template tags
-
-`django-components` is designed for flexibility, making working with templates a breeze.
-
-It extends Django's template tags syntax with:
-
-- [Python expressions](../concepts/fundamentals/template_tag_syntax.md#python-expressions) `disabled=(not editable)` to evaluate Python code in templates
-- [Literal lists and dictionaries](../concepts/fundamentals/template_tag_syntax.md#literal-lists-and-dictionaries) `headers=["Name", "Age"]` and `data=[{"name": "John"}]` to pass structured data directly
-- [Self-closing tags](../concepts/fundamentals/template_tag_syntax.md#self-closing-tags) `{% mytag / %}`
-- [Multi-line template tags](../concepts/fundamentals/template_tag_syntax.md#multiline-tags)
-- [Spread operator](../concepts/fundamentals/template_tag_syntax.md#spread-operator) `...` to dynamically pass args or kwargs into the template tag
-- [Nested templates](../concepts/fundamentals/template_tag_syntax.md#nested-templates) like `"{{ first_name }} {{ last_name }}"`
-- [Flat dictionaries](../concepts/fundamentals/template_tag_syntax.md#flat-dictionaries) `dict:key=val`
-
-```htmldjango
-{% component "table"
-    disabled=(not user.is_active)
-    title="Friend list for {{ user.name }}"
-    headers=["Name", "Age", "Email"]
-    data=[
-        {
-            "name": "Jane"|upper,
-            "age": 25|add:1,
-            "email": "jane@example.com",
-            "hobbies": ["reading", "coding"],
-        },
-    ],
-    ...default_attrs
-    attrs:class="py-4 ma-2 border-2 border-gray-300 rounded-md"
-/ %}
-```
-
-You too can define template tags with these features by using
-[`@template_tag()`](../reference/api.md#django_components.template_tag)
-or [`BaseNode`](../reference/api.md#django_components.BaseNode).
-
-Read more on [Custom template tags](../concepts/advanced/template_tags.md).
-
 ### Composition with slots
 
 - Render components inside templates with
@@ -274,6 +169,49 @@ Read more on [Custom template tags](../concepts/advanced/template_tags.md).
     {% endfill %}
 {% endcomponent %}
 ```
+
+### Extended template tags
+
+`django-components` is designed for flexibility, making working with templates a breeze.
+
+It extends Django's template tags syntax with:
+
+<!-- TODO - Document literal lists and dictionaries -->
+- Literal lists and dictionaries in the template
+- [Self-closing tags](https://django-components.github.io/django-components/latest/concepts/fundamentals/template_tag_syntax#self-closing-tags) `{% mytag / %}`
+- [Multi-line template tags](https://django-components.github.io/django-components/latest/concepts/fundamentals/template_tag_syntax#multiline-tags)
+- [Spread operator](https://django-components.github.io/django-components/latest/concepts/fundamentals/template_tag_syntax#spread-operator) `...` to dynamically pass args or kwargs into the template tag
+- [Template tags inside literal strings](https://django-components.github.io/django-components/latest/concepts/fundamentals/template_tag_syntax#template-tags-inside-literal-strings) like `"{{ first_name }} {{ last_name }}"`
+- [Pass dictonaries by their key-value pairs](https://django-components.github.io/django-components/latest/concepts/fundamentals/template_tag_syntax#pass-dictonary-by-its-key-value-pairs) `attr:key=val`
+
+```htmldjango
+{% component "table"
+    ...default_attrs
+    title="Friend list for {{ user.name }}"
+    headers=["Name", "Age", "Email"]
+    data=[
+        {
+            "name": "John"|upper,
+            "age": 30|add:1,
+            "email": "john@example.com",
+            "hobbies": ["reading"],
+        },
+        {
+            "name": "Jane"|upper,
+            "age": 25|add:1,
+            "email": "jane@example.com",
+            "hobbies": ["reading", "coding"],
+        },
+    ],
+    attrs:class="py-4 ma-2 border-2 border-gray-300 rounded-md"
+/ %}
+```
+
+You too can define template tags with these features by using
+[`@template_tag()`](https://django-components.github.io/django-components/latest/reference/api/#django_components.template_tag)
+or [`BaseNode`](https://django-components.github.io/django-components/latest/reference/api/#django_components.BaseNode).
+
+Read more on [Custom template tags](https://django-components.github.io/django-components/latest/concepts/advanced/template_tags/).
 
 ### Full programmatic access
 
@@ -455,6 +393,7 @@ Avoid needless errors with [type hints and runtime input validation](https://dja
 To opt-in to input validation, define types for component's args, kwargs, slots:
 
 ```py
+from typing import Optional
 from django.template import Context
 from django_components import Component, Slot, SlotInput
 
@@ -466,10 +405,10 @@ class Button(Component):
     class Kwargs:
         variable: str
         another: int
-        maybe_var: int | None = None  # May be omitted
+        maybe_var: Optional[int] = None  # May be omitted
 
     class Slots:
-        my_slot: SlotInput | None = None
+        my_slot: Optional[SlotInput] = None
         another_slot: SlotInput
 
     def get_template_data(self, args: Args, kwargs: Kwargs, slots: Slots, context: Context):

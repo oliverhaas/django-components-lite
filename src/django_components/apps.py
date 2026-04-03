@@ -15,12 +15,10 @@ class ComponentsConfig(AppConfig):
 
     # This is the code that gets run when user adds django_components
     # to Django's INSTALLED_APPS
-    # NOTE: Except for `extensions._init_app()`, the rest of the code is Django-specific.
     def ready(self) -> None:
         from django_components.app_settings import app_settings
+        from django_components.autodiscovery import autodiscover, import_libraries
         from django_components.component_registry import registry
-        from django_components.components.dynamic import DynamicComponent
-        from django_components.components.error_fallback import ErrorFallback
         from django_components.extension import extensions
         from django_components.util.django_monkeypatch import (
             monkeypatch_include_node,
@@ -29,9 +27,8 @@ class ComponentsConfig(AppConfig):
             monkeypatch_template_proxy_cls,
         )
 
-        # Monkeypatch Django template classes to make django-components
-        # work with django-debug-toolbar-template-profiler.
         # NOTE: This monkeypatch is applied here, before Django processes any requests.
+        #       To make django-components work with django-debug-toolbar-template-profiler
         #       See https://github.com/django-components/django-components/discussions/819
         monkeypatch_template_cls(Template)
         monkeypatch_include_node(IncludeNode)
@@ -41,6 +38,12 @@ class ComponentsConfig(AppConfig):
         # This makes django-components work with django-template-partials
         # NOTE: Delete when Django 5.2 reaches end of life
         monkeypatch_template_proxy_cls()
+
+        # Import modules set in `COMPONENTS.libraries` setting
+        import_libraries()
+
+        if app_settings.AUTODISCOVER:
+            autodiscover()
 
         # Auto-reload Django dev server when any component files changes
         # See https://github.com/django-components/django-components/discussions/567#discussioncomment-10273632
@@ -64,12 +67,8 @@ class ComponentsConfig(AppConfig):
 
             base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 
-        # Register the dynamic component under the name as given in settings
-        registry.register(app_settings.DYNAMIC_COMPONENT_NAME, DynamicComponent)
-        registry.register("error_fallback", ErrorFallback)
-
         # Let extensions process any components which may have been created before the app was ready
-        extensions._init_app(app_settings.EXTENSIONS)
+        extensions._init_app()
 
 
 # See https://github.com/django-components/django-components/issues/586#issue-2472678136

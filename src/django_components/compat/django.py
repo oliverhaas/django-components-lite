@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
-from collections.abc import Iterable
-from typing import Any
+from typing import Any, Iterable, List, Optional, Type, Union
 
 import django
 import django.urls as django_urls
@@ -70,7 +69,7 @@ DJANGO_COMMAND_ARGS = [
 ]
 
 
-def load_as_django_command(command: type[ComponentCommand]) -> type[DjangoCommand]:
+def load_as_django_command(command: Type[ComponentCommand]) -> Type[DjangoCommand]:
     """
     Create a Django `Command` class from a `ComponentCommand` class.
 
@@ -105,13 +104,13 @@ def load_as_django_command(command: type[ComponentCommand]) -> type[DjangoComman
         # this is where we forward the args to the command handler.
         def handle(self, *args: Any, **options: Any) -> None:
             # Case: (Sub)command matched and it HAS handler
-            resolved_command: ComponentCommand | None = options.get("_command")
+            resolved_command: Optional[ComponentCommand] = options.get("_command")
             if resolved_command and resolved_command.handle:
                 resolved_command.handle(*args, **options)
                 return
 
             # Case: (Sub)command matched and it DOES NOT have handler (e.g. subcommand used for routing)
-            cmd_parser: ArgumentParser | None = options.get("_parser")
+            cmd_parser: Optional[ArgumentParser] = options.get("_parser")
             if cmd_parser:
                 cmd_parser.print_help()
                 return
@@ -129,7 +128,7 @@ def load_as_django_command(command: type[ComponentCommand]) -> type[DjangoComman
 ################################################
 
 
-def routes_to_django(routes: Iterable[URLRoute]) -> list[URLPattern | URLResolver]:
+def routes_to_django(routes: Iterable[URLRoute]) -> List[Union[URLPattern, URLResolver]]:
     """
     Convert a list of `URLRoute` objects to a list of `URLPattern` objects.
 
@@ -150,7 +149,7 @@ def routes_to_django(routes: Iterable[URLRoute]) -> list[URLPattern | URLResolve
     ])
     ```
     """
-    django_routes: list[URLPattern | URLResolver] = []
+    django_routes: List[Union[URLPattern, URLResolver]] = []
     for route in routes:
         # The handler is equivalent to `view` function in Django
         if route.handler is not None:

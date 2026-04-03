@@ -1,5 +1,6 @@
 """Catch-all for tests that use template tags and don't fit other files"""
 
+import pytest
 from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
@@ -589,25 +590,20 @@ class TestExtendsCompat:
         # inside the include.
         # NOTE 2: The IDs differ when rendered as part of whole test suite vs as a single test.
         comp_id = "ca1bc41" if "ca1bc41" in rendered else "ca1bc40"
-
-        assertHTMLEqual(
-            rendered,
-            f"""
+        expected = f"""
             <body>
                 <outer>
                     <div data-djc-id-{comp_id}>Hello</div>
                 </outer>
                 <script src="django_components/django_components.min.js"></script>
-                <script type="application/json" data-djc>{{"cssUrls__markAsLoaded": ["c3R5bGUuY3Nz"],
-                    "jsUrls__markAsLoaded": ["c2NyaXB0Lmpz"],
-                    "cssTags__toFetch": [],
-                    "jsTags__toFetch": [],
-                    "componentJsVars": [],
-                    "componentJsCalls": []}}</script>
+                <script type="application/json" data-djc>{{"loadedCssUrls": ["c3R5bGUuY3Nz"],
+                    "loadedJsUrls": ["c2NyaXB0Lmpz"],
+                    "toLoadCssTags": [],
+                    "toLoadJsTags": []}}</script>
                 <script src="script.js"></script>
             </body>
-            """,
-        )
+        """
+        assertHTMLEqual(rendered, expected)
 
     # In this case, because `{% include %}` is rendered inside a `{% component %}` tag,
     # then the component inside the `{% include %}` knows it's inside another component.
@@ -652,27 +648,22 @@ class TestExtendsCompat:
 
         # NOTE: The IDs differ when rendered as part of whole test suite vs as a single test.
         comp_id = "ca1bc45" if "ca1bc45" in rendered else "ca1bc44"
-
-        assertHTMLEqual(
-            rendered,
-            f"""
+        expected = f"""
             <html>
                 <body data-djc-id-ca1bc43>
                     <outer>
                         <div data-djc-id-{comp_id}>Hello</div>
                     </outer>
                     <script src="django_components/django_components.min.js"></script>
-                    <script type="application/json" data-djc>{{"cssUrls__markAsLoaded": ["c3R5bGUuY3Nz"],
-                        "jsUrls__markAsLoaded": ["c2NyaXB0Lmpz"],
-                        "cssTags__toFetch": [],
-                        "jsTags__toFetch": [],
-                        "componentJsVars": [],
-                        "componentJsCalls": []}}</script>
+                    <script type="application/json" data-djc>{{"loadedCssUrls": ["c3R5bGUuY3Nz"],
+                        "loadedJsUrls": ["c2NyaXB0Lmpz"],
+                        "toLoadCssTags": [],
+                        "toLoadJsTags": []}}</script>
                     <script src="script.js"></script>
                 </body>
             </html>
-            """,
-        )
+        """
+        assertHTMLEqual(rendered, expected)
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_component_inside_block(self, components_settings):
@@ -957,6 +948,7 @@ class TestExtendsCompat:
         assertHTMLEqual(rendered, expected)
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
+    @pytest.mark.skip(reason="REMOVED: Provide/Inject system")
     def test_inject_inside_block(self, components_settings):
         registry.register("slotted_component", gen_slotted_component())
 

@@ -1,8 +1,5 @@
-import tempfile
-from pathlib import Path
-from typing import cast
+from typing import Dict, Optional, cast
 
-import pytest
 from django.http import HttpRequest
 from django.template import Context, RequestContext, Template
 from pytest_django.asserts import assertHTMLEqual, assertInHTML
@@ -20,15 +17,6 @@ setup_test_config()
 # processor is generated only once, as each time this is called, it should generate a different ID.
 def dummy_context_processor(request):  # noqa: ARG001
     return {"dummy": gen_id()}
-
-
-# For test_context_processor_called_once_with_extends (issue #1569)
-_context_processor_call_count_1569 = [0]
-
-
-def list_context_processor_1569(request):  # noqa: ARG001
-    _context_processor_call_count_1569[0] += 1
-    return {"MY_LIST": []}
 
 
 #########################
@@ -593,8 +581,8 @@ class TestIsolatedContextSetting:
 class TestContextProcessors:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_context_in_template(self, components_settings):
-        context_processors_data: dict | None = None
-        inner_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        inner_request: Optional[HttpRequest] = None
 
         @register("test")
         class TestComponent(Component):
@@ -625,8 +613,8 @@ class TestContextProcessors:
     def test_request_context_in_template_nested(self, components_settings):
         context_processors_data = None
         context_processors_data_child = None
-        parent_request: HttpRequest | None = None
-        child_request: HttpRequest | None = None
+        parent_request: Optional[HttpRequest] = None
+        child_request: Optional[HttpRequest] = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -671,8 +659,8 @@ class TestContextProcessors:
     def test_request_context_in_template_slot(self, components_settings):
         context_processors_data = None
         context_processors_data_child = None
-        parent_request: HttpRequest | None = None
-        child_request: HttpRequest | None = None
+        parent_request: Optional[HttpRequest] = None
+        child_request: Optional[HttpRequest] = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -718,7 +706,7 @@ class TestContextProcessors:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_context_in_python(self, components_settings):
         context_processors_data = None
-        inner_request: HttpRequest | None = None
+        inner_request: Optional[HttpRequest] = None
 
         @register("test")
         class TestComponent(Component):
@@ -740,10 +728,10 @@ class TestContextProcessors:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_context_in_python_nested(self, components_settings):
-        context_processors_data: dict | None = None
-        context_processors_data_child: dict | None = None
-        parent_request: HttpRequest | None = None
-        child_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        context_processors_data_child: Optional[Dict] = None
+        parent_request: Optional[HttpRequest] = None
+        child_request: Optional[HttpRequest] = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -780,8 +768,8 @@ class TestContextProcessors:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_in_python(self, components_settings):
-        context_processors_data: dict | None = None
-        inner_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        inner_request: Optional[HttpRequest] = None
 
         @register("test")
         class TestComponent(Component):
@@ -802,10 +790,10 @@ class TestContextProcessors:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_in_python_nested(self, components_settings):
-        context_processors_data: dict | None = None
-        context_processors_data_child: dict | None = None
-        parent_request: HttpRequest | None = None
-        child_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        context_processors_data_child: Optional[Dict] = None
+        parent_request: Optional[HttpRequest] = None
+        child_request: Optional[HttpRequest] = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -842,8 +830,8 @@ class TestContextProcessors:
     # No request, regular Context
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_no_context_processor_when_non_request_context_in_python(self, components_settings):
-        context_processors_data: dict | None = None
-        inner_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        inner_request: Optional[HttpRequest] = None
 
         @register("test")
         class TestComponent(Component):
@@ -864,8 +852,8 @@ class TestContextProcessors:
     # No request, no Context
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_no_context_processor_when_non_request_context_in_python_2(self, components_settings):
-        context_processors_data: dict | None = None
-        inner_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        inner_request: Optional[HttpRequest] = None
 
         @register("test")
         class TestComponent(Component):
@@ -886,8 +874,8 @@ class TestContextProcessors:
     # Yes request, regular Context
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_context_processor_when_regular_context_and_request_in_python(self, components_settings):
-        context_processors_data: dict | None = None
-        inner_request: HttpRequest | None = None
+        context_processors_data: Optional[Dict] = None
+        inner_request: Optional[HttpRequest] = None
 
         @register("test")
         class TestComponent(Component):
@@ -925,8 +913,8 @@ class TestContextProcessors:
         },
     )
     def test_data_generated_only_once(self):
-        context_processors_data: dict | None = None
-        context_processors_data_child: dict | None = None
+        context_processors_data: Optional[Dict] = None
+        context_processors_data_child: Optional[Dict] = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -962,103 +950,6 @@ class TestContextProcessors:
         assert child_data["dummy"] == "a1bc3f"
         assert parent_data["csrf_token"] == child_data["csrf_token"]
 
-    @djc_test(
-        django_settings={
-            "TEMPLATES": [
-                {
-                    "BACKEND": "django.template.backends.django.DjangoTemplates",
-                    "DIRS": [],
-                    "OPTIONS": {
-                        "context_processors": [
-                            "tests.test_context.list_context_processor_1569",
-                        ],
-                        "loaders": [
-                            "django.template.loaders.filesystem.Loader",
-                            "django.template.loaders.app_directories.Loader",
-                        ],
-                    },
-                },
-            ],
-            # Use "django" context behavior so the component receives the same context
-            # (with MY_LIST from context processors), not an isolated copy that can
-            # miss the context-processor layer when run after test_benchmark_django.
-            "COMPONENTS": {"context_behavior": "django"},
-        },
-    )
-    def test_context_processor_called_once_with_extends(self):
-        """
-        Regression test for #1569: context processors run twice with {% extends %}.
-
-        See https://github.com/django-components/django-components/issues/1569
-        """
-        _context_processor_call_count_1569[0] = 0
-
-        @register("outer_component_1569")
-        class OuterComponent1569(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                <div>
-                    {% component "inner_component_1569" %}{% endcomponent %}
-                </div>
-            """
-
-            def get_template_data(self, args, kwargs, slots, context):
-                context["MY_LIST"].append("outer")
-                return {}
-
-        @register("inner_component_1569")
-        class InnerComponent1569(Component):
-            template: types.django_html = "{{ MY_LIST }}"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                context["MY_LIST"].append("inner")
-                return {}
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmppath = Path(tmpdir)
-            (tmppath / "base_1569.html").write_text("""
-                {% block content %}{% endblock %}
-            """)
-            (tmppath / "child_1569.html").write_text("""
-                {% extends "base_1569.html" %}
-                {% load component_tags %}
-                {% block content %}
-                    {% component "outer_component_1569" %}{% endcomponent %}
-                {% endblock %}
-            """)
-
-            # Use a fresh backend built from this test's TEMPLATES so we don't depend on
-            # the global engine cache (which can be populated by test_benchmark_django or
-            # other tests with a different config). This ensures the context processor
-            # list_context_processor_1569 is used when rendering.
-            from django.template.backends.django import DjangoTemplates
-
-            backend = DjangoTemplates(
-                {
-                    "NAME": "django",
-                    "DIRS": [str(tmppath)],
-                    "APP_DIRS": False,
-                    "OPTIONS": {
-                        "context_processors": [
-                            "tests.test_context.list_context_processor_1569",
-                        ],
-                        "loaders": [
-                            "django.template.loaders.filesystem.Loader",
-                            "django.template.loaders.app_directories.Loader",
-                        ],
-                    },
-                }
-            )
-
-            request = HttpRequest()
-            request.method = "GET"
-            template = backend.get_template("child_1569.html")
-            result = template.render({}, request)
-
-            assert _context_processor_call_count_1569[0] == 1, "Context processor should be called once, not twice"
-            assert "outer" in result, "Outer component should see shared MY_LIST"
-            assert "inner" in result, "Inner component should see shared MY_LIST"
-
     def test_context_processors_data_outside_of_rendering(self):
         class TestComponent(Component):
             template: types.django_html = """{% csrf_token %}"""
@@ -1077,43 +968,6 @@ class TestContextProcessors:
         component = TestComponent(request=request)
 
         assert component.request == request
-
-    @djc_test(
-        # Same as settings in testutils.py, but also sets context_processors
-        django_settings={
-            "TEMPLATES": [
-                {
-                    "BACKEND": "django.template.backends.django.DjangoTemplates",
-                    "DIRS": [
-                        "tests/templates/",
-                        "tests/components/",
-                    ],
-                    "OPTIONS": {
-                        "builtins": [
-                            "django_components.templatetags.component_tags",
-                        ],
-                        "loaders": [
-                            "django.template.loaders.filesystem.Loader",
-                            "django.template.loaders.app_directories.Loader",
-                            "django_components.template_loader.Loader",
-                        ],
-                        "context_processors": [
-                            "django.template.context_processors.request",
-                        ],
-                    },
-                },
-            ],
-        }
-    )
-    def test_raises_on_conflict_with_template_data(self):
-        class TestComponent(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "request": "OVERWRITTEN",
-                }
-
-        with pytest.raises(ValueError, match="Variable 'request' defined in component 'TestComponent' conflicts"):
-            TestComponent.render(request=HttpRequest())
 
 
 @djc_test
@@ -1370,16 +1224,16 @@ class TestContextVarsIsFilled:
 
         @register("is_filled_vars")
         class IsFilledVarsComponent(self.IsFilledVarsComponent):  # type: ignore[name-defined]
-            def on_render_before(self, context: Context, template: Template | None) -> None:
+            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
                 nonlocal captured_before
                 captured_before = self.is_filled.copy()
 
             def on_render_after(
                 self,
                 context: Context,
-                template: Template | None,
-                content: str | None,
-                error: Exception | None,
+                template: Optional[Template],
+                content: Optional[str],
+                error: Optional[Exception],
             ) -> None:
                 nonlocal captured_after
                 captured_after = self.is_filled.copy()

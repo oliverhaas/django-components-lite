@@ -3,194 +3,107 @@ name: Run tests
 on:
   push:
     branches:
-      - "master"
-      - "dev"
+      - 'master'
+      - 'dev'
   pull_request:
   workflow_dispatch:
 
 jobs:
-  # Main test job - runs tests across all Python/Django/OS combinations
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      # Configure git to handle long paths
-      # See https://stackoverflow.com/questions/22575662/filename-too-long-in-git-for-windows
-      #
-      # Long paths that are over the limit are because of the benchmarking data
-      # created by asv, as these may look like this:
-      # docs/benchmarks/graphs/arch-x86_64/branch-master/cpu-AMD EPYC 7763 64-Core Processor/django-5.1/djc-core-html-parser/machine-fv-az1693-854/num_cpu-4/os-Linux 6.8.0-1021-azure/python-3.13/ram-16373792/isolated vs django modes.timeraw_render_lg_subsequent.json
-      - name: Configure git
-        run: |
-          git config --global core.longpaths true
+    # Configure git to handle long paths
+    # See https://stackoverflow.com/questions/22575662/filename-too-long-in-git-for-windows
+    #
+    # Long paths that are over the limit are because of the benchmarking data
+    # created by asv, as these may look like this:
+    # docs/benchmarks/graphs/arch-x86_64/branch-master/cpu-AMD EPYC 7763 64-Core Processor/django-5.1/djc-core-html-parser/machine-fv-az1693-854/num_cpu-4/os-Linux 6.8.0-1021-azure/python-3.13/ram-16373792/isolated vs django modes.timeraw_render_lg_subsequent.json
+    - name: Configure git
+      run: |
+        git config --global core.longpaths true
 
-      - uses: actions/checkout@v6
+    - uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          uv sync --group ci
-
-      # TODO: DELETEME
-      # Workaround: Yarn Debian repo switched GPG key (Jan 2026); old key in images breaks apt-get update.
-      # See https://github.com/yarnpkg/yarn/issues/9218
-      # Remove this step once CI images ship with the updated Yarn APT key or Yarn repo is no longer enabled by default.
-      - name: Disable broken third-party apt repos (e.g. Yarn) before Playwright install
-        if: runner.os == 'Linux'
-        run: |
-          # Playwright's --with-deps runs apt-get update; a broken/unsigned Yarn repo breaks it.
-          sudo rm -f /etc/apt/sources.list.d/yarn.list 2>/dev/null || true
-      # DELETEME_END
-
-      # NOTE: WINDOWS ONLY - Installing system dependencies for Playwright browsers takes ~3-4 mins.
-      # See https://github.com/django-components/django-components/pull/1554
-      # See https://playwright.dev/docs/browsers#managing-browser-binaries
-      - name: Install Playwright browsers
-        run: |
-          # See https://playwright.dev/python/docs/intro#installing-playwright-pytest
-          uv run playwright install chromium firefox webkit --with-deps
-      - name: Run tests
-        run: uv run tox
-
-  # Coverage job - runs tests with coverage on a single Python version
-  # NOTE: The steps are the same as the build job.
-  coverage:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.14"]
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      # TODO: DELETEME
-      # Workaround: Yarn Debian repo switched GPG key (Jan 2026); old key in images breaks apt-get update.
-      # See https://github.com/yarnpkg/yarn/issues/9218
-      # Remove this step once CI images ship with the updated Yarn APT key or Yarn repo is no longer enabled by default.
-      - name: Disable broken third-party apt repos (e.g. Yarn) before Playwright install
-        if: runner.os == 'Linux'
-        run: |
-          # Playwright's --with-deps runs apt-get update; a broken/unsigned Yarn repo breaks it.
-          sudo rm -f /etc/apt/sources.list.d/yarn.list 2>/dev/null || true
-      # DELETEME_END
-
-      # NOTE: WINDOWS ONLY - Installing system dependencies for Playwright browsers takes ~3-4 mins.
-      # See https://github.com/django-components/django-components/pull/1554
-      # See https://playwright.dev/docs/browsers#managing-browser-binaries
-      - name: Install Playwright browsers
-        run: |
-          # See https://playwright.dev/python/docs/intro#installing-playwright-pytest
-          uv run playwright install chromium firefox webkit --with-deps
-      # Run the actual tests with coverage
-      - name: Run coverage
-        run: uv run tox -e coverage
-
-  # Linting job - runs ruff and mypy checks
-  lint:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.14"]
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          uv sync --group ci
-
-      - name: Run linting checks
-        run: uv run tox -e ruff,mypy
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: "pip"
+    - name: Install dependencies (Python 3.8)
+      if: matrix.python-version == '3.8'
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements-ci-python38.txt
+    - name: Install dependencies (Python > 3.8)
+      if: matrix.python-version != '3.8'
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements-ci.txt
+    - name: Install Playwright browsers
+      run: |
+        # See https://playwright.dev/python/docs/intro#installing-playwright-pytest
+        playwright install chromium --with-deps
+    - name: Run tests
+      run: tox
 
   # Verify that docs build
   test_docs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.13"]
+        python-version: ['3.13']
 
     steps:
-      - uses: actions/checkout@v6
+    - uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: "pip"
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          uv sync --group docs
-      - name: Build documentation
-        run: uv run mkdocs build --verbose
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements-docs.txt
+        # Install your package locally
+        python -m pip install -e .
+    - name: Build documentation
+      run: mkdocs build --verbose
 
   # Verify that the sample project works
   test_sampleproject:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.14"]
+        python-version: ['3.14']
 
     steps:
-      - uses: actions/checkout@v6
+    - uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: "pip"
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          cd sampleproject
-          uv pip install --system -r requirements.txt
-          # Install django-components locally
-          uv pip install --system -e ..
-      - name: Check Django project
-        run: |
-          cd sampleproject
-          uv run python manage.py check
-          uv run python manage.py migrate --noinput
-          # Start the server, make request, and exit with error if it fails
-          uv run python manage.py runserver & sleep 5
-          curl http://127.0.0.1:8000/ || exit 1
+    - name: Install dependencies
+      run: |
+        cd sampleproject
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+        # Install django-components locally
+        python -m pip install -e ..
+    - name: Check Django project
+      run: |
+        cd sampleproject
+        python manage.py check
+        python manage.py migrate --noinput
+        # Start the server, make request, and exit with error if it fails
+        python manage.py runserver & sleep 5
+        curl http://127.0.0.1:8000/ || exit 1

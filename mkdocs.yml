@@ -12,9 +12,6 @@ dev_addr: "127.0.0.1:9000"
 site_dir: site
 docs_dir: docs
 
-# TODO - There's about 15 errors preventing strict mode from being enabled.
-# strict: true
-
 watch:
   - src
   - docs
@@ -23,12 +20,9 @@ watch:
   - CHANGELOG.md
   - scripts
 
-# Validate internal / relative links
 validation:
-  omitted_files: warn
   absolute_links: warn
-  unrecognized_links: warn
-  anchors: warn
+  unrecognized_links: info
 
 theme:
   name: "material"
@@ -166,7 +160,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          inventories:
+          import:
             - https://docs.python.org/3.12/objects.inv
             - url: https://docs.djangoproject.com/en/5.2/_objects/
               base: https://docs.djangoproject.com/en/5.2/

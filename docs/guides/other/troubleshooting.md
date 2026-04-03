@@ -4,7 +4,7 @@ As larger projects get more complex, it can be hard to debug issues. Django Comp
 
 Django Components provides a visual debugging feature that helps you understand the structure and boundaries of your components and slots. When enabled, it adds a colored border and a label around each component and slot on your rendered page.
 
-To enable component and slot highlighting for all components and slots, set `highlight_components` and `highlight_slots` to `True` in [extensions defaults](../../reference/settings.md#django_components.app_settings.ComponentsSettings.extensions_defaults) in your `settings.py` file:
+To enable component and slot highlighting for all components and slots, set `highlight_components` and `highlight_slots` to `True` in [extensions defaults](../../../reference/settings/#django_components.app_settings.ComponentsSettings.extensions_defaults) in your `settings.py` file:
 
 ```python
 from django_components import ComponentsSettings
@@ -39,15 +39,6 @@ While the slots will be highlighted with a **red** border and label:
 !!! warning
 
     Use this feature ONLY in during development. Do NOT use it in production.
-
-## Template position in errors
-
-When a component or template tag raises an error, django-components automatically includes the exact tag
-that caused the error, as found in the template. This makes it easy to locate the problematic code in your template files.
-
-For example, this is the error message when a component receives incorrect arguments:
-
-![Template position in error message](../../images/debug-error-component-underline.png)
 
 ## Component path in errors
 
@@ -144,7 +135,7 @@ Thus, you can check where a slot was filled from by printing it out:
 
 ```python
 class MyComponent(Component):
-    def on_render_before(self, context: Context, template: Template | None):
+    def on_render_before(self, context: Context, template: Optional[Template]):
         print(self.slots)
 ```
 

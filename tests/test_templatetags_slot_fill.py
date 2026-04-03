@@ -1,4 +1,5 @@
 import re
+from typing import Dict
 
 import pytest
 from django.template import Context, Template, TemplateSyntaxError
@@ -2397,7 +2398,7 @@ class TestSlotBehavior:
 class TestSlotInput:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_slots_accessible_when_python_render(self, components_settings):
-        seen_slots: dict = {}
+        seen_slots: Dict = {}
 
         @register("test")
         class SlottedComponent(Component):
@@ -2433,7 +2434,7 @@ class TestSlotInput:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_slots_normalized_as_slot_instances(self, components_settings):
-        seen_slots: dict[str, Slot] = {}
+        seen_slots: Dict[str, Slot] = {}
 
         @register("test")
         class SlottedComponent(Component):

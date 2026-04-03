@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Optional, Type
 
 from django_components.extension import extensions
 from django_components.util.command import ComponentCommand
@@ -16,8 +16,8 @@ from django_components.util.command import ComponentCommand
 #         ...commands
 #     ]
 # ```
-def _gen_subcommands() -> list[type[ComponentCommand]]:
-    commands: list[type[ComponentCommand]] = []
+def _gen_subcommands() -> List[Type[ComponentCommand]]:
+    commands: List[Type[ComponentCommand]] = []
     for extension in extensions.extensions:
         if not extension.commands:
             continue
@@ -43,7 +43,7 @@ def _gen_subcommands() -> list[type[ComponentCommand]]:
 #
 # NOTE: This is possible, because Django sets up the project and settings BEFORE the commands are loaded.
 class SubcommandsDescriptor:
-    def __get__(self, obj: Any | None, objtype: type | None) -> list[type[ComponentCommand]]:
+    def __get__(self, obj: Optional[Any], objtype: Type) -> List[Type[ComponentCommand]]:
         # This will be called when accessing ExtRunCommand.subcommands
         # or instance.subcommands
         return _gen_subcommands()
@@ -51,7 +51,7 @@ class SubcommandsDescriptor:
 
 class ExtRunCommand(ComponentCommand):
     """
-    Run a command added by an [extension](../concepts/advanced/extensions.md).
+    Run a command added by an [extension](../../concepts/advanced/extensions).
 
     Each extension can add its own commands, which will be available to run with this command.
 

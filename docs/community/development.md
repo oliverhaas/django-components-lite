@@ -8,88 +8,16 @@ git clone https://github.com/<your GitHub username>/django-components.git
 cd django-components
 ```
 
-### Installing uv
-
-This project uses [uv](https://github.com/astral-sh/uv) for dependency management. Install uv first:
-
-**On macOS and Linux:**
-```sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-**On Windows:**
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-Or using pip:
-```sh
-pip install uv
-```
-
-For more installation options, see the [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
-
-### Installing dependencies
-
-To install all development dependencies (including the package itself in editable mode):
+To quickly run the tests install the local dependencies by running:
 
 ```sh
-uv sync --group dev
+pip install -r requirements-dev.txt
 ```
 
-This will:
+You also have to install this local django-components version. Use `-e` for [editable mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html) so you don't have to re-install after every change:
 
-- Create a virtual environment (if one doesn't exist)
-- Install all project dependencies and dev dependencies
-- Install the package in editable mode
-- Generate or update `uv.lock` file
-
-To install dependencies for a specific group:
-
-- `uv sync --group dev` - Development dependencies (for local development)
-- `uv sync --group ci` - CI dependencies (for running tests in CI)
-- `uv sync --group docs` - Documentation dependencies (for building docs)
-
-### Managing dependencies
-
-**Adding a new dependency:**
 ```sh
-# Add to main dependencies
-uv add <package-name>
-
-# Add to dev dependencies
-uv add --group dev <package-name>
-
-# Add to docs dependencies
-uv add --group docs <package-name>
-```
-
-**Removing a dependency:**
-```sh
-uv remove <package-name>
-# Or for a specific group:
-uv remove --group dev <package-name>
-```
-
-**Updating dependencies:**
-```sh
-# Update all dependencies to latest compatible versions
-uv lock --upgrade
-
-# Then sync to apply updates
-uv sync --group dev
-```
-
-**Switching between environments:**
-```sh
-# Activate the virtual environment
-source .venv/bin/activate  # On macOS/Linux
-# or
-.venv\Scripts\activate  # On Windows
-
-# Or use uv run to run commands in the environment
-uv run pytest
-uv run ruff check .
+pip install -e .
 ```
 
 ## Running tests
@@ -103,19 +31,21 @@ pytest
 The library is also tested across many versions of Python and Django. To run tests that way:
 
 ```sh
+pyenv install -s 3.8
+pyenv install -s 3.9
 pyenv install -s 3.10
 pyenv install -s 3.11
 pyenv install -s 3.12
 pyenv install -s 3.13
 pyenv install -s 3.14
-pyenv local 3.10 3.11 3.12 3.13 3.14
+pyenv local 3.8 3.9 3.10 3.11 3.12 3.13 3.14
 tox -p
 ```
 
 To run tests for a specific Python version, use:
 
 ```sh
-tox -e py310
+tox -e py38
 ```
 
 NOTE: See the available environments in `tox.ini`.
@@ -152,30 +82,13 @@ tox -e mypy,ruff
 
 ## Playwright tests
 
-We use [Playwright](https://playwright.dev/python/docs/intro) for end-to-end tests.
+We use [Playwright](https://playwright.dev/python/docs/intro) for end-to-end tests. You will need to install Playwright to run these tests.
 
-Tests decorated with `@with_playwright` automatically run across all major browsers: Chromium, Firefox, and WebKit. This ensures cross-browser compatibility.
-
-Test functions must include the `browser` and `browser_name` fixtures to work correctly.
-
-```py
-from django_components.testing import djc_test
-from tests.e2e.utils import BrowserType, with_playwright
-from playwright.async_api import Browser
-
-@djc_test
-class MyTest:
-    @with_playwright
-    async def test_script_loads(self, browser: Browser, browser_name: BrowserType):
-        page = await browser.new_page()
-        await page.goto(f"{TEST_SERVER_URL}/my-page")
-        assert page.content() == "My page"
-```
-
-You will need to install Playwright to run these tests. If you've already run `uv sync --group dev`, Playwright should be installed. Then install the browsers:
+Luckily, Playwright makes it very easy:
 
 ```sh
-playwright install chromium firefox webkit --with-deps
+pip install -r requirements-dev.txt
+playwright install chromium --with-deps
 ```
 
 After Playwright is ready, run the tests the same way as before:
@@ -183,79 +96,8 @@ After Playwright is ready, run the tests the same way as before:
 ```sh
 pytest
 # Or for specific Python version
-tox -e py310
+tox -e py38
 ```
-
-### E2E Test Server Configuration
-
-When writing E2E tests, it consists of 2 parts:
-
-1. Define endpoints on a Django test server that runs during tests and serves the pages/components/files that we want to fetch and render in the browser.
-2. The actual code that uses Playwright browser automation to test the logic.
-
-The Django test server is defined `tests/e2e/testserver/`.
-
-But this means splitting your logic across 2 places. To avoid this, you can co-locate the code with your test file using the `server()` function pattern.
-
-Define a `server()` function in your test file that returns a dictionary mapping URL paths to view functions. The Django test server will automatically discover and register these during startup:
-
-```py
-# tests/test_component_js_e2e.py
-from django.http import HttpResponse
-from django.template import Context, Template
-from django_components import Component, register, types
-from django_components.testing import djc_test
-from tests.e2e.utils import TEST_SERVER_URL, with_playwright
-
-def server():
-    """
-    Define server-side components and views for E2E tests.
-    
-    This function is automatically discovered and called by the testserver
-    to register URL patterns, views, and components.
-    """
-    @register("my_component")
-    class MyComponent(Component):
-        template: types.django_html = """
-            <div id="my-component">Hello</div>
-        """
-        
-        js: types.js = """
-            console.log("Component loaded");
-        """
-    
-    def my_view(_request):
-        template_str: types.django_html = """
-            {% load component_tags %}
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    {% component_css_dependencies %}
-                </head>
-                <body>
-                    {% component 'my_component' / %}
-                    {% component_js_dependencies %}
-                </body>
-            </html>
-        """
-        template = Template(template_str)
-        rendered = template.render(Context({}))
-        return HttpResponse(rendered)
-    
-    return {
-        "/my-page": my_view,
-    }
-
-@djc_test
-class MyTest:
-    @with_playwright
-    async def test_my_component(self, browser: Browser, browser_name: BrowserType):
-        page = await browser.new_page()
-        await page.goto(f"{TEST_SERVER_URL}/my-page")
-        # Your test assertions here
-```
-
-This pattern eliminates the need to manually update `testserver/urls.py`, `testserver/views.py`, and `testserver/components/__init__.py` when adding new E2E tests.
 
 ## Snapshot tests
 
@@ -270,7 +112,7 @@ pytest --snapshot-update
 Or with tox:
 
 ```sh
-tox -e py310 -- --snapshot-update
+tox -e py39 -- --snapshot-update
 ```
 
 ## Dev server
@@ -288,19 +130,13 @@ Use the [sampleproject](https://github.com/django-components/django-components/t
 2. Install dependencies from the [requirements.txt](https://github.com/django-components/django-components/blob/master/sampleproject/requirements.txt) file:
 
     ```sh
-    # Using pip
     pip install -r requirements.txt
-    # Or using uv
-    uv pip install -r requirements.txt
     ```
 
 3. Link to your local version of django-components:
 
     ```sh
-    # Using pip
     pip install -e ..
-    # Or using uv
-    uv pip install -e ..
     ```
 
     !!! note
@@ -351,13 +187,17 @@ When you make changes to this JS code, you also need to compile it:
 
 The documentation website is built using [MkDocs](https://www.mkdocs.org/) and [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/).
 
-Install dependencies needed for the documentation:
+First install dependencies needed for the documentation:
 
 ```sh
-uv sync --group docs
+pip install -r requirements-docs.txt
 ```
 
-This will install all documentation dependencies and the package itself in editable mode.
+Then install this local django-components version. Use `-e` for [editable mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html) so you don't have to re-install after every change:
+
+```sh
+pip install -e .
+```
 
 To run the documentation server locally, run:
 
@@ -382,10 +222,10 @@ The CI workflow runs when:
 
 ### Examples
 
-The [examples page](../examples/index.md) is populated from entries in `docs/examples/`.
+The [examples page](../../examples) is populated from entries in `docs/examples/`. 
 
 These examples have special folder layout:
-
+ 
 ```txt
 |- docs/
   |- examples/
@@ -517,13 +357,6 @@ Head over to [Dev guides](./devguides/dependency_mgmt.md) for a deep dive into h
 ### Updating supported versions
 
 The `scripts/supported_versions.py` script manages the supported Python and Django versions for the project.
-
-The script determines supported versions by:
-1. Fetching actively supported Python versions from https://devguide.python.org/versions/
-2. Fetching Django's compatibility matrix from https://docs.djangoproject.com/
-3. Finding the intersection: Python versions that are both actively supported by Python and compatible with supported Django versions
-
-This means we only support Python versions that are still actively maintained by the Python team, even if Django still supports older deprecated versions (like Python 3.8 or 3.9).
 
 The script runs automatically via GitHub Actions once a week to check for version updates. If changes are detected, it creates a GitHub issue with the necessary updates. See the [`maint-supported-versions.yml`](https://github.com/django-components/django-components/blob/master/.github/workflows/maint-supported-versions.yml) workflow.
 

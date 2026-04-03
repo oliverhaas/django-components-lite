@@ -9,7 +9,6 @@ class SimpleFragment(Component):
 
     class Kwargs:
         type: str
-        message: str = "JavaScript has run."
 
     template: types.django_html = """
         <div class="frag_simple">
@@ -18,15 +17,8 @@ class SimpleFragment(Component):
         </div>
     """
 
-    def get_js_data(self, args, kwargs: Kwargs, slots, context):
-        return {
-            "message": kwargs.message,
-        }
-
     js: types.js = """
-        $onComponent(({ message }, ctx) => {
-            document.querySelector('#frag-text').textContent = ' ' + message;
-        });
+        document.querySelector('#frag-text').textContent = ' JavaScript has run.';
     """
 
     css: types.css = """
@@ -45,7 +37,6 @@ class AlpineFragment(Component):
 
     class Kwargs:
         type: str
-        message: str = "Fragment with JS and CSS (AlpineJS)."
 
     # The fragment is wrapped in `<template x-if="false">` so that we prevent
     # AlpineJS from inserting the HTML right away. Instead, we want to load it
@@ -66,20 +57,13 @@ class AlpineFragment(Component):
         </template>
     """
 
-    def get_js_data(self, args, kwargs: Kwargs, slots, context):
-        return {
-            "message": kwargs.message,
-        }
-
     js: types.js = """
-        $onComponent(({ message }, ctx) => {
-            Alpine.data('frag', () => ({
-                message: message,
-            }));
+        Alpine.data('frag', () => ({
+            message: 'Fragment with JS and CSS (AlpineJS).',
+        }));
 
-            document.querySelectorAll('[data-name="frag"]').forEach((el) => {
-                el.setAttribute('x-if', 'true');
-            });
+        document.querySelectorAll('[data-name="frag"]').forEach((el) => {
+            el.setAttribute('x-if', 'true');
         });
     """
 

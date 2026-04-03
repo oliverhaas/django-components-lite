@@ -3,15 +3,12 @@
 Each component can define extra or "secondary" CSS / JS files using the nested [`Component.Media`](../../reference/api.md#django_components.Component.Media) class,
 by setting [`Component.Media.js`](../../reference/api.md#django_components.ComponentMediaInput.js) and [`Component.Media.css`](../../reference/api.md#django_components.ComponentMediaInput.css).
 
-The [main HTML / JS / CSS files](html_js_css_files.md) are limited to 1 per component. This is not the case for the secondary files,
+The [main HTML / JS / CSS files](../html_js_css_files) are limited to 1 per component. This is not the case for the secondary files,
 where components can have many of them.
 
 There is also no special behavior or post-processing for these secondary files, they are loaded as is.
 
 You can use these for third-party libraries, or for shared CSS / JS files.
-
-To modify how JS/CSS is rendered into `<script>`, `<style>`, or `<link>` tags (e.g. add attributes,
-reorder, or inject scripts), see [Modifying JS / CSS scripts](../advanced/rendering_js_css.md#modifying-js-css-scripts).
 
 These must be set as paths, URLs, or [custom objects](#paths-as-objects).
 
@@ -45,7 +42,7 @@ class Calendar(Component):
   in constrast to it.
 
   Instead we should go over all features / behaviours of the `Media` class.
-
+  
   We should also make `Media` class into a separate extension,
   and then have a separate page on "Secondary JS / CSS files".
  -->
@@ -63,19 +60,19 @@ This `Media` class behaves similarly to
 - **Bypass formatting** - A [`SafeString`](https://docs.djangoproject.com/en/5.2/ref/utils/#django.utils.safestring.SafeString),
   or a function (with `__html__` method) is considered an already-formatted HTML tag, skipping both static file
   resolution and rendering with `media_class.render_js()` or `media_class.render_css()`.
-- **Inheritance** - You can set [`extend`](../../reference/api.md#django_components.ComponentMediaInput.extend) to configure
-  whether to inherit JS / CSS from parent components. See [Media inheritance](#media-inheritance).
+- **Inheritance** - You can set [`extend`](../../../reference/api#django_components.ComponentMediaInput.extend) to configure
+    whether to inherit JS / CSS from parent components. See [Media inheritance](#media-inheritance).
 
 However, there's a few differences from Django's Media class:
 
 1. Our Media class accepts various formats for the JS and CSS files: either a single file, a list,
-   or (CSS-only) a dictonary (See [`ComponentMediaInput`](../../reference/api.md#django_components.ComponentMediaInput)).
+   or (CSS-only) a dictonary (See [`ComponentMediaInput`](../../../reference/api#django_components.ComponentMediaInput)).
 2. Individual JS / CSS files can be any of `str`, `bytes`, `Path`,
    [`SafeString`](https://docs.djangoproject.com/en/5.2/ref/utils/#django.utils.safestring.SafeString), or a function
-   (See [`ComponentMediaInputPath`](../../reference/api.md#django_components.ComponentMediaInputPath)).
+   (See [`ComponentMediaInputPath`](../../../reference/api#django_components.ComponentMediaInputPath)).
 3. Individual JS / CSS files can be glob patterns, e.g. `*.js` or `styles/**/*.css`.
-4. If you set [`Media.extend`](../../reference/api.md#django_components.ComponentMediaInput.extend) to a list,
-   it should be a list of [`Component`](../../reference/api.md#django_components.Component) classes.
+4. If you set [`Media.extend`](../../../reference/api/#django_components.ComponentMediaInput.extend) to a list,
+   it should be a list of [`Component`](../../../reference/api/#django_components.Component) classes.
 
 ```py
 from components.layout import LayoutComp
@@ -123,9 +120,9 @@ class MyComponent(Component):
 Which will render the following HTML:
 
 ```html
-<link href="/static/path/to/style1.css" media="all" rel="stylesheet" />
-<link href="/static/path/to/style2.css" media="print" rel="stylesheet" />
-<link href="/static/path/to/style3.css" media="print" rel="stylesheet" />
+<link href="/static/path/to/style1.css" media="all" rel="stylesheet">
+<link href="/static/path/to/style2.css" media="print" rel="stylesheet">
+<link href="/static/path/to/style3.css" media="print" rel="stylesheet">
 ```
 
 !!! note
@@ -206,7 +203,7 @@ print(MyComponent.media._js)  # ["script.js", "other1.js", "other2.js"]
 
 ### Accessing Media files
 
-To access the files that you defined under [`Component.Media`](../../reference/api.md#django_components.Component.Media),
+To access the files that you defined under [`Component.Media`](../../../reference/api#django_components.Component.Media),
 use [`Component.media`](../../reference/api.md#django_components.Component.media) (lowercase).
 
 This is consistent behavior with
@@ -261,7 +258,7 @@ you can configure [`Component.media_class`](../../reference/api.md#django_compon
 
 ## File paths
 
-Unlike the [main HTML / JS / CSS files](html_js_css_files.md), the path definition for the secondary files are quite ergonomic.
+Unlike the [main HTML / JS / CSS files](../html_js_css_files), the path definition for the secondary files are quite ergonomic.
 
 ### Relative to component
 
@@ -369,15 +366,13 @@ File paths can be any of:
 - `bytes`
 - `PathLike` (`__fspath__` method)
 - `SafeData` (`__html__` method)
-- `Script`
-- `Style`
 - `Callable` that returns any of the above, evaluated at class creation (`__new__`)
 
-To help with typing the union, use [`ComponentMediaInputPath`](../../reference/api.md#django_components.ComponentMediaInputPath).
+To help with typing the union, use [`ComponentMediaInputPath`](../../../reference/api#django_components.ComponentMediaInputPath).
 
 ```py
 from pathlib import Path
-from django_components import Script, Style
+
 from django.utils.safestring import mark_safe
 
 class SimpleComponent(Component):
@@ -385,7 +380,6 @@ class SimpleComponent(Component):
         css = [
             mark_safe('<link href="/static/calendar/style1.css" rel="stylesheet" />'),
             Path("calendar/style1.css"),
-            Style(content=".x { color: red; }"),
             "calendar/style2.css",
             b"calendar/style3.css",
             lambda: "calendar/style4.css",
@@ -393,7 +387,6 @@ class SimpleComponent(Component):
         js = [
             mark_safe('<script src="/static/calendar/script1.js"></script>'),
             Path("calendar/script1.js"),
-            Script(content="console.log('inline');", wrap=False),
             "calendar/script2.js",
             b"calendar/script3.js",
             lambda: "calendar/script4.js",
@@ -444,34 +437,6 @@ class Calendar(Component):
             ModuleJsPath("calendar/script2.js"),
         ]
 ```
-
-### `Script` and `Style` in Media
-
-You can use [`Script`](../../reference/api.md#django_components.Script) and [`Style`](../../reference/api.md#django_components.Style) objects from `django_components` directly in [`Component.Media.js`](../../reference/api.md#django_components.ComponentMediaInput.js) and [`Component.Media.css`](../../reference/api.md#django_components.ComponentMediaInput.css). This lets you add inline JS/CSS or external URLs with custom attributes (e.g. `type="module"`, `nonce`) without building HTML strings.
-
-```py
-from django_components import Component, Script, Style
-
-@register("calendar")
-class Calendar(Component):
-    class Media:
-        js = [
-            "calendar/script.js",  # path as usual
-            Script(
-                content="console.log('inline');",
-                attrs={"type": "module"},
-                wrap=False,
-            ),
-            Script(url="/static/analytics.js", content=None),
-        ]
-        css = [
-            "calendar/style.css",
-            Style(content=".print-only { display: none; }", attrs={"media": "print"}),
-            Style(url="/static/print.css", content=None, attrs={"media": "print"}),
-        ]
-```
-
-See [Modifying JS / CSS scripts](../advanced/rendering_js_css.md#modifying-js-css-scripts) for more on `Script`/`Style` and the `on_dependencies` hooks.
 
 ### Rendering paths
 

@@ -8,9 +8,10 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Initial Setup
 - Install development dependencies:
-  - `uv sync --group dev` -- installs all dev dependencies including pytest, ruff, etc. (uses uv for dependency management)
+  - `pip install -r requirements-dev.txt` -- installs all dev dependencies including pytest, ruff, etc.
+  - `pip install -e .` -- install the package in development mode
 - Install Playwright for browser testing (optional, may timeout):
-  - `playwright install chromium firefox webkit --with-deps` -- NEVER CANCEL: Can take 10+ minutes due to large download. Set timeout to 15+ minutes.
+  - `playwright install chromium --with-deps` -- NEVER CANCEL: Can take 10+ minutes due to large download. Set timeout to 15+ minutes.
 
 ### Building and Testing
 - **NEVER CANCEL BUILDS OR TESTS** -- All timeouts below are validated minimums
@@ -60,9 +61,10 @@ The package provides custom Django management commands:
 - `tests/` -- comprehensive test suite with 1000+ tests
 - `sampleproject/` -- working Django project demonstrating component usage
 - `docs/` -- documentation source (uses mkdocs)
+- `requirements-dev.txt` -- development dependencies (validated to work)
+- `requirements-docs.txt` -- documentation building dependencies
 - `pyproject.toml` -- package configuration and dependencies
 - `tox.ini` -- test environment configuration for multiple Python/Django versions
-- `uv.lock` -- dependency lock file for uv
 
 ### Key Files to Check When Making Changes
 - Always check the sample project works after making changes to core functionality
@@ -72,8 +74,8 @@ The package provides custom Django management commands:
 
 ### CI/CD Information  
 - GitHub Actions workflow: `.github/workflows/tests.yml`
-- Tests run on Python 3.10-3.14 with Django 4.2-5.2
-- Includes Playwright browser testing (requires `playwright install chromium firefox webkit --with-deps`)
+- Tests run on Python 3.8-3.14 with Django 4.2-5.2
+- Includes Playwright browser testing (requires `playwright install chromium --with-deps`)
 - Documentation building uses mkdocs
 - Pre-commit hooks run ruff
 
@@ -92,7 +94,7 @@ The package provides custom Django management commands:
 - All core functionality works without additional network access once dependencies are installed
 
 ### Development Workflow
-1. Install dependencies: `uv sync --group dev`
+1. Install dependencies: `pip install -r requirements-dev.txt && pip install -e .`
 2. Make changes to source code in `src/django_components/`
 3. Run tests: `python -m pytest tests/test_component.py` (or specific test files)
 4. Run linting: `ruff check .`
@@ -295,7 +297,7 @@ class ComponentCache(ComponentExtension.ExtensionClass):
         # but then still prefix it wih our own prefix, so it's clear where it comes from.
         input_hash = self.hash(*args, **kwargs)
         slot_hash = self.hash_slots(slots)
-        cache_key = CACHE_KEY_PREFIX + self.component.class_id + ":" + input_hash + ":" + slot_hash
+        cache_key = CACHE_KEY_PREFIX + self.component._class_hash + ":" + input_hash + ":" + slot_hash
         return cache_key
 
     def hash_slots(self, slots) -> str:
