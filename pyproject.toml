@@ -1,42 +1,29 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "django_components"
 version = "0.143.0"
-requires-python = ">=3.8, <4.0"
 description = "A way to create simple reusable template components in Django."
-keywords = ["django", "components", "css", "js", "html"]
 readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+keywords = ["django", "components", "css", "js", "html"]
 authors = [
-    { name = "Emil Stenström", email = "emil@emilstenstrom.se" },
-    { name = "Juro Oravec", email = "juraj.oravec.josefson@gmail.com" },
+  { name = "Emil Stenström", email = "emil@emilstenstrom.se" },
+  { name = "Juro Oravec", email = "juraj.oravec.josefson@gmail.com" },
 ]
 classifiers = [
-    "Framework :: Django",
-    "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.1",
-    "Framework :: Django :: 5.2",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
+  "Framework :: Django",
+  "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
-dependencies = [
-    'Django>=4.2',
-    'djc-core-html-parser>=1.0.3',
-    'typing-extensions>=4.12.2',
-]
-license = { text = "MIT" }
+dependencies = ["Django>=5.2,<7"]
 
-# See https://docs.pypi.org/project_metadata/#icons
 [project.urls]
 Homepage = "https://github.com/django-components/django-components/"
 Documentation = "https://django-components.github.io/django-components/"
@@ -44,187 +31,203 @@ Changelog = "https://django-components.github.io/django-components/latest/releas
 Issues = "https://github.com/django-components/django-components/issues"
 Donate = "https://github.com/sponsors/EmilStenstrom"
 
-
-###########################################
-# TOOLS
-###########################################
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["django_components*"]
-exclude = ["django_components.tests*"]
-namespaces = false
-
-[tool.black]
-line-length = 119
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | activate
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
-[tool.ruff]
-line-length = 119
-src = ["src", "tests"]
-exclude = [
-    "migrations",
-    "manage.py",
-    "settings.py",
-    "env",
-    ".env",
-    # From mypy
-    "test_structures",
+[dependency-groups]
+dev = [
+  "django-template-partials",
+  "mypy",
+  "pathspec",
+  "pydantic",
+  "playwright==1.55.0",
+  "pre-commit",
+  "pygments",
+  "pygments-djc",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+  "pytest-django",
+  "pytest-xdist",
+  "requests",
+  "ruff",
+  "syrupy",
+  "ty",
+  "types-requests",
+  "whitenoise",
+]
+docs = [
+  "markdown-exec",
+  "mike",
+  "mkdocs",
+  "mkdocs-autorefs",
+  "mkdocs-awesome-nav",
+  "mkdocs-gen-files",
+  "mkdocs-git-authors-plugin",
+  "mkdocs-git-revision-date-localized-plugin",
+  "mkdocs-include-markdown-plugin",
+  "mkdocs-macros-plugin",
+  "mkdocs-material",
+  "mkdocs-material[imaging]",
+  "mkdocs-minify-plugin",
+  "mkdocs-redirects",
+  "mkdocstrings",
+  "mkdocstrings-python",
+  "pymdown-extensions",
+  "pygments",
+  "pygments-djc",
 ]
 
-# See https://docs.astral.sh/ruff/linter/#rule-selection
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["django_components"]
+
+[tool.hatch.build.targets.sdist]
+include = ["django_components", "LICENSE", "README.md"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 119
+fix = true
+src = ["django_components", "tests"]
+exclude = [
+  "migrations",
+  "manage.py",
+  "settings.py",
+  "env",
+  ".env",
+]
+
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    # Annotations
-    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in `*args`
-    # Docstring
-    "D100",  # Missing docstring in public module
-    "D101",  # Missing docstring in public class
-    "D102",  # Missing docstring in public method
-    "D103",  # Missing docstring in public function
-    "D104",  # Missing docstring in public package
-    "D105",  # Missing docstring in magic method
-    "D106",  # Missing docstring in public nested class
-    "D107",  # Missing docstring in `__init__`
-    "D203",  # Incorrect blank line before class
-    "D205",  # 1 blank line required between summary line and description
-    "D212",  # Multi-line docstring summary should start at the first line
-    "D400",  # First line should end with a period
-    "D401",  # First line of docstring should be in imperative mood
-    "D404",  # First word of the docstring should not be "This"
-    "D412",  # No blank lines allowed between a section header and its content ("Examples")
-    "D415",  # First line should end with a period, question mark, or exclamation point
-    # Exceptions
-    "EM101",  # Exception must not use a string literal, assign to variable first
-    "EM102",  # Exception must not use an f-string literal, assign to variable first
-    # `TODO` comments
-    "FIX002",  # Line contains TODO, consider resolving the issue
-    "TD002",  # Missing author in TODO; try: `# TODO(<author_name>): ...` or `# TODO @<author_name>: ...`
-    "TD003",  # Missing issue link for this TODO
-    "TD004",  # Missing colon in TODO
-    # Code
-    "C901",  # `test_result_interception` is too complex (36 > 10)
-    "COM812",  # missing-trailing-comma (NOTE: Already handled by formatter)
-    "ERA001",  # Found commented-out code (NOTE: Too many false positives)
-    "INP001",  # File `...` is part of an implicit namespace package. Add an `__init__.py`.
-    "PLR0915",  # Too many statements (64 > 50)
-    "PLR0911",  # Too many return statements (7 > 6)
-    "PLR0912",  # Too many branches (31 > 12)
-    "PLR0913",  # Too many arguments in function definition (6 > 5)
-    "PLR2004",  # Magic value used in comparison, consider replacing `123` with a constant variable
-    "RET504",  # Unnecessary assignment to `collected` before `return` statement
-    "RET505",  # Unnecessary `elif` after `return` statement
-    "S308",  # Use of `mark_safe` may expose cross-site scripting vulnerabilities
-    "S603",  # `subprocess` call: check for execution of untrusted input
-    "SIM108",  # Use ternary operator `...` instead of `if`-`else`-block
-    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
-    "SLF001",  # Private member accessed: `_registry`
-    "TRY300",  # Consider moving this statement to an `else` block
-    "TRY301",  # Abstract `raise` to an inner function
-
-    # TODO: Following could be useful to start using, but might require more changes.
-    "C420",  # Unnecessary dict comprehension for iterable; use `dict.fromkeys` instead
-    "PERF401",  # Use `list.extend` to create a transformed list
-    "PERF203",  # `try`-`except` within a loop incurs performance overhead
-    "FBT001",  # Boolean-typed positional argument in function definition
-    "FBT002",  # Boolean default positional argument in function definition
-    "TRY003",  # Avoid specifying long messages outside the exception class
-    # TODO - Enable FA100 once we drop support for Python 3.8
-    "FA100",  # Add `from __future__ import annotations` to simplify `typing.Optional`
-    # TODO_V1 - Rename error to suffix with `Error` before v1?
-    "N818",  # Exception name `NotRegistered` should be named with an Error suffix
+  "ANN401",   # Any is correct for dynamic expressions
+  "COM812",   # Conflicts with ruff-format
+  "D",        # Docstrings - will add incrementally
+  "E501",     # Line length handled by config
+  "EM",       # Exception strings inline are fine
+  "ERA001",   # Found commented-out code (too many false positives)
+  "FBT",      # Boolean params match API conventions
+  "FIX002",   # Line contains TODO
+  "INP001",   # Implicit namespace package
+  "PERF203",  # try/except in loop is fine
+  "PLC0415",  # Dynamic imports intentional
+  "PLR0911",  # Too many return statements
+  "PLR0912",  # Too many branches
+  "PLR0913",  # Too many arguments
+  "PLR0915",  # Too many statements
+  "PLR2004",  # Magic value used in comparison
+  "RET504",   # Unnecessary assignment before return
+  "RET505",   # Unnecessary elif after return
+  "S308",     # Use of mark_safe
+  "S603",     # subprocess call
+  "SIM108",   # Ternary not always clearer
+  "SIM117",   # Nested with statements
+  "SLF001",   # Private member access
+  "TD002",    # Missing author in TODO
+  "TD003",    # Missing issue link for TODO
+  "TD004",    # Missing colon in TODO
+  "TRY003",   # Long exception messages are helpful
+  "TRY300",   # return in try block is cleaner
+  "TRY301",   # Abstract raise to inner function
+  "C420",     # Unnecessary dict comprehension
+  "C901",     # Too complex
+  "A005",     # Module shadows stdlib module
+  "ANN001",   # Missing type annotation for function argument
+  "ANN201",   # Missing return type annotation
+  "ARG",      # Unused arguments (API compat)
+  "BLE001",   # Do not catch blind exception
+  "E402",     # Module level import not at top of file (Django patterns)
+  "N818",     # Exception name suffix
+  "PERF401",  # Use list.extend
+  "PTH",      # Use pathlib instead of os.path
+  "S110",     # try-except-pass detected
+  "SIM105",   # Use contextlib.suppress
+  "UP007",    # Use X | Y for type annotations
 ]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = [
-    "ARG002",  # Unused method argument: `components_settings`
-    "ANN",     # Annotations are not needed for tests
-    "N806",    # Variable `SimpleComponent` in function should be lowercase
-    "PLC0415", # `import` should be at the top-level of a file
-    "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
-    "S101",    # Use of `assert` detected
-    "TRY002",  # Create your own exception
+"tests/**" = [
+  "ANN",      # Type annotations not required in tests
+  "ARG",      # Unused arguments common in fixtures
+  "F821",     # Undefined name (references to removed features on this branch)
+  "N806",     # Variable in function should be lowercase
+  "PLC0415",  # import should be at top-level
+  "RUF012",   # Mutable class attributes
+  "S101",     # assert in tests
+  "TRY002",   # Create your own exception
 ]
-"benchmarks/*" = [
-    "ARG002",  # Unused method argument: `components_settings`
-    "ANN",     # Annotations are not needed for tests
-    "N806",    # Variable `SimpleComponent` in function should be lowercase
-    "PLC0415", # `import` should be at the top-level of a file
-    "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
-    "S101",    # Use of `assert` detected
-    "TRY002",  # Create your own exception
+"benchmarks/**" = [
+  "ANN", "ARG", "N806", "PLC0415", "RUF012", "S101", "TRY002",
 ]
-"sampleproject/*" = [
-    "ARG002", # Unused method argument
-    "ANN",    # Annotations are not needed for tests
-    "T201",   # `print` found
-    "DTZ",    # `datetime` found
+"sampleproject/**" = [
+  "ARG002",   # Unused method argument
+  "ANN",      # Annotations not needed
+  "T201",     # print found
+  "DTZ",      # datetime found
 ]
-"docs/examples/*" = [
-    "ARG002", # Unused method argument
-    "ANN",    # Annotations are not needed for tests
-    "S101",   # Use of `assert` detected
-    "T201",   # `print` found
-    "DTZ",    # `datetime` found
+"docs/examples/**" = [
+  "ARG002", "ANN", "S101", "T201", "DTZ",
+]
+"scripts/**" = [
+  "ANN", "T201", "S324",
+]
+"convert_inline_templates.py" = [
+  "ANN", "T201", "S324", "RUF001", "SIM102", "EXE001", "PLR1722",
 ]
 
 [tool.ruff.lint.isort]
 known-first-party = ["django_components"]
 
 [tool.mypy]
+python_version = "3.12"
 check_untyped_defs = true
 ignore_missing_imports = true
+pretty = true
+show_error_codes = true
+show_error_context = true
+warn_redundant_casts = true
+warn_unused_ignores = true
 exclude = [
-    "build",
-    "sampleproject",
-    "test_structures",
+  "build",
+  "sampleproject",
+  "test_structures",
 ]
 
 [[tool.mypy.overrides]]
 module = "django_components.*"
 disallow_untyped_defs = true
 
-# TODO - Review these rules once we officially support Pylance / Pyright
-#        See https://github.com/django-components/django-components/issues/1397
-[tool.basedpyright]
-reportMissingTypeArgument = "none"
-reportUnknownParameterType = "none"
-reportAny = "none"
-reportExplicitAny = "none"
-reportUnknownVariableType = "none"
-reportUnknownArgumentType = "none"
-reportUnknownMemberType = "none"
-reportAttributeAccessIssue = "none"
-reportPrivateUsage = "none"
-reportConstantRedefinition = "none"
-reportUnusedCallResult = "none"
-reportImplicitStringConcatenation = "none"
-reportUnannotatedClassAttribute = "none"
-reportSelfClsParameterName = "none"
-reportDeprecated = "none"
-reportUnusedParameter = "none"
-reportUninitializedInstanceVariable = "none"
-reportRedeclaration = "none"
-reportIncompatibleVariableOverride = "none"
+[tool.ty.rules]
+invalid-method-override = "ignore"
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false
+
+[[tool.ty.overrides]]
+include = ["tests/**"]
+
+[tool.ty.overrides.rules]
+unresolved-attribute = "ignore"
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-    "docs/examples",
-]
+testpaths = ["tests", "docs/examples"]
 asyncio_mode = "auto"
+addopts = ""
+xfail_strict = true
+
+[tool.coverage.run]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+precision = 2
+skip_covered = true
