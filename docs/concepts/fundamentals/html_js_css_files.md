@@ -113,9 +113,8 @@ static file URL is prepended to the component's rendered HTML.
 
 ## File paths
 
-Compared to the [secondary JS / CSS files](../secondary_js_css_files), the definition of file paths for the main HTML / JS / CSS files is quite simple - just strings, without any lists, objects, or globs.
-
-However, similar to the secondary JS / CSS files, you can specify the file paths [relative to the component's directory](../secondary_js_css_files/#relative-to-component).
+File paths for HTML / JS / CSS files are simple strings. You can specify them
+relative to the component's directory.
 
 So if you have a directory with following files:
 
@@ -158,8 +157,6 @@ to resolve the path relative to the component directories, as set in
 [`COMPONENTS.dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.dirs)
 or
 [`COMPONENTS.app_dirs`](../../reference/settings.md#django_components.app_settings.ComponentsSettings.app_dirs).
-
-Read more about [file path resolution](../secondary_js_css_files/#relative-to-component).
 
 ## File path resolution
 

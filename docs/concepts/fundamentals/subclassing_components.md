@@ -52,37 +52,6 @@ class CustomCard(BaseCard):
     """
 ```
 
-## Media inheritance
-
-The [`Component.Media`](../../reference/api.md#django_components.Component.Media) nested class follows Django's media inheritance rules:
-
-- If both parent and child define a `Media` class, the child's media will automatically include both its own and the parent's JS and CSS files.
-- This behavior can be configured using the [`extend`](../../reference/api.md#django_components.Component.Media.extend) attribute in the Media class, similar to Django's forms.
-  Read more on this in [Media inheritance](./secondary_js_css_files/#media-inheritance).
-
-For example:
-
-```python
-class BaseModal(Component):
-    template = "<div>Modal content</div>"
-
-    class Media:
-        css = ["base_modal.css"]
-        js = ["base_modal.js"]  # Contains core modal functionality
-
-class FancyModal(BaseModal):
-    class Media:
-        # Will include both base_modal.css/js AND fancy_modal.css/js
-        css = ["fancy_modal.css"]  # Additional styling
-        js = ["fancy_modal.js"]    # Additional animations
-
-class SimpleModal(BaseModal):
-    class Media:
-        extend = False  # Don't inherit parent's media
-        css = ["simple_modal.css"]  # Only this CSS will be included
-        js = ["simple_modal.js"]    # Only this JS will be included
-```
-
 ## Opt out of inheritance
 
 For the following media attributes, when you don't want to inherit from the parent,
@@ -92,7 +61,6 @@ you can set these attributes to `None`.
 - [`template`](../../reference/api.md#django_components.Component.template) / [`template_file`](../../reference/api.md#django_components.Component.template_file)
 - [`js`](../../reference/api.md#django_components.Component.js) / [`js_file`](../../reference/api.md#django_components.Component.js_file)
 - [`css`](../../reference/api.md#django_components.Component.css) / [`css_file`](../../reference/api.md#django_components.Component.css_file)
-- [`Media`](../../reference/api.md#django_components.Component.Media) class
 
 For example:
 

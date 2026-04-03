@@ -1813,7 +1813,7 @@ class Component(metaclass=ComponentMeta):
         This method is part of the [Render API](../../concepts/fundamentals/render_api), and
         raises an error if called from outside the rendering execution.
 
-        Read more about [Provide / Inject](../../concepts/advanced/provide_inject).
+        Read more about Provide / Inject.
 
         **Example:**
 
@@ -2574,8 +2574,7 @@ class ComponentNode(BaseNode):
     {% button name="John" job="Developer" / %}
     ```
 
-    You can do so by setting the "shorthand" [Tag formatter](../../concepts/advanced/tag_formatters)
-    in the settings:
+    You can do so by setting the "shorthand" tag formatter in the settings:
 
     ```python
     # settings.py

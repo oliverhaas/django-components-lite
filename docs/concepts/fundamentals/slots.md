@@ -793,8 +793,6 @@ slot.slot_name = "name"
 slot.extra["foo"] = "bar"
 ```
 
-Read more in [Pass slot metadata](../../advanced/extensions#pass-slot-metadata).
-
 ### Slot contents
 
 Whether you create a slot from a function, a string, or from the [`{% fill %}`](../../../reference/template_tags#fill) tags,
