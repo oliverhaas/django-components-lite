@@ -15,7 +15,6 @@ import ast
 import hashlib
 import re
 from pathlib import Path
-from typing import List, Tuple, Optional
 
 
 class InlineTemplateExtractor(ast.NodeVisitor):
@@ -24,14 +23,16 @@ class InlineTemplateExtractor(ast.NodeVisitor):
     def __init__(self, source: str):
         self.source = source
         self.source_lines = source.splitlines()
-        self.templates: List[Tuple[int, int, str, str, Optional[str]]] = []  # (start_line, end_line, class_name, template_content, test_name)
-        self.current_test_name: Optional[str] = None
-        self.current_class_name: Optional[str] = None
+        self.templates: list[
+            tuple[int, int, str, str, str | None]
+        ] = []  # (start_line, end_line, class_name, template_content, test_name)
+        self.current_test_name: str | None = None
+        self.current_class_name: str | None = None
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
         """Track which test function we're in."""
         old_test_name = self.current_test_name
-        if node.name.startswith('test_'):
+        if node.name.startswith("test_"):
             self.current_test_name = node.name
         self.generic_visit(node)
         self.current_test_name = old_test_name
@@ -46,42 +47,34 @@ class InlineTemplateExtractor(ast.NodeVisitor):
             # Handle regular assignment: template = """..."""
             if isinstance(item, ast.Assign):
                 for target in item.targets:
-                    if isinstance(target, ast.Name) and target.id == 'template':
+                    if isinstance(target, ast.Name) and target.id == "template":
                         # Found a template assignment
                         if isinstance(item.value, ast.Constant) and isinstance(item.value.value, str):
                             template_content = item.value.value
                             start_line = item.lineno
                             end_line = item.end_lineno or start_line
 
-                            self.templates.append((
-                                start_line,
-                                end_line,
-                                node.name,
-                                template_content,
-                                self.current_test_name
-                            ))
+                            self.templates.append(
+                                (start_line, end_line, node.name, template_content, self.current_test_name)
+                            )
 
             # Handle annotated assignment: template: types.django_html = """..."""
             elif isinstance(item, ast.AnnAssign):
-                if isinstance(item.target, ast.Name) and item.target.id == 'template':
+                if isinstance(item.target, ast.Name) and item.target.id == "template":
                     if item.value and isinstance(item.value, ast.Constant) and isinstance(item.value.value, str):
                         template_content = item.value.value
                         start_line = item.lineno
                         end_line = item.end_lineno or start_line
 
-                        self.templates.append((
-                            start_line,
-                            end_line,
-                            node.name,
-                            template_content,
-                            self.current_test_name
-                        ))
+                        self.templates.append(
+                            (start_line, end_line, node.name, template_content, self.current_test_name)
+                        )
 
         self.generic_visit(node)
         self.current_class_name = old_class_name
 
 
-def extract_templates(test_file: Path) -> List[Tuple[int, int, str, str, Optional[str]]]:
+def extract_templates(test_file: Path) -> list[tuple[int, int, str, str, str | None]]:
     """Extract all inline templates from a test file."""
     source = test_file.read_text()
 
@@ -100,25 +93,24 @@ def extract_templates(test_file: Path) -> List[Tuple[int, int, str, str, Optiona
 def sanitize_filename(name: str) -> str:
     """Convert test/class name to safe filename."""
     # Remove test_ prefix if present
-    if name.startswith('test_'):
-        name = name[5:]
+    name = name.removeprefix("test_")
 
     # Convert to lowercase, replace spaces/underscores with hyphens
-    name = name.lower().replace('_', '-').replace(' ', '-')
+    name = name.lower().replace("_", "-").replace(" ", "-")
 
     # Remove any non-alphanumeric characters except hyphens
-    name = re.sub(r'[^a-z0-9-]', '', name)
+    name = re.sub(r"[^a-z0-9-]", "", name)
 
     return name
 
 
-def generate_template_filename(class_name: str, test_name: Optional[str], template_content: str) -> str:
+def generate_template_filename(class_name: str, test_name: str | None, template_content: str) -> str:
     """Generate a descriptive filename for the template."""
     # Try to extract meaningful name from class name
     base_name = sanitize_filename(class_name)
 
     # If class name is too generic, try to use test name
-    if base_name in ('component', 'simplecomponent', 'testcomponent') and test_name:
+    if base_name in ("component", "simplecomponent", "testcomponent") and test_name:
         base_name = sanitize_filename(test_name)
 
     # If still too generic or empty, use content hash
@@ -129,12 +121,7 @@ def generate_template_filename(class_name: str, test_name: Optional[str], templa
     return f"{base_name}.html"
 
 
-def create_template_file(
-    template_dir: Path,
-    filename: str,
-    content: str,
-    dry_run: bool = False
-) -> Path:
+def create_template_file(template_dir: Path, filename: str, content: str, dry_run: bool = False) -> Path:
     """Create a template file with the given content."""
     template_path = template_dir / filename
 
@@ -160,11 +147,7 @@ def create_template_file(
     return template_path
 
 
-def update_test_file(
-    test_file: Path,
-    replacements: List[Tuple[int, int, str]],
-    dry_run: bool = False
-) -> None:
+def update_test_file(test_file: Path, replacements: list[tuple[int, int, str]], dry_run: bool = False) -> None:
     """Update test file to use template_file instead of inline templates."""
     source_lines = test_file.read_text().splitlines(keepends=True)
 
@@ -179,19 +162,19 @@ def update_test_file(
         indent = len(template_line) - len(template_line.lstrip())
 
         # Create replacement line
-        replacement = ' ' * indent + f'template_file = "{template_file_path}"\n'
+        replacement = " " * indent + f'template_file = "{template_file_path}"\n'
 
         # Replace the lines
         source_lines[start_idx:end_idx] = [replacement]
 
     if not dry_run:
-        test_file.write_text(''.join(source_lines))
+        test_file.write_text("".join(source_lines))
         print(f"  ✅ Updated: {test_file.name}")
     else:
         print(f"  [DRY RUN] Would update: {test_file.name}")
 
 
-def convert_file(test_file: Path, dry_run: bool = False, limit: Optional[int] = None) -> int:
+def convert_file(test_file: Path, dry_run: bool = False, limit: int | None = None) -> int:
     """Convert inline templates in a test file to template_file references."""
     print(f"\n📄 Processing: {test_file}")
 
@@ -240,24 +223,10 @@ def convert_file(test_file: Path, dry_run: bool = False, limit: Optional[int] = 
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Convert inline templates to template_file references"
-    )
-    parser.add_argument(
-        "test_file",
-        type=Path,
-        help="Path to test file to convert"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without making changes"
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        help="Limit number of templates to convert (for testing)"
-    )
+    parser = argparse.ArgumentParser(description="Convert inline templates to template_file references")
+    parser.add_argument("test_file", type=Path, help="Path to test file to convert")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
+    parser.add_argument("--limit", type=int, help="Limit number of templates to convert (for testing)")
 
     args = parser.parse_args()
 

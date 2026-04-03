@@ -1,5 +1,3 @@
-from django.urls import path
-
 # REMOVED: Component.as_view() - View extension removed
 # from tests.components.multi_file.multi_file import MultFileComponent
 # from tests.components.single_file import SingleFileComponent

@@ -49,7 +49,7 @@ class TestTemplatePartialsIntegration:
                         document.querySelector(".calendar-component").onclick = function(){ alert("Clicked calendar!"); };
                     }
                 })()
-            """  # noqa: E501
+            """
 
             class Kwargs:
                 date: str

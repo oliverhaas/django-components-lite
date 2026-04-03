@@ -1,6 +1,5 @@
 """Catch-all for tests that use template tags and don't fit other files"""
 
-import pytest
 from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 

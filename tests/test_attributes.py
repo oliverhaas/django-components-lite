@@ -1,7 +1,7 @@
 import re
 
 import pytest
-from django.template import Context, Template, TemplateSyntaxError
+from django.template import Context, Template
 from django.utils.safestring import SafeString, mark_safe
 from pytest_django.asserts import assertHTMLEqual
 
@@ -133,7 +133,7 @@ class TestHtmlAttrs:
         {% load component_tags %}
         {% component "test" attrs:@click.stop="dispatch('click_event')" attrs:x-data="{hello: 'world'}" attrs:class=class_var %}
         {% endcomponent %}
-    """  # noqa: E501
+    """
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_tag_positional_args(self, components_settings):
@@ -160,7 +160,7 @@ class TestHtmlAttrs:
             <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
                 content
             </div>
-            """,  # noqa: E501
+            """,
         )
         assert "override-me" not in rendered
 
@@ -199,7 +199,7 @@ class TestHtmlAttrs:
                 <div {% html_attrs attrs=attrs defaults=defaults class="added_class" class="another-class" data-id=123 %}>
                     content
                 </div>
-            """  # noqa: E501
+            """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return {
@@ -215,7 +215,7 @@ class TestHtmlAttrs:
             <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-id="123" x-data="{hello: 'world'}">
                 content
             </div>
-            """,  # noqa: E501
+            """,
         )
         assert "override-me" not in rendered
 
@@ -227,7 +227,7 @@ class TestHtmlAttrs:
                 <div {% html_attrs class="added_class" class="another-class" data-id=123 defaults=defaults attrs=attrs %}>
                     content
                 </div>
-            """  # noqa: E501
+            """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return {
@@ -243,7 +243,7 @@ class TestHtmlAttrs:
             <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
                 content
             </div>
-            """,  # noqa: E501
+            """,
         )
         assert "override-me" not in rendered
 
@@ -275,7 +275,7 @@ class TestHtmlAttrs:
             <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-id="123" x-data="{hello: 'world'}">
                 content
             </div>
-            """,  # noqa: E501
+            """,
         )
         assert "override-me" not in rendered
 
@@ -287,7 +287,7 @@ class TestHtmlAttrs:
                 <div {% html_attrs attrs:class="from_agg_key" attrs:type="submit" defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
                     content
                 </div>
-            """  # noqa: E501
+            """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return {"attrs": kwargs["attrs"]}
@@ -320,7 +320,7 @@ class TestHtmlAttrs:
                 <div {% html_attrs attrs attrs:class="from_agg_key" defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
                     content
                 </div>
-            """  # noqa: E501
+            """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return {"attrs": kwargs["attrs"]}
@@ -341,7 +341,7 @@ class TestHtmlAttrs:
                 <div {% html_attrs defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
                     content
                 </div>
-            """  # noqa: E501
+            """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return {"attrs": kwargs["attrs"]}
@@ -374,7 +374,7 @@ class TestHtmlAttrs:
             {% load component_tags %}
             {% component "test" attrs:@click.stop="dispatch('click_event')" attrs:x-data="{hello: 'world'}" attrs:class=class_var %}
             {% endcomponent %}
-        """  # noqa: E501
+        """
         template = Template(template_str)
         rendered = template.render(Context({"class_var": "padding-top-8"}))
         assertHTMLEqual(
@@ -383,7 +383,7 @@ class TestHtmlAttrs:
             <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
                 content
             </div>
-            """,  # noqa: E501
+            """,
         )
         assert "override-me" not in rendered
 

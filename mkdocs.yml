@@ -13,7 +13,7 @@ site_dir: site
 docs_dir: docs
 
 watch:
-  - src
+  - django_components
   - docs
   - mkdocs.yml
   - README.md
@@ -165,7 +165,7 @@ plugins:
             - url: https://docs.djangoproject.com/en/5.2/_objects/
               base: https://docs.djangoproject.com/en/5.2/
               domains: [std, py]
-          paths: [src]  # search packages in the src folder
+          paths: [.]  # search packages in the project root
           options:
             docstring_options:
               ignore_init_summary: true

@@ -2201,7 +2201,7 @@ class TestTagParser:
         assert attrs == expected_attrs
         assert [a.serialize() for a in attrs] == [
             "component",
-            'data={"items": [1|add:2, {"x"|upper: 2|add:3}, *spread_items|default:""], "nested": {"a": [1|add:2, *nums|default:""], "b": {"x": [*more|default:""]}}, **rest|default, "key": _(\'value\')|upper}',  # noqa: E501
+            'data={"items": [1|add:2, {"x"|upper: 2|add:3}, *spread_items|default:""], "nested": {"a": [1|add:2, *nums|default:""], "b": {"x": [*more|default:""]}}, **rest|default, "key": _(\'value\')|upper}',
         ]
 
     # Test that spread operator cannot be used as dictionary value

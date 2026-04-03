@@ -1,4 +1,4 @@
-from typing import Dict, Optional, cast
+from typing import cast
 
 from django.http import HttpRequest
 from django.template import Context, RequestContext, Template
@@ -15,7 +15,7 @@ setup_test_config()
 
 # Context processor that generates a unique ID. This is used to test that the context
 # processor is generated only once, as each time this is called, it should generate a different ID.
-def dummy_context_processor(request):  # noqa: ARG001
+def dummy_context_processor(request):
     return {"dummy": gen_id()}
 
 
@@ -94,7 +94,7 @@ def gen_parent_component():
                     {% endcomponent %}
                 {% endslot %}
             </div>
-        """  # noqa: E501
+        """
 
         def get_template_data(self, args, kwargs, slots, context):
             return {"shadowing_variable": "NOT SHADOWED"}
@@ -118,7 +118,7 @@ def gen_parent_component_with_args():
                     {% endcomponent %}
                 {% endslot %}
             </div>
-        """  # noqa: E501
+        """
 
         def get_template_data(self, args, kwargs, slots, context):
             return {"inner_parent_value": kwargs["parent_value"]}
@@ -186,7 +186,7 @@ class TestContext:
                     {% endcomponent %}
                 {% endfill %}
             {% endcomponent %}
-        """  # noqa: E501
+        """
         template = Template(template_str)
         rendered = template.render(Context())
 
@@ -207,7 +207,7 @@ class TestContext:
                     {% endcomponent %}
                 {% endfill %}
             {% endcomponent %}
-        """  # noqa: E501
+        """
         template = Template(template_str)
         rendered = template.render(Context())
 
@@ -249,7 +249,7 @@ class TestContext:
                     {% endcomponent %}
                 {% endfill %}
             {% endcomponent %}
-        """  # noqa: E501
+        """
         template = Template(template_str)
         rendered = template.render(Context({"shadowing_variable": "NOT SHADOWED"}))
 
@@ -342,7 +342,7 @@ class TestParentArgs:
                     {% endcomponent %}
                 {% endfill %}
             {% endcomponent %}
-            """  # noqa: E501
+            """
         template = Template(template_str)
         rendered = template.render(Context())
 
@@ -579,8 +579,8 @@ class TestIsolatedContextSetting:
 class TestContextProcessors:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_context_in_template(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        inner_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        inner_request: HttpRequest | None = None
 
         @register("test")
         class TestComponent(Component):
@@ -611,8 +611,8 @@ class TestContextProcessors:
     def test_request_context_in_template_nested(self, components_settings):
         context_processors_data = None
         context_processors_data_child = None
-        parent_request: Optional[HttpRequest] = None
-        child_request: Optional[HttpRequest] = None
+        parent_request: HttpRequest | None = None
+        child_request: HttpRequest | None = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -657,8 +657,8 @@ class TestContextProcessors:
     def test_request_context_in_template_slot(self, components_settings):
         context_processors_data = None
         context_processors_data_child = None
-        parent_request: Optional[HttpRequest] = None
-        child_request: Optional[HttpRequest] = None
+        parent_request: HttpRequest | None = None
+        child_request: HttpRequest | None = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -704,7 +704,7 @@ class TestContextProcessors:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_context_in_python(self, components_settings):
         context_processors_data = None
-        inner_request: Optional[HttpRequest] = None
+        inner_request: HttpRequest | None = None
 
         @register("test")
         class TestComponent(Component):
@@ -726,10 +726,10 @@ class TestContextProcessors:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_context_in_python_nested(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        context_processors_data_child: Optional[Dict] = None
-        parent_request: Optional[HttpRequest] = None
-        child_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        context_processors_data_child: dict | None = None
+        parent_request: HttpRequest | None = None
+        child_request: HttpRequest | None = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -766,8 +766,8 @@ class TestContextProcessors:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_in_python(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        inner_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        inner_request: HttpRequest | None = None
 
         @register("test")
         class TestComponent(Component):
@@ -788,10 +788,10 @@ class TestContextProcessors:
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_request_in_python_nested(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        context_processors_data_child: Optional[Dict] = None
-        parent_request: Optional[HttpRequest] = None
-        child_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        context_processors_data_child: dict | None = None
+        parent_request: HttpRequest | None = None
+        child_request: HttpRequest | None = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -828,8 +828,8 @@ class TestContextProcessors:
     # No request, regular Context
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_no_context_processor_when_non_request_context_in_python(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        inner_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        inner_request: HttpRequest | None = None
 
         @register("test")
         class TestComponent(Component):
@@ -850,8 +850,8 @@ class TestContextProcessors:
     # No request, no Context
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_no_context_processor_when_non_request_context_in_python_2(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        inner_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        inner_request: HttpRequest | None = None
 
         @register("test")
         class TestComponent(Component):
@@ -872,8 +872,8 @@ class TestContextProcessors:
     # Yes request, regular Context
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_context_processor_when_regular_context_and_request_in_python(self, components_settings):
-        context_processors_data: Optional[Dict] = None
-        inner_request: Optional[HttpRequest] = None
+        context_processors_data: dict | None = None
+        inner_request: HttpRequest | None = None
 
         @register("test")
         class TestComponent(Component):
@@ -911,8 +911,8 @@ class TestContextProcessors:
         },
     )
     def test_data_generated_only_once(self):
-        context_processors_data: Optional[Dict] = None
-        context_processors_data_child: Optional[Dict] = None
+        context_processors_data: dict | None = None
+        context_processors_data_child: dict | None = None
 
         @register("test_parent")
         class TestParentComponent(Component):
@@ -1222,16 +1222,16 @@ class TestContextVarsIsFilled:
 
         @register("is_filled_vars")
         class IsFilledVarsComponent(self.IsFilledVarsComponent):  # type: ignore[name-defined]
-            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
+            def on_render_before(self, context: Context, template: Template | None) -> None:
                 nonlocal captured_before
                 captured_before = self.is_filled.copy()
 
             def on_render_after(
                 self,
                 context: Context,
-                template: Optional[Template],
-                content: Optional[str],
-                error: Optional[Exception],
+                template: Template | None,
+                content: str | None,
+                error: Exception | None,
             ) -> None:
                 nonlocal captured_after
                 captured_after = self.is_filled.copy()

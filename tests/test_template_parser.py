@@ -1,9 +1,5 @@
-import pytest
-from django.template import Context
-from django.template.base import Template, Token, TokenType
-from pytest_django.asserts import assertHTMLEqual
+from django.template.base import Token, TokenType
 
-from django_components import Component, register, types
 from django_components.testing import djc_test
 from django_components.util.template_parser import parse_template
 

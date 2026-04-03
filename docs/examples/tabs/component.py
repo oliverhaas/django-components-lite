@@ -4,7 +4,7 @@ Alpine-based tab components: Tablist and Tab.
 Based on https://github.com/django-components/django-components/discussions/540
 """
 
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple
 
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
@@ -27,7 +27,7 @@ class TabDatum(NamedTuple):
 
 class TabContext(NamedTuple):
     id: str
-    tab_data: List[TabDatum]
+    tab_data: list[TabDatum]
     enabled: bool
 
 
@@ -47,14 +47,14 @@ class _TablistImpl(Component):
         )
 
     class Kwargs(NamedTuple):
-        tab_data: List[TabDatum]
-        id: Optional[str] = None
-        name: Optional[str] = None
-        selected_tab: Optional[str] = None
-        container_attrs: Optional[dict] = None
-        tablist_attrs: Optional[dict] = None
-        tab_attrs: Optional[dict] = None
-        tabpanel_attrs: Optional[dict] = None
+        tab_data: list[TabDatum]
+        id: str | None = None
+        name: str | None = None
+        selected_tab: str | None = None
+        container_attrs: dict | None = None
+        tablist_attrs: dict | None = None
+        tab_attrs: dict | None = None
+        tabpanel_attrs: dict | None = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         selected_tab = kwargs.selected_tab if kwargs.selected_tab is not None else kwargs.tab_data[0].tab_id
@@ -264,17 +264,17 @@ class Tablist(Component):
     """
 
     class Kwargs:
-        id: Optional[str] = None
+        id: str | None = None
         name: str = "Tabs"
-        selected_tab: Optional[str] = None
-        container_attrs: Optional[dict] = None
-        tablist_attrs: Optional[dict] = None
-        tab_attrs: Optional[dict] = None
-        tabpanel_attrs: Optional[dict] = None
+        selected_tab: str | None = None
+        container_attrs: dict | None = None
+        tablist_attrs: dict | None = None
+        tab_attrs: dict | None = None
+        tabpanel_attrs: dict | None = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         self.tablist_id: str = kwargs.id or slugify(kwargs.name)
-        self.tab_data: List[TabDatum] = []
+        self.tab_data: list[TabDatum] = []
 
         tab_context = TabContext(
             id=self.tablist_id,
@@ -286,7 +286,7 @@ class Tablist(Component):
             "tab_context": tab_context._asdict(),
         }
 
-    def on_render_after(self, context, template, result, error) -> Optional[str]:
+    def on_render_after(self, context, template, result, error) -> str | None:
         """
         Render the tab set.
 
@@ -344,7 +344,7 @@ class Tab(Component):
     class Kwargs:
         header: str
         disabled: bool = False
-        id: Optional[str] = None
+        id: str | None = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         """
@@ -371,7 +371,7 @@ class Tab(Component):
 
         self.tab_id = f"{slug}_tab"
         self.tabpanel_id = f"{slug}_content"
-        self.parent_tabs: List[TabDatum] = tab_ctx.tab_data
+        self.parent_tabs: list[TabDatum] = tab_ctx.tab_data
 
         # Prevent Tab's children from accessing the parent Tablist context.
         # If we didn't do this, then you could place a Tab inside another Tab,

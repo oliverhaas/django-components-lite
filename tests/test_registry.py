@@ -1,22 +1,18 @@
 import pytest
-from django.template import Context, Engine, Library, Template
-from pytest_django.asserts import assertHTMLEqual
+from django.template import Library
 
 from django_components import (
     AlreadyRegistered,
     Component,
     ComponentRegistry,
     NotRegistered,
-    RegistrySettings,
-    TagProtectedError,
     all_registries,
     register,
     registry,
-    types,
 )
 from django_components.testing import djc_test
 
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
+from .testutils import setup_test_config
 
 setup_test_config()
 

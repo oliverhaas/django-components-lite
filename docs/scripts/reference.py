@@ -41,7 +41,7 @@ import sys
 from importlib import import_module
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, NamedTuple, Optional, Type
+from typing import Any, NamedTuple
 
 import mkdocs_gen_files
 from django.conf import settings
@@ -61,7 +61,7 @@ from django_components.util.misc import get_import_path
 
 current_dir = str(Path(__file__).parent)
 sys.path.append(current_dir)
-from extensions import _format_source_code_html  # noqa: E402
+from extensions import _format_source_code_html
 
 root = Path(__file__).parent.parent.parent
 
@@ -228,7 +228,7 @@ def gen_reference_settings() -> None:
 
 
 # Get attributes / methods that are unique to the subclass
-def _get_unique_methods(base_class: Type, sub_class: Type) -> List[str]:
+def _get_unique_methods(base_class: type, sub_class: type) -> list[str]:
     base_methods = set(dir(base_class))
     subclass_methods = set(dir(sub_class))
     unique_methods = subclass_methods - base_methods
@@ -259,7 +259,7 @@ def _gen_default_settings_section(app_settings_filepath: str) -> str:
     #
     # However, for the documentation, we need to remove those.
     dynamic_re = re.compile(r"Dynamic\(lambda\: (?P<code>.+)\)")
-    cleaned_snippet_lines: List[str] = []
+    cleaned_snippet_lines: list[str] = []
     for line in defaults_snippet_lines:
         curr_line = comment_re.split(line)[0].rstrip()
         curr_line = dynamic_re.sub(
@@ -359,8 +359,6 @@ def gen_reference_template_variables() -> None:
             f.write(f"::: {ComponentVars.__module__}.{ComponentVars.__name__}.{field}\n\n")
 
     mkdocs_gen_files.set_edit_path(out_path, template_path)
-
-
 
 
 # NOTE: Unlike other references, the API of Signals is not yet codified (AKA source of truth defined

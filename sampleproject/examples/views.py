@@ -128,4 +128,4 @@ class ExamplesIndexPage(Component):
                 </div>
             </body>
         </html>
-    """  # noqa: E501
+    """
