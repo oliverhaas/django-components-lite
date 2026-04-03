@@ -33,7 +33,6 @@ from django_components import (
     Slot,
     SlotNode,
     Style,
-    URLRoute,
     register,
     registry,
     render_dependencies,
@@ -42,6 +41,7 @@ from django_components import (
 from django_components.extension import (
     extensions as extension_manager,
 )
+from django_components.util.routing import URLRoute
 from django_components.extensions.autodiscovery import AutodiscoveryExtension
 from django_components.extensions.cache import CacheExtension
 from django_components.extensions.debug_highlight import DebugHighlightExtension
