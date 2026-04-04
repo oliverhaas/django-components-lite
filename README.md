@@ -10,11 +10,24 @@ This project is built on the excellent work of the **[django-components](https:/
 
 **If you're looking for a mature, full-featured, and battle-tested component library for Django, use [django-components](https://github.com/django-components/django-components).** It has an active community, extensive documentation, and a rich feature set.
 
-This fork is an experiment  -  it deliberately removes features to explore what a leaner alternative looks like.
 
-## What's different?
+## Features
 
-Removed from the original:
+What django-components-lite keeps from django-components:
+
+- Component classes with Python logic and Django templates
+- `{% component %}` / `{% endcomponent %}` template tags
+- Slots and fills (`{% slot %}`, `{% fill %}`)
+- Component autodiscovery
+- Component registry
+- Static file handling (JS/CSS)
+- Isolated component context
+- Single-file and multi-file components
+- HTML attribute rendering utilities
+
+## What's removed?
+
+Compared to django-components, the following have been stripped out:
 
 - Extension system
 - Built-in components (DynamicComponent, ErrorFallback)
@@ -28,8 +41,6 @@ Removed from the original:
 - `context_behavior` setting (always isolated)
 - Tag formatters
 - Component views and URLs
-
-What remains is the core: define a component with a Python class and a template, use it in your templates with `{% component %}`, fill slots with `{% fill %}`, and render.
 
 ## Installation
 

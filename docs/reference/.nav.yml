@@ -1,9 +1,0 @@
-# `.nav.yml` is provided by https://lukasgeiter.github.io/mkdocs-awesome-nav
-nav:
-  - API: api.md
-  - Exceptions: exceptions.md
-  - Settings: settings.md
-  - Signals: signals.md
-  - Template tags: template_tags.md
-  - Template variables: template_variables.md
-  - Testing API: testing_api.md

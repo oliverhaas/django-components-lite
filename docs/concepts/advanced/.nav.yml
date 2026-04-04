@@ -1,9 +1,0 @@
-# `.nav.yml` is provided by https://lukasgeiter.github.io/mkdocs-awesome-nav
-nav:
-  - Rendering JS / CSS: rendering_js_css.md
-  - HTML fragments: html_fragments.md
-  - Registering components: component_registry.md
-  - Component context and scope: component_context_scope.md
-  - Custom template tags: template_tags.md
-  - Testing: testing.md
-  - Component libraries: component_libraries.md

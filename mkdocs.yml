@@ -1,208 +1,63 @@
----
-# See https://www.mkdocs.org/user-guide/configuration
 site_name: django-components-lite
 site_description: Lightweight reusable template components for Django.
 site_url: https://oliverhaas.github.io/django-components-lite/
-
 repo_url: https://github.com/oliverhaas/django-components-lite
-repo_name: django-components-lite
-edit_uri: https://github.com/oliverhaas/django-components-lite/edit/main/docs/
-
-dev_addr: "127.0.0.1:9000"
-site_dir: site
-docs_dir: docs
-
-watch:
-  - django_components_lite
-  - docs
-  - mkdocs.yml
-  - README.md
-
-validation:
-  absolute_links: warn
-  unrecognized_links: info
+repo_name: oliverhaas/django-components-lite
+edit_uri: edit/main/docs/
 
 theme:
-  name: "material"
-  custom_dir: docs/overrides
-  features:
-    - content.action.edit
-    - content.action.view
-    - content.code.annotate
-    - content.code.copy
-    - content.tabs.link
-    - navigation.expand
-    - navigation.footer
-    - navigation.instant
-    - navigation.instant.progress
-    - navigation.indexes
-    - navigation.sections
-    - navigation.tabs
-    - navigation.tracking
-    - navigation.top
-    - search.highlight
-    - search.share
-    - search.suggest
-    - toc.follow
-  icon:
-    repo: fontawesome/brands/github
+  name: material
   palette:
-    - media: "(prefers-color-scheme)"
-      toggle:
-        icon: material/brightness-auto
-        name: Switch to light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: teal
+      accent: teal
       toggle:
-        icon: material/weather-night
+        icon: material/brightness-7
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: teal
+      accent: teal
       toggle:
-        icon: material/weather-sunny
+        icon: material/brightness-4
         name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
 
-extra_css:
-  - css/style.css
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
 
 extra:
   version:
     provider: mike
-    default:
-      - dev
-    alias: true
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/django-components/django-components
-    - icon: fontawesome/brands/python
-      link: https://pypi.org/project/django-components/
-    - icon: fontawesome/brands/discord
-      link: https://discord.gg/NaQ8QPyHtD
-  google_site_verification: vQA3d50F2ByQxG0eB6b0YoPnYW9gZo8xnd6HKhCyuys
 
-markdown_extensions:
-  abbr: {}
-  admonition: {}
-  attr_list: {}
-  codehilite: {}
-  def_list: {}
-  tables: {}
-  md_in_html: {}
-#  mdx_truly_sane_lists: {}
-  pymdownx.magiclink:
-    repo_url_shorthand: true
-    user: django-components
-    repo: django-components
-  pymdownx.details: {}
-  pymdownx.highlight:
-    anchor_linenums: true
-  pymdownx.inlinehilite: {}
-  pymdownx.snippets:
-    check_paths: true
-    base_path: .
-  pymdownx.tabbed:
-    alternate_style: true
-  pymdownx.superfences:
-  pymdownx.tasklist:
-    custom_checkbox: true
-  pymdownx.emoji:
-    emoji_index: !!python/name:material.extensions.emoji.twemoji
-    emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  toc:
-    permalink: "¤"
-
-
-plugins:
-  - autorefs
-  - include-markdown:
-      # Default is django style...
-      opening_tag: "{!"
-      closing_tag: "!}"
-  - gen-files:
-      scripts:
-        - docs/scripts/setup.py
-        - docs/scripts/reference.py
-        - docs/scripts/gen_release_notes.py
-  - awesome-nav
-  - git-revision-date-localized:
-      enabled: !ENV [CI, false]
-      type: timeago
-      exclude:
-        - reference/*
-        - changelog.md
-        - code_of_conduct.md
-        - license.md
-  - git-authors:
-      enabled: !ENV [CI, false]
-      exclude:
-        - reference/*
-        - changelog.md
-        - code_of_conduct.md
-        - license.md
-  - markdown-exec
-  # - toc-md:
-  - search
-  - social:
-      enabled: !ENV [CI, false]
-  - mike:
-      canonical_version: "latest"
-      version_selector: true
-  - redirects:
-      redirect_maps:
-        # 'old.md': 'new.md'
-        'README.md': 'overview/welcome.md'
-  - minify:
-      minify_html: true
-  - mkdocstrings:
-      handlers:
-        python:
-          import:
-            - https://docs.python.org/3.12/objects.inv
-            - url: https://docs.djangoproject.com/en/5.2/_objects/
-              base: https://docs.djangoproject.com/en/5.2/
-              domains: [std, py]
-          paths: [.]  # search packages in the project root
-          options:
-            docstring_options:
-              ignore_init_summary: true
-            docstring_section_style: list
-            filters: ["!^_"]
-            group_by_category: true
-            heading_level: 2
-            inherited_members: true
-            merge_init_into_class: true
-            preload_modules: [mkdocstrings]
-            separate_signature: true
-            show_root_heading: true
-            show_root_full_path: false
-            show_signature_annotations: true
-            show_symbol_type_heading: true
-            show_symbol_type_toc: true
-            signature_crossrefs: true
-            summary: true
-            unwrap_annotated: true
-            show_if_no_docstring: false
-            line_length: 140
-            show_submodules: true
-            docstring_style: google
-            show_bases: false # NOTE: Instead we use RuntimeBasesExtension
-            show_source: false # NOTE: Instead we use SourceCodeExtension
-            # NOTE: Order matters!
-            extensions:
-            - docs/scripts/extensions.py:RuntimeBasesExtension
-            - docs/scripts/extensions.py:SourceCodeExtension
-            # - docs/scripts/extensions.py:ComponentSyntaxesExtension
-  - macros:
-      # Macros plugin automatically transforms markdown pages into Jinja2 templates.
-      # The combination of `render_by_default: false` and `force_render_paths` makes
-      # this behaviour OPT-IN for specific pages.
-      # See https://mkdocs-macros-plugin.readthedocs.io/en/latest/rendering/#opt-in-through-the-config-file
-      render_by_default: false
-      force_render_paths: community/people.md
-      # The data included in these YAML files will be available as variables in the Jinja2 templates.
-      # e.g. `{{ people.maintainers }}`
-      # See https://mkdocs-macros-plugin.readthedocs.io/en/latest/#configuration-of-the-plugin
-      include_yaml:
-        - people: docs/community/people.yml
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+  - User Guide:
+      - Components: user-guide/components.md
+      - Slots: user-guide/slots.md
+      - Settings: user-guide/settings.md
+  - Reference:
+      - API: reference/api.md
+      - Changelog: reference/changelog.md
