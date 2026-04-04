@@ -4,10 +4,7 @@ from collections.abc import Callable
 from django_components_lite.util.loader import get_component_files
 from django_components_lite.util.logger import logger
 
-# Set to True by the test fixture (tests/conftest.py) to track loaded modules.
-IS_TESTING = False
-
-# Modules loaded during tests, cleaned up between tests by the fixture.
+# Tracks imported modules so they can be cleaned up between tests.
 LOADED_MODULES: list[str] = []
 
 
@@ -48,7 +45,6 @@ def _import_modules(
         importlib.import_module(module_name)
         imported_modules.append(module_name)
 
-        if IS_TESTING:
-            LOADED_MODULES.append(module_name)
+        LOADED_MODULES.append(module_name)
 
     return imported_modules

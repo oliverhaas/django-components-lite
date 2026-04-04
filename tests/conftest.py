@@ -94,15 +94,11 @@ def _djc_isolation():
     # Start patchers and set testing flag
     from django.test.signals import setting_changed
 
-    import django_components_lite.autodiscovery as autodiscovery_mod
-
     def on_setting_changed(*, setting, **kwargs):
         if setting in ("COMPONENTS", "BASE_DIR"):
             app_settings._load_settings()
 
     setting_changed.connect(on_setting_changed)
-
-    autodiscovery_mod.IS_TESTING = True
     id_patcher.start()
     csrf_patcher.start()
     app_settings._load_settings()
@@ -163,5 +159,4 @@ def _djc_isolation():
         cache.clear()
 
     gc.collect()
-    autodiscovery_mod.IS_TESTING = False
     app_settings._load_settings()
