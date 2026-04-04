@@ -1886,8 +1886,24 @@ class Component(metaclass=ComponentMeta):
 
         return mark_safe(html) if html is not None else ""
 
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """
+        Override this to provide template context variables.
+
+        This is the simple, Django-style API. For access to args, slots, and
+        the rendering context, override `get_template_data()` instead.
+
+        By default, returns an empty dict.
+        """
+        return {}
+
     def _call_data_methods(self) -> dict:
-        maybe_template_data = self.get_template_data(self.args, self.kwargs, self.slots, self.context)
+        # If the subclass overrides get_template_data, use that (advanced API).
+        # Otherwise fall back to get_context_data (simple Django-style API).
+        if type(self).get_template_data is not Component.get_template_data:
+            maybe_template_data = self.get_template_data(self.args, self.kwargs, self.slots, self.context)
+        else:
+            maybe_template_data = self.get_context_data(**self.kwargs)
         return to_dict(default(maybe_template_data, {}))
 
 
