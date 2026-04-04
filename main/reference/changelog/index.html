@@ -701,6 +701,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="0.1.0a1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed-from-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed from upstream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -754,6 +782,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="0.1.0a1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed-from-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed from upstream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -779,13 +835,35 @@
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <h2 id="010a1">0.1.0a1<a class="headerlink" href="#010a1" title="Permanent link">&para;</a></h2>
 <p>Initial release. Forked from <a href="https://github.com/django-components/django-components">django-components</a> v0.143.0.</p>
+<h3 id="removed-from-upstream">Removed from upstream<a class="headerlink" href="#removed-from-upstream" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Stripped to core component rendering functionality</li>
+<li>Extension system</li>
+<li>Built-in components (DynamicComponent, ErrorFallback)</li>
+<li>Component caching</li>
+<li>Provide/Inject system (<code>inject()</code> method, <code>{% provide %}</code> tag)</li>
+<li>Template expressions</li>
+<li>Management commands</li>
+<li>JS/CSS data methods and dependency management</li>
+<li>Type validation (Args/Kwargs/Slots/TemplateData)</li>
+<li><code>on_render()</code> generator system and deferred rendering</li>
+<li><code>context_behavior</code> setting (always isolated)</li>
+<li>Tag formatters</li>
+<li>Component views and URLs</li>
+<li><code>libraries</code> setting and <code>import_libraries()</code> function</li>
+<li><code>reload_on_file_change</code> setting</li>
+<li>All deprecated setting aliases (<code>debug_highlight_components</code>, <code>debug_highlight_slots</code>, <code>dynamic_component_name</code>, <code>template_cache_size</code>, <code>reload_on_template_change</code>, <code>forbidden_static_files</code>)</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
 <li>Renamed package to <code>django-components-lite</code> (import: <code>django_components_lite</code>)</li>
 <li>Python 3.12+ and Django 5.2+ only</li>
-<li>Switched to hatchling build system with uv</li>
-<li>Removed: extension system, built-in components, caching, provide/inject, template expressions, management commands, JS/CSS data methods, type validation, on_render generators, context_behavior setting, tag formatters, component views/URLs</li>
-<li>Removed deprecated settings</li>
+<li>Switched build system from setuptools to hatchling</li>
+<li>Switched from pip/tox to uv</li>
+<li>Moved source from <code>src/</code> to flat layout</li>
+<li>Moved <code>sampleproject/</code> to <code>examples/simple/</code></li>
+<li>Rewrote documentation from scratch</li>
+<li>Simplified CI workflows (matching django-cachex patterns)</li>
+<li>Automatic tagging and PyPI publishing on version bump</li>
 </ul>
 
 
