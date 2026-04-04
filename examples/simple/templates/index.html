@@ -1,0 +1,18 @@
+{% load component_tags %}
+<!DOCTYPE html>
+<html>
+<head><title>django-components-lite example</title></head>
+<body>
+  <h1>django-components-lite</h1>
+
+  {% component "greeting" name="Django" %}{% endcomponent %}
+
+  {% component "greeting" name="World" %}
+    {% fill "extra" %}
+      <p>This slot was filled by the parent template.</p>
+    {% endfill %}
+  {% endcomponent %}
+
+  {% component "greeting" %}{% endcomponent %}
+</body>
+</html>

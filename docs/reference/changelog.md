@@ -31,5 +31,5 @@ Initial release. Forked from [django-components](https://github.com/django-compo
 - Moved source from `src/` to flat layout
 - Moved `sampleproject/` to `examples/simple/`
 - Rewrote documentation from scratch
-- Simplified CI workflows (matching django-cachex patterns)
+- Simplified CI workflows
 - Automatic tagging and PyPI publishing on version bump

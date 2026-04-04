@@ -126,15 +126,11 @@ jobs:
         run: uv python install 3.14
 
       - name: Install dependencies
-        run: |
-          cd examples/simple
-          uv pip install -e ../..
-          uv pip install gunicorn whitenoise
+        run: uv pip install -e .
 
-      - name: Check Django project
+      - name: Check example project
         run: |
           cd examples/simple
-          uv run python manage.py check
-          uv run python manage.py migrate --noinput
-          uv run python manage.py runserver & sleep 5
-          curl http://127.0.0.1:8000/ || exit 1
+          PYTHONPATH=. uv run python manage.py check
+          uv run python manage.py runserver 8123 & sleep 3
+          curl http://127.0.0.1:8123/ || exit 1

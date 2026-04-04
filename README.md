@@ -2,7 +2,7 @@
 
 **An exploratory, lightweight fork of [django-components](https://github.com/django-components/django-components).**
 
-This package strips django-components down to its core: simple, reusable template components for Django  -  nothing more. The goal is to see how a minimal django-components feels in practice.
+This package strips django-components down to its core: simple, reusable template components for Django, just templates with some optional python logic. The goal is to see how a minimal django-components feels in practice.
 
 ## Attribution
 

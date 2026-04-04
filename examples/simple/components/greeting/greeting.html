@@ -1,0 +1,5 @@
+{% load component_tags %}
+<div style="border: 1px solid #ccc; padding: 16px; margin: 8px; border-radius: 8px;">
+  <h2>Hello, {{ name }}!</h2>
+  {% slot "extra" %}{% endslot %}
+</div>
