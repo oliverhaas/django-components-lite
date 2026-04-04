@@ -13,7 +13,6 @@ An exploratory fork of [django-components](https://github.com/django-components/
 - Component registry
 - Static file handling (JS/CSS)
 - Isolated component context
-- Single-file and multi-file components
 - HTML attribute rendering utilities
 
 ## Attribution

@@ -22,7 +22,6 @@ What django-components-lite keeps from django-components:
 - Component registry
 - Static file handling (JS/CSS)
 - Isolated component context
-- Single-file and multi-file components
 - HTML attribute rendering utilities
 
 ## What's removed?

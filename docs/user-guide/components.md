@@ -56,17 +56,3 @@ Components are automatically discovered from:
 - Directories listed in `COMPONENTS.dirs`
 - Modules listed in `COMPONENTS.libraries`
 
-## Single-file components
-
-You can define everything in a single Python file:
-
-```python
-from django_components_lite import Component, register
-
-@register("badge")
-class Badge(Component):
-    template = "<span class='badge'>{{ label }}</span>"
-
-    def get_context_data(self, label):
-        return {"label": label}
-```
