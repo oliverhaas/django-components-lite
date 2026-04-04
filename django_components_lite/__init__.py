@@ -13,9 +13,9 @@ from django_components_lite.component import (
     get_component_by_class_id,
 )
 from django_components_lite.component_registry import (
-    AlreadyRegistered,
+    AlreadyRegisteredError,
     ComponentRegistry,
-    NotRegistered,
+    NotRegisteredError,
     RegistrySettings,
     register,
     registry,
@@ -40,7 +40,7 @@ from django_components_lite.util.types import Empty
 
 
 __all__ = [
-    "AlreadyRegistered",
+    "AlreadyRegisteredError",
     "Component",
     "ComponentFileEntry",
     "ComponentNode",
@@ -49,7 +49,7 @@ __all__ = [
     "ComponentsSettings",
     "Empty",
     "FillNode",
-    "NotRegistered",
+    "NotRegisteredError",
     "RegistrySettings",
     "Slot",
     "SlotContext",

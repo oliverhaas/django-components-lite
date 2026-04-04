@@ -214,11 +214,6 @@ def _detailed_tag_parser(text: str, lineno: int, start_index: int) -> Token:
 def _compile_take_until_pattern(stop_chars: str, allow_escapes: bool) -> re.Pattern:
     escaped_stops = "".join(re.escape(c) for c in stop_chars)
 
-    if allow_escapes:
-        # Match either escaped characters or anything until stop chars
-        pattern = f"(?:\\\\.|[^{escaped_stops}])*"
-    else:
-        # Match anything until stop chars
-        pattern = f"[^{escaped_stops}]*"
+    pattern = f"(?:\\\\.|[^{escaped_stops}])*" if allow_escapes else f"[^{escaped_stops}]*"
 
     return re.compile(pattern)

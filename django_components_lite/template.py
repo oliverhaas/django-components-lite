@@ -207,9 +207,7 @@ def _create_template_from_string(
 
     set_component_to_origin(origin, component)
 
-    template = Template(template_string, name=origin.template_name, origin=origin)
-
-    return template
+    return Template(template_string, name=origin.template_name, origin=origin)
 
 
 # When loading a template, use Django's `get_template()` to ensure it triggers Django template loaders

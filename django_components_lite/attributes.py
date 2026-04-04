@@ -4,7 +4,7 @@
 
 import re
 from collections.abc import Mapping, Sequence
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 from django.template import Context
 from django.utils.html import conditional_escape, format_html
@@ -12,9 +12,9 @@ from django.utils.safestring import SafeString, mark_safe
 
 from django_components_lite.node import BaseNode
 
-ClassValue = Union[Sequence["ClassValue"], str, dict[str, bool]]
+ClassValue = Sequence["ClassValue"] | str | dict[str, bool]
 StyleDict = dict[str, str | int | Literal[False] | None]
-StyleValue = Union[Sequence["StyleValue"], str, StyleDict]
+StyleValue = Sequence["StyleValue"] | str | StyleDict
 
 
 class HtmlAttrsNode(BaseNode):

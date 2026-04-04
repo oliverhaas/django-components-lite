@@ -4,7 +4,7 @@ import pytest
 from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, NotRegistered, register, registry
+from django_components_lite import Component, NotRegisteredError, register, registry
 
 
 def gen_slotted_component():
@@ -81,7 +81,7 @@ class TestComponentTemplateTag:
         """
 
         template = Template(simple_tag_template)
-        with pytest.raises(NotRegistered):
+        with pytest.raises(NotRegisteredError):
             template.render(Context({}))
 
     def test_component_called_with_positional_name(self):

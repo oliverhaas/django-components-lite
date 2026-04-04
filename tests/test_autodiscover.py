@@ -1,6 +1,6 @@
 import pytest
 
-from django_components_lite import AlreadyRegistered, registry
+from django_components_lite import AlreadyRegisteredError, registry
 from django_components_lite.autodiscovery import autodiscover
 
 
@@ -14,8 +14,8 @@ class TestAutodiscover:
 
         try:
             modules = autodiscover(map_module=lambda p: "tests." + p if p.startswith("components") else p)
-        except AlreadyRegistered:
-            pytest.fail("Autodiscover should not raise AlreadyRegistered exception")
+        except AlreadyRegisteredError:
+            pytest.fail("Autodiscover should not raise AlreadyRegisteredError exception")
 
         assert "tests.components" in modules
         assert "tests.components.single_file" in modules

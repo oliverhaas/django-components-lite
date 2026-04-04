@@ -493,7 +493,7 @@ class BaseNode(Node, metaclass=NodeMeta):
         template_component: type["Component"] | None = None,
     ) -> None:
         self.params = params
-        self.flags = flags or {flag: False for flag in self.allowed_flags or []}
+        self.flags = flags or dict.fromkeys(self.allowed_flags or [], False)
         self.nodelist = nodelist or NodeList()
         self.node_id = node_id or gen_id()
         self.contents = contents

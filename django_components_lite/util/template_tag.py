@@ -111,8 +111,7 @@ def resolve_params(
                 for key, value in resolved.items():
                     resolved_params.append(TagParam(key=key, value=value))
             elif isinstance(resolved, Iterable):
-                for value in resolved:
-                    resolved_params.append(TagParam(key=None, value=value))
+                resolved_params.extend(TagParam(key=None, value=value) for value in resolved)
             else:
                 raise ValueError(
                     f"Cannot spread non-iterable value: '{param.value.serialize()}' resolved to {resolved}",
@@ -122,9 +121,7 @@ def resolve_params(
 
     if tag == "html_attrs":
         resolved_params = merge_repeated_kwargs(resolved_params)
-    resolved_params = process_aggregate_kwargs(resolved_params)
-
-    return resolved_params
+    return process_aggregate_kwargs(resolved_params)
 
 
 # Data obj to give meaning to the parsed tag fields
@@ -255,9 +252,9 @@ def _extract_flags(
 
     flags_dict: dict[str, bool] = {
         # Base state - all flags False
-        **{flag: False for flag in (allowed_flags or [])},
+        **dict.fromkeys(allowed_flags or [], False),
         # Flags found on the template tag
-        **{flag: True for flag in found_flags},
+        **dict.fromkeys(found_flags, True),
     }
 
     return remaining_attrs, flags_dict

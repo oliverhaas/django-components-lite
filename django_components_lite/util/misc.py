@@ -83,7 +83,7 @@ def get_module_info(
         else:
             try:
                 module = import_module(module_name)
-            except Exception:
+            except (ImportError, AttributeError):
                 module = None
     else:
         module = None
@@ -255,8 +255,7 @@ def format_as_ascii_table(
         data_rows.append(data_row)
 
     # Combine all parts into the final table
-    table = "\n".join([header_row, separator, *data_rows]) if include_headers else "\n".join(data_rows)
-    return table
+    return "\n".join([header_row, separator, *data_rows]) if include_headers else "\n".join(data_rows)
 
 
 def is_generator(obj: Any) -> bool:

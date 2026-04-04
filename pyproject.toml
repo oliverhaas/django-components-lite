@@ -62,49 +62,28 @@ exclude = ["migrations", "manage.py", "settings.py", "env", ".env"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+  "ANN001",  # Missing type annotation for function argument
+  "ANN201",  # Missing return type annotation
   "ANN401",  # Any is correct for dynamic expressions
+  "ARG",     # Unused arguments (API compat)
   "COM812",  # Conflicts with ruff-format
+  "C901",    # Too complex
   "D",       # Docstrings - will add incrementally
+  "E402",    # Module level import not at top of file (Django patterns)
   "E501",    # Line length handled by config
   "EM",      # Exception strings inline are fine
   "ERA001",  # Found commented-out code (too many false positives)
   "FBT",     # Boolean params match API conventions
-  "FIX002",  # Line contains TODO
   "INP001",  # Implicit namespace package
-  "PERF203", # try/except in loop is fine
   "PLC0415", # Dynamic imports intentional
-  "PLR0911", # Too many return statements
   "PLR0912", # Too many branches
   "PLR0913", # Too many arguments
   "PLR0915", # Too many statements
   "PLR2004", # Magic value used in comparison
-  "RET504",  # Unnecessary assignment before return
-  "RET505",  # Unnecessary elif after return
   "S308",    # Use of mark_safe
-  "S603",    # subprocess call
-  "SIM108",  # Ternary not always clearer
-  "SIM117",  # Nested with statements
   "SLF001",  # Private member access
-  "TD002",   # Missing author in TODO
-  "TD003",   # Missing issue link for TODO
-  "TD004",   # Missing colon in TODO
   "TRY003",  # Long exception messages are helpful
   "TRY300",  # return in try block is cleaner
-  "TRY301",  # Abstract raise to inner function
-  "C420",    # Unnecessary dict comprehension
-  "C901",    # Too complex
-  "A005",    # Module shadows stdlib module
-  "ANN001",  # Missing type annotation for function argument
-  "ANN201",  # Missing return type annotation
-  "ARG",     # Unused arguments (API compat)
-  "BLE001",  # Do not catch blind exception
-  "E402",    # Module level import not at top of file (Django patterns)
-  "N818",    # Exception name suffix
-  "PERF401", # Use list.extend
-  "PTH",     # Use pathlib instead of os.path
-  "S110",    # try-except-pass detected
-  "SIM105",  # Use contextlib.suppress
-  "UP007",   # Use X | Y for type annotations
 ]
 
 [tool.ruff.lint.flake8-annotations]
@@ -115,7 +94,6 @@ suppress-none-returning = true
 "tests/**" = [
   "ANN",     # Type annotations not required in tests
   "ARG",     # Unused arguments common in fixtures
-  "F821",    # Undefined name (references to removed features on this branch)
   "N806",    # Variable in function should be lowercase
   "PLC0415", # import should be at top-level
   "RUF012",  # Mutable class attributes

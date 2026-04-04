@@ -126,11 +126,7 @@ def get_component_files(suffix: str | None = None) -> list[ComponentFileEntry]:
     dirs = get_component_dirs(include_apps=False)
     component_filepaths = _search_dirs(dirs, search_glob)
 
-    if hasattr(settings, "BASE_DIR") and settings.BASE_DIR:
-        project_root = settings.BASE_DIR
-    else:
-        # Fallback for getting the root dir, see https://stackoverflow.com/a/16413955/9788634
-        project_root = Path.cwd()
+    project_root = settings.BASE_DIR if hasattr(settings, "BASE_DIR") and settings.BASE_DIR else Path.cwd()
 
     # NOTE: We handle dirs from `COMPONENTS.dirs` and from individual apps separately.
     modules: list[ComponentFileEntry] = []
@@ -199,9 +195,7 @@ def _filepath_to_python_module(
 
     # Combine with the base module path
     full_module_name = f"{root_module_path}.{module_name}" if root_module_path else module_name
-    full_module_name = full_module_name.removesuffix(".__init__")  # Remove the trailing `.__init__`
-
-    return full_module_name
+    return full_module_name.removesuffix(".__init__")  # Remove the trailing `.__init__`
 
 
 def _search_dirs(dirs: list[Path], search_glob: str) -> list[Path]:

@@ -2,10 +2,10 @@ import pytest
 from django.template import Library
 
 from django_components_lite import (
-    AlreadyRegistered,
+    AlreadyRegisteredError,
     Component,
     ComponentRegistry,
-    NotRegistered,
+    NotRegisteredError,
     all_registries,
     register,
     registry,
@@ -108,7 +108,7 @@ class TestComponentRegistry:
     def test_prevent_registering_different_components_with_the_same_name(self):
         custom_registry = ComponentRegistry()
         custom_registry.register(name="testcomponent", component=MockComponent)
-        with pytest.raises(AlreadyRegistered):
+        with pytest.raises(AlreadyRegisteredError):
             custom_registry.register(name="testcomponent", component=MockComponent2)
 
     def test_allow_duplicated_registration_of_the_same_component(self):
@@ -116,8 +116,8 @@ class TestComponentRegistry:
         try:
             custom_registry.register(name="testcomponent", component=MockComponentView)
             custom_registry.register(name="testcomponent", component=MockComponentView)
-        except AlreadyRegistered:
-            pytest.fail("Should not raise AlreadyRegistered")
+        except AlreadyRegisteredError:
+            pytest.fail("Should not raise AlreadyRegisteredError")
 
     def test_simple_unregister(self):
         custom_registry = ComponentRegistry()
@@ -127,7 +127,7 @@ class TestComponentRegistry:
 
     def test_raises_on_failed_unregister(self):
         custom_registry = ComponentRegistry()
-        with pytest.raises(NotRegistered):
+        with pytest.raises(NotRegisteredError):
             custom_registry.unregister(name="testcomponent")
 
 

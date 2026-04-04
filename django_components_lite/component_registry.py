@@ -20,7 +20,7 @@ AllRegistries = list[ReferenceType["ComponentRegistry"]]
 TComponent = TypeVar("TComponent", bound="Component")
 
 
-class AlreadyRegistered(Exception):
+class AlreadyRegisteredError(Exception):
     """
     Raised when you try to register a [Component](./api.md#django_components_lite.Component),
     but it's already registered with given
@@ -28,7 +28,7 @@ class AlreadyRegistered(Exception):
     """
 
 
-class NotRegistered(Exception):
+class NotRegisteredError(Exception):
     """
     Raised when you try to access a [Component](./api.md#django_components_lite.Component),
     but it's NOT registered with given
@@ -221,7 +221,7 @@ class ComponentRegistry:
 
         **Raises:**
 
-        - [`AlreadyRegistered`](./exceptions.md#django_components_lite.AlreadyRegistered)
+        - [`AlreadyRegisteredError`](./exceptions.md#django_components_lite.AlreadyRegisteredError)
         if a different component was already registered under the same name.
 
         **Example:**
@@ -233,7 +233,7 @@ class ComponentRegistry:
         """
         existing_component = self._registry.get(name)
         if existing_component and existing_component.cls.class_id != component.class_id:
-            raise AlreadyRegistered(f'The component "{name}" has already been registered')
+            raise AlreadyRegisteredError(f'The component "{name}" has already been registered')
 
         entry = self._register_to_library(name, component)
 
@@ -261,7 +261,7 @@ class ComponentRegistry:
 
         **Raises:**
 
-        - [`NotRegistered`](./exceptions.md#django_components_lite.NotRegistered)
+        - [`NotRegisteredError`](./exceptions.md#django_components_lite.NotRegisteredError)
         if the given name is not registered.
 
         **Example:**
@@ -315,7 +315,7 @@ class ComponentRegistry:
 
         **Raises:**
 
-        - [`NotRegistered`](./exceptions.md#django_components_lite.NotRegistered)
+        - [`NotRegisteredError`](./exceptions.md#django_components_lite.NotRegisteredError)
           if the given name is not registered.
 
         **Example:**
@@ -330,7 +330,7 @@ class ComponentRegistry:
 
         """
         if name not in self._registry:
-            raise NotRegistered(f'The component "{name}" is not registered')
+            raise NotRegisteredError(f'The component "{name}" is not registered')
 
         return self._registry[name].cls
 
@@ -380,8 +380,7 @@ class ComponentRegistry:
         ```
 
         """
-        comps = {key: entry.cls for key, entry in self._registry.items()}
-        return comps
+        return {key: entry.cls for key, entry in self._registry.items()}
 
     def clear(self) -> None:
         """
@@ -506,7 +505,7 @@ def register(
             to which to register this component. If omitted, component is registered to the default registry.
 
     Raises:
-        AlreadyRegistered: If there is already a component registered under the same name.
+        AlreadyRegisteredError: If there is already a component registered under the same name.
 
     **Examples**:
 

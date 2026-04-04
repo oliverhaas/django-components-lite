@@ -139,12 +139,8 @@ def monkeypatch_template_render(template_cls: type[Template]) -> None:
     def _template_render(self: Template, context: Context, *args: Any, **kwargs: Any) -> str:
         """Display stage -- can be called many times"""
         # We parametrized `isolated_context`, which was `True` in the original method.
-        if COMPONENT_IS_NESTED_KEY not in context:
-            isolated_context = True
-        else:
-            # MUST be `True` for templates that are NOT import with `{% extends %}` tag,
-            # and `False` otherwise.
-            isolated_context = not context[COMPONENT_IS_NESTED_KEY]
+        # MUST be `True` for templates that are NOT imported with `{% extends %}` tag
+        isolated_context = True if COMPONENT_IS_NESTED_KEY not in context else not context[COMPONENT_IS_NESTED_KEY]
 
         with context.render_context.push_state(self, isolated_context=isolated_context):
             if context.template is None:

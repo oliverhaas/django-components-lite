@@ -6,7 +6,6 @@ into paths relative to COMPONENTS.dirs, suitable for Django's static files
 and template loading.
 """
 
-import os
 from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -38,8 +37,8 @@ def resolve_component_files(comp_cls: type["Component"]) -> None:
     if matched_component_dir is None:
         return
 
-    comp_dir_abs = os.path.abspath(matched_component_dir)
-    comp_file_dir_abs = os.path.dirname(module_file_path)
+    comp_dir_abs = Path(matched_component_dir).resolve()
+    comp_file_dir = Path(module_file_path).parent
 
     # Resolve each file attribute
     for attr in ("template_file", "js_file", "css_file"):
@@ -52,10 +51,10 @@ def resolve_component_files(comp_cls: type["Component"]) -> None:
             continue
 
         # Check if the file exists relative to the component's directory
-        abs_path = os.path.join(comp_file_dir_abs, filepath)
-        if os.path.exists(abs_path):
+        abs_path = comp_file_dir / filepath
+        if abs_path.exists():
             # Convert to path relative to the component root dir
-            rel_path = Path(os.path.relpath(abs_path, comp_dir_abs)).as_posix()
+            rel_path = abs_path.resolve().relative_to(comp_dir_abs).as_posix()
             setattr(comp_cls, attr, rel_path)
 
 
@@ -64,8 +63,8 @@ def _find_component_dir(
     target_file_path: str,
 ) -> str | Path | None:
     """Find which COMPONENTS.dirs directory contains the given file."""
-    abs_target = os.path.abspath(target_file_path)
+    abs_target = Path(target_file_path).resolve()
     for component_dir in component_dirs:
-        if abs_target.startswith(os.path.abspath(component_dir)):
+        if abs_target.is_relative_to(Path(component_dir).resolve()):
             return component_dir
     return None

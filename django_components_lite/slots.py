@@ -45,7 +45,7 @@ FILL_BODY_KWARG = "body"
 
 
 # Public types
-SlotResult = Union[str, SafeString]
+SlotResult = str | SafeString
 """
 Type representing the result of a slot render function.
 
@@ -368,7 +368,7 @@ class Slot[TSlotData: Mapping]:
 
 # NOTE: This must be defined here, so we don't have any forward references
 # otherwise Pydantic has problem resolving the types.
-SlotInput = Union[SlotResult, SlotFunc[TSlotData], Slot[TSlotData]]
+SlotInput = SlotResult | SlotFunc[TSlotData] | Slot[TSlotData]
 """
 Type representing all forms in which slot content can be passed to a component.
 
@@ -687,10 +687,7 @@ class SlotNode(BaseNode):
 
         # If slot is marked as 'default', we use the name 'default' for the fill,
         # IF SUCH FILL EXISTS. Otherwise, we use the slot's name.
-        if is_default and DEFAULT_SLOT_KEY in slot_fills:
-            fill_name = DEFAULT_SLOT_KEY
-        else:
-            fill_name = slot_name
+        fill_name = DEFAULT_SLOT_KEY if is_default and DEFAULT_SLOT_KEY in slot_fills else slot_name
 
         # NOTE: TBH not sure why this happens. But there's an edge case when:
         # 1. Using the "django" context behavior
@@ -800,12 +797,11 @@ class SlotNode(BaseNode):
                 # Otherwise we simply re-use the last layer, so that following logic uses `with` in either case
                 render_ctx_layer = used_ctx.render_context.dicts[-1]
 
-            with used_ctx.render_context.push(render_ctx_layer):
-                with add_slot_to_error_message(component_name, slot_name):
-                    # Render slot as a function
-                    # NOTE: While `{% fill %}` tag has to opt in for the `fallback` and `data` variables,
-                    #       the render function ALWAYS receives them.
-                    output = slot(data=kwargs, fallback=fallback, context=used_ctx)
+            with used_ctx.render_context.push(render_ctx_layer), add_slot_to_error_message(component_name, slot_name):
+                # Render slot as a function
+                # NOTE: While `{% fill %}` tag has to opt in for the `fallback` and `data` variables,
+                #       the render function ALWAYS receives them.
+                output = slot(data=kwargs, fallback=fallback, context=used_ctx)
 
         trace_component_msg(
             "RENDER_SLOT_END",
@@ -1301,9 +1297,8 @@ def _extract_fill_content(
     # it will add itself into captured_fills, because `FILL_GEN_CONTEXT_KEY` is defined.
     captured_fills: list[FillWithData] = []
 
-    with _extends_context_reset(context):
-        with context.update({FILL_GEN_CONTEXT_KEY: captured_fills}):
-            content = mark_safe(nodes.render(context).strip())
+    with _extends_context_reset(context), context.update({FILL_GEN_CONTEXT_KEY: captured_fills}):
+        content = mark_safe(nodes.render(context).strip())
 
     # If we did not encounter any fills (not accounting for those nested in other
     # {% componenet %} tags), then we treat the content as default slot.
@@ -1350,10 +1345,7 @@ def normalize_slot_fills(
 
         # Otherwise, we create a new instance of Slot, whether we've been given Slot or not,
         # so we can assign metadata to our internal copies without affecting the original.
-        if not isinstance(content, Slot):
-            content_func = content
-        else:
-            content_func = content.content_func
+        content_func = content if not isinstance(content, Slot) else content.content_func
 
         # Populate potentially missing fields so we can trace the component and slot
         if isinstance(content, Slot):
@@ -1371,7 +1363,7 @@ def normalize_slot_fills(
             used_fill_node = None
             used_extra = {}
 
-        slot = Slot(
+        return Slot(
             contents=used_contents,
             content_func=content_func,
             component_name=used_component_name,
@@ -1380,8 +1372,6 @@ def normalize_slot_fills(
             fill_node=used_fill_node,
             extra=used_extra,
         )
-
-        return slot
 
     for slot_name, content in fills.items():
         # Case: No content, so nothing to do.
