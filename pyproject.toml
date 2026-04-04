@@ -74,7 +74,6 @@ ignore = [
   "EM",      # Exception strings inline are fine
   "ERA001",  # Found commented-out code (too many false positives)
   "FBT",     # Boolean params match API conventions
-  "INP001",  # Implicit namespace package
   "PLC0415", # Dynamic imports intentional
   "PLR0912", # Too many branches
   "PLR0913", # Too many arguments
@@ -93,11 +92,15 @@ suppress-none-returning = true
 "tests/**" = [
   "ANN",     # Type annotations not required in tests
   "ARG",     # Unused arguments common in fixtures
+  "INP001",  # Component dirs are implicit namespace packages by design
   "N806",    # Variable in function should be lowercase
   "PLC0415", # import should be at top-level
   "RUF012",  # Mutable class attributes
   "S101",    # assert in tests
   "TRY002",  # Create your own exception
+]
+"examples/**" = [
+  "INP001", # Component dirs are implicit namespace packages by design
 ]
 "benchmarks/**" = ["ANN", "ARG", "N806", "PLC0415", "RUF012", "S101", "TRY002"]
 "sampleproject/**" = [
