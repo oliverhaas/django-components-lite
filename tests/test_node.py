@@ -12,15 +12,9 @@ from django.template.exceptions import TemplateSyntaxError
 from django_components_lite import Component
 from django_components_lite.node import BaseNode
 from django_components_lite.templatetags import component_tags
-from django_components_lite.testing import djc_test
 from django_components_lite.util.tag_parser import TagAttr
 
-from .testutils import setup_test_config
 
-setup_test_config()
-
-
-@djc_test
 class TestNode:
     def test_node_class_requires_tag(self):
         with pytest.raises(ValueError):  # noqa: PT011
@@ -405,7 +399,6 @@ def force_signature_validation(fn):
     return SignatureOnlyFunction(fn)
 
 
-@djc_test
 class TestSignatureBasedValidation:
     # Test that the template tag can be used within the template under the registered tag
     def test_node_class_tags(self):

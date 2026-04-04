@@ -3,11 +3,6 @@ from functools import wraps
 from django.template import Context, Template
 
 from django_components_lite import Component, registry
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
 def _get_templates_used_to_render(subject_template, render_context=None):
@@ -42,7 +37,6 @@ def with_template_signal(func):
     return wrapper
 
 
-@djc_test
 class TestTemplateSignal:
     def gen_slotted_component(self):
         class SlottedComponent(Component):
@@ -66,9 +60,8 @@ class TestTemplateSignal:
 
         return InnerComponent
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     @with_template_signal
-    def test_template_rendered(self, components_settings):
+    def test_template_rendered(self):
         registry.register("test_component", self.gen_slotted_component())
         registry.register("inner_component", self.gen_inner_component())
         template_str: str = """
@@ -79,9 +72,8 @@ class TestTemplateSignal:
         templates_used = _get_templates_used_to_render(template)
         assert "slotted_template.html" in templates_used
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     @with_template_signal
-    def test_template_rendered_nested_components(self, components_settings):
+    def test_template_rendered_nested_components(self):
         registry.register("test_component", self.gen_slotted_component())
         registry.register("inner_component", self.gen_inner_component())
         template_str: str = """
@@ -97,9 +89,8 @@ class TestTemplateSignal:
         assert "slotted_template.html" in templates_used
         assert "simple_template.html" in templates_used
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     @with_template_signal
-    def test_template_rendered_skipped_when_no_template(self, components_settings):
+    def test_template_rendered_skipped_when_no_template(self):
         class EmptyComponent(Component):
             pass
 

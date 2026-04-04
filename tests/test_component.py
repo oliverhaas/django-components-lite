@@ -10,7 +10,7 @@ import pytest
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.template import Context, RequestContext, Template, TemplateSyntaxError
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import path
 from pytest_django.asserts import assertHTMLEqual
 
@@ -21,12 +21,7 @@ from django_components_lite import (
     get_component_by_class_id,
     register,
 )
-from django_components_lite.testing import djc_test
-from django_components_lite.urls import urlpatterns as dc_urlpatterns
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
+from tests.urls import urlpatterns as dc_urlpatterns
 
 
 # Client for testing endpoints via requests
@@ -44,17 +39,14 @@ class CustomClient(Client):
         super().__init__(*args, **kwargs)
 
 
-@djc_test
 class TestComponent:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_empty_component(self, components_settings):
+    def test_empty_component(self):
         class EmptyComponent(Component):
             pass
 
         EmptyComponent.render(args=["123"])
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_template_string_static_inlined(self, components_settings):
+    def test_template_string_static_inlined(self):
         class SimpleComponent(Component):
             template: str = """
                 Variable: <strong>{{ variable }}</strong>
@@ -73,8 +65,7 @@ class TestComponent:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_template_file_static(self, components_settings):
+    def test_template_file_static(self):
         class SimpleComponent(Component):
             template_file = "simple_template.html"
 
@@ -93,39 +84,36 @@ class TestComponent:
 
     # Test that even with cached template loaders, each Component has its own `Template`
     # even when multiple components point to the same template file.
-    @djc_test(
-        parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR,
-        django_settings={
-            "TEMPLATES": [
-                {
-                    "BACKEND": "django.template.backends.django.DjangoTemplates",
-                    "DIRS": [
-                        "tests/templates/",
-                        "tests/components/",
+    @override_settings(
+        TEMPLATES=[
+            {
+                "BACKEND": "django.template.backends.django.DjangoTemplates",
+                "DIRS": [
+                    "tests/templates/",
+                    "tests/components/",
+                ],
+                "OPTIONS": {
+                    "builtins": [
+                        "django_components_lite.templatetags.component_tags",
                     ],
-                    "OPTIONS": {
-                        "builtins": [
-                            "django_components_lite.templatetags.component_tags",
-                        ],
-                        "loaders": [
-                            (
-                                "django.template.loaders.cached.Loader",
-                                [
-                                    # Default Django loader
-                                    "django.template.loaders.filesystem.Loader",
-                                    # Including this is the same as APP_DIRS=True
-                                    "django.template.loaders.app_directories.Loader",
-                                    # Components loader
-                                    "django_components_lite.template_loader.Loader",
-                                ],
-                            ),
-                        ],
-                    },
+                    "loaders": [
+                        (
+                            "django.template.loaders.cached.Loader",
+                            [
+                                # Default Django loader
+                                "django.template.loaders.filesystem.Loader",
+                                # Including this is the same as APP_DIRS=True
+                                "django.template.loaders.app_directories.Loader",
+                                # Components loader
+                                "django_components_lite.template_loader.Loader",
+                            ],
+                        ),
+                    ],
                 },
-            ],
-        },
+            },
+        ],
     )
-    def test_template_file_static__cached(self, components_settings):
+    def test_template_file_static__cached(self):
         class SimpleComponent1(Component):
             template_file = "simple_template.html"
 
@@ -167,8 +155,7 @@ class TestComponent:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_template_file_static__compat(self, components_settings):
+    def test_template_file_static__compat(self):
         class SimpleComponent(Component):
             template_name = "simple_template.html"
 
@@ -236,7 +223,6 @@ class TestComponent:
         assert SimpleComponent.render() == "Hello"
 
 
-@djc_test
 class TestComponentRenderAPI:
     def test_component_render_id(self):
         class SimpleComponent(Component):
@@ -432,7 +418,6 @@ class TestComponentRenderAPI:
         assert comp.node is None
 
 
-@djc_test
 class TestComponentTemplateVars:
     def test_args_kwargs_slots__simple_untyped(self):
         class TestComponent(Component):
@@ -564,10 +549,8 @@ class TestComponentTemplateVars:
         )
 
 
-@djc_test
 class TestComponentRender:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_minimal(self, components_settings):
+    def test_render_minimal(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
@@ -606,8 +589,7 @@ class TestComponentRender:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_full(self, components_settings):
+    def test_render_full(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
@@ -659,8 +641,7 @@ class TestComponentRender:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_to_response_full(self, components_settings):
+    def test_render_to_response_full(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
@@ -714,8 +695,7 @@ class TestComponentRender:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_to_response_change_response_class(self, components_settings):
+    def test_render_to_response_change_response_class(self):
         class MyResponse:
             def __init__(self, content: str) -> None:
                 self.content = bytes(content, "utf-8")
@@ -732,8 +712,7 @@ class TestComponentRender:
             "HELLO",
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_with_include(self, components_settings):
+    def test_render_with_include(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
@@ -754,8 +733,7 @@ class TestComponentRender:
 
     # See https://github.com/django-components/django-components/issues/580
     # And https://github.com/django-components/django-components/commit/fee26ec1d8b46b5ee065ca1ce6143889b0f96764
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_with_include_and_context(self, components_settings):
+    def test_render_with_include_and_context(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
@@ -777,8 +755,7 @@ class TestComponentRender:
     # See https://github.com/django-components/django-components/issues/580
     # And https://github.com/django-components/django-components/issues/634
     # And https://github.com/django-components/django-components/commit/fee26ec1d8b46b5ee065ca1ce6143889b0f96764
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_with_include_and_request_context(self, components_settings):
+    def test_render_with_include_and_request_context(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
@@ -822,8 +799,7 @@ class TestComponentRender:
         assert not token_re.findall(response.content)
         assert "Existing context: foo" in response.content.decode()
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_with_extends(self, components_settings):
+    def test_render_with_extends(self):
         class SimpleComponent(Component):
             template: str = """
                 {% extends 'block.html' %}
@@ -849,8 +825,7 @@ class TestComponentRender:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_can_access_instance(self, components_settings):
+    def test_render_can_access_instance(self):
         class TestComponent(Component):
             template_file = "test_component/render-can-access-instance.html"
 
@@ -865,8 +840,7 @@ class TestComponentRender:
             "Variable: <strong>ca1bc3e</strong>",
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_to_response_can_access_instance(self, components_settings):
+    def test_render_to_response_can_access_instance(self):
         class TestComponent(Component):
             template_file = "test_component/render-to-response-can-access-instance.html"
 
@@ -881,8 +855,7 @@ class TestComponentRender:
             "Variable: <strong>ca1bc3e</strong>",
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_prepends_exceptions_on_template_compile_error(self, components_settings):
+    def test_prepends_exceptions_on_template_compile_error(self):
         @register("simple_component")
         class SimpleComponent(Component):
             template_file = "test_component/prepends-exceptions-on-template-compile-error.html"
@@ -899,8 +872,7 @@ class TestComponentRender:
         ):
             Other.render()
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_prepends_exceptions_on_template_compile_error2(self, components_settings):
+    def test_prepends_exceptions_on_template_compile_error2(self):
         @register("simple_component")
         class SimpleComponent(Component):
             template_file = "test_component/prepends-exceptions-on-template-compile-error2.html"
@@ -916,9 +888,8 @@ class TestComponentRender:
         ):
             Other.render()
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     @pytest.mark.skip(reason="Optional pydantic dependency not installed")
-    def test_pydantic_exception(self, components_settings):
+    def test_pydantic_exception(self):
         from pydantic import BaseModel, ValidationError
 
         @register("broken")
@@ -968,12 +939,10 @@ class TestComponentRender:
             Root.render()
 
 
-@djc_test
 class TestComponentHelpers:
     def test_all_components(self):
         # NOTE: When running all tests, this list may already have some components
-        # as some components in test files are defined on module level, outside of
-        # `djc_test` decorator.
+        # as some components in test files are defined on module level.
         all_comps_before = len(all_components())
 
         # Components don't have to be registered to be included in the list

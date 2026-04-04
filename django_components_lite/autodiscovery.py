@@ -3,12 +3,6 @@ from collections.abc import Callable
 
 from django_components_lite.util.loader import get_component_files
 from django_components_lite.util.logger import logger
-from django_components_lite.util.testing import is_testing
-
-# In tests, we want to capture which modules have been loaded, so we can
-# clean them up between tests. But there's no need to track this in
-# production.
-LOADED_MODULES: list[str] = []
 
 
 def autodiscover(
@@ -21,26 +15,14 @@ def autodiscover(
     [`COMPONENTS.app_dirs`](../settings#django_components_lite.app_settings.ComponentsSettings.app_dirs)
     and import them.
 
-    See [Autodiscovery](../../concepts/fundamentals/autodiscovery).
-
-    NOTE: Subdirectories and files starting with an underscore `_` (except for `__init__.py` are ignored.
+    NOTE: Subdirectories and files starting with an underscore `_` (except for `__init__.py`) are ignored.
 
     Args:
-        map_module (Callable[[str], str], optional): Map the module paths with `map_module` function.\
+        map_module (Callable[[str], str], optional): Map the module paths with `map_module` function.
         This serves as an escape hatch for when you need to use this function in tests.
 
     Returns:
         List[str]: A list of module paths of imported files.
-
-    To get the same list of modules that `autodiscover()` would return, but without importing them, use
-    [`get_component_files()`](../api#django_components_lite.get_component_files):
-
-    ```python
-    from django_components_lite import get_component_files
-
-    modules = get_component_files(".py")
-    ```
-
     """
     modules = get_component_files(".py")
     logger.debug(f"Autodiscover found {len(modules)} files in component directories.")
@@ -56,15 +38,8 @@ def _import_modules(
         if map_module:
             module_name = map_module(module_name)  # noqa: PLW2901
 
-        # This imports the file and runs it's code. So if the file defines any
-        # django components, they will be registered.
         logger.debug(f'Importing module "{module_name}"')
         importlib.import_module(module_name)
         imported_modules.append(module_name)
-
-        # In tests tagged with `@djc_test`, we want to capture the modules that
-        # are imported so we can clean them up between tests.
-        if is_testing():
-            LOADED_MODULES.append(module_name)
 
     return imported_modules

@@ -14,15 +14,9 @@ from pytest_django.asserts import assertHTMLEqual
 from django_components_lite import Component, register
 from django_components_lite.component import ComponentNode
 from django_components_lite.slots import FillNode, Slot, SlotContext, SlotFallback
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
 # Test interaction of the `Slot` instances with Component rendering
-@djc_test
 class TestSlot:
     def test_render_slot_as_func(self):
         class SimpleComponent(Component):
@@ -75,8 +69,7 @@ class TestSlot:
             "FROM_INSIDE_SLOT_FN | SLOT_DEFAULT",
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_render_raises_on_missing_slot(self, components_settings):
+    def test_render_raises_on_missing_slot(self):
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}

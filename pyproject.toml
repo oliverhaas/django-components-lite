@@ -28,27 +28,19 @@ Issues = "https://github.com/oliverhaas/django-components-lite/issues"
 
 [dependency-groups]
 dev = [
-  "django-template-partials",
-  "mypy",
-  "pathspec",
-  "pydantic",
+  "django-template-partials==25.3",
+  "mypy==1.20.0",
   "playwright==1.55.0",
-  "pre-commit",
-  "pygments",
-  "pygments-djc",
-  "pytest",
-  "pytest-asyncio",
-  "pytest-cov",
-  "pytest-django",
-  "pytest-xdist",
-  "requests",
-  "ruff",
-  "syrupy",
-  "ty",
-  "types-requests",
-  "whitenoise",
+  "pre-commit==4.5.1",
+  "pytest==9.0.2",
+  "pytest-asyncio==1.3.0",
+  "pytest-cov==7.1.0",
+  "pytest-django==4.12.0",
+  "pytest-xdist==3.8.0",
+  "ruff==0.15.9",
+  "ty==0.0.28",
 ]
-docs = ["mkdocs", "mkdocs-material", "mike"]
+docs = ["mkdocs", "mkdocs-material", "mike", "pygments", "pygments-djc"]
 
 [build-system]
 requires = ["hatchling"]

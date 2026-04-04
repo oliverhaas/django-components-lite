@@ -4,22 +4,14 @@ from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, register, registry
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
-
 
 #######################
 # TESTS
 #######################
 
 
-@djc_test
 class TestMultilineTags:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_multiline_tags(self, components_settings):
+    def test_multiline_tags(self):
         @register("test_component")
         class SimpleComponent(Component):
             template: str = """
@@ -48,7 +40,6 @@ class TestMultilineTags:
         assertHTMLEqual(rendered, expected)
 
 
-@djc_test
 class TestNestedTags:
     class SimpleComponent(Component):
         template: str = """
@@ -60,8 +51,7 @@ class TestNestedTags:
                 "var": kwargs["var"],
             }
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_quote_single(self, components_settings):
+    def test_nested_quote_single(self):
         registry.register("test", self.SimpleComponent)
 
         template: str = """
@@ -74,8 +64,7 @@ class TestNestedTags:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_quote_single_self_closing(self, components_settings):
+    def test_nested_quote_single_self_closing(self):
         registry.register("test", self.SimpleComponent)
 
         template: str = """
@@ -88,8 +77,7 @@ class TestNestedTags:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_quote_double(self, components_settings):
+    def test_nested_quote_double(self):
         registry.register("test", self.SimpleComponent)
 
         template: str = """
@@ -102,8 +90,7 @@ class TestNestedTags:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_quote_double_self_closing(self, components_settings):
+    def test_nested_quote_double_self_closing(self):
         registry.register("test", self.SimpleComponent)
 
         template: str = """

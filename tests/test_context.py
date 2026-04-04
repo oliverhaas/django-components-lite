@@ -2,15 +2,11 @@ from typing import cast
 
 from django.http import HttpRequest
 from django.template import Context, RequestContext, Template
+from django.test import override_settings
 from pytest_django.asserts import assertHTMLEqual, assertInHTML
 
 from django_components_lite import Component, register, registry
-from django_components_lite.testing import djc_test
 from django_components_lite.util.misc import gen_id
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
 # Context processor that generates a unique ID. This is used to test that the context
@@ -131,12 +127,9 @@ def gen_parent_component_with_args():
 #########################
 
 
-@djc_test
 class TestContext:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_nested_component_context_shadows_parent_with_unfilled_slots_and_component_tag(
         self,
-        components_settings,
     ):
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
@@ -152,10 +145,8 @@ class TestContext:
         assertInHTML("<h1>Shadowing variable = slot_default_override</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_nested_component_instances_have_unique_context_with_unfilled_slots_and_component_tag(
         self,
-        components_settings,
     ):
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
@@ -173,8 +164,7 @@ class TestContext:
             rendered,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_component_context_shadows_parent_with_filled_slots(self, components_settings):
+    def test_nested_component_context_shadows_parent_with_filled_slots(self):
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
@@ -194,8 +184,7 @@ class TestContext:
         assertInHTML("<h1>Shadowing variable = shadow_from_slot</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_component_instances_have_unique_context_with_filled_slots(self, components_settings):
+    def test_nested_component_instances_have_unique_context_with_filled_slots(self):
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
@@ -214,10 +203,8 @@ class TestContext:
         assertInHTML("<h1>Uniquely named variable = unique_val</h1>", rendered)
         assertInHTML("<h1>Uniquely named variable = unique_from_slot</h1>", rendered)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_nested_component_context_shadows_outer_context_with_unfilled_slots_and_component_tag(
         self,
-        components_settings,
     ):
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
@@ -233,10 +220,8 @@ class TestContext:
         assertInHTML("<h1>Shadowing variable = slot_default_override</h1>", rendered)
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_nested_component_context_shadows_outer_context_with_filled_slots(
         self,
-        components_settings,
     ):
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
@@ -258,10 +243,8 @@ class TestContext:
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
 
-@djc_test
 class TestParentArgs:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_parent_args_can_be_drawn_from_context(self, components_settings):
+    def test_parent_args_can_be_drawn_from_context(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         registry.register(name="parent_with_args", component=gen_parent_component_with_args())
         registry.register(name="variable_display", component=gen_variable_display_component())
@@ -290,8 +273,7 @@ class TestParentArgs:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_parent_args_available_outside_slots(self, components_settings):
+    def test_parent_args_available_outside_slots(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         registry.register(name="parent_with_args", component=gen_parent_component_with_args())
         registry.register(name="variable_display", component=gen_variable_display_component())
@@ -320,16 +302,7 @@ class TestParentArgs:
         )
         assert "Shadowing variable = NOT SHADOWED" not in rendered
 
-    @djc_test(
-        parametrize=(
-            ["components_settings", "first_val", "second_val"],
-            [
-                [{}, "passed_in", ""],
-            ],
-            ["isolated"],
-        ),
-    )
-    def test_parent_args_available_in_slots(self, components_settings, first_val, second_val):
+    def test_parent_args_available_in_slots(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         registry.register(name="parent_with_args", component=gen_parent_component_with_args())
         registry.register(name="variable_display", component=gen_variable_display_component())
@@ -348,24 +321,22 @@ class TestParentArgs:
 
         assertHTMLEqual(
             rendered,
-            f"""
+            """
             <div>
                 <h1>Parent content</h1>
-                <h1>Shadowing variable = {first_val}</h1>
+                <h1>Shadowing variable = passed_in</h1>
                 <h1>Uniquely named variable = unique_val</h1>
             </div>
             <div>
                 <h1>Shadowing variable = value_from_slot</h1>
-                <h1>Uniquely named variable = {second_val}</h1>
+                <h1>Uniquely named variable = </h1>
             </div>
             """,
         )
 
 
-@djc_test
 class TestContextCalledOnce:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_one_context_call_with_simple_component(self, components_settings):
+    def test_one_context_call_with_simple_component(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
@@ -378,8 +349,7 @@ class TestContextCalledOnce:
             '<p class="incrementer">value=1;calls=1</p>',
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_one_context_call_with_simple_component_and_arg(self, components_settings):
+    def test_one_context_call_with_simple_component_and_arg(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
@@ -395,8 +365,7 @@ class TestContextCalledOnce:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_one_context_call_with_component(self, components_settings):
+    def test_one_context_call_with_component(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
@@ -407,8 +376,7 @@ class TestContextCalledOnce:
 
         assertHTMLEqual(rendered, '<p class="incrementer">value=1;calls=1</p>')
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_one_context_call_with_component_and_arg(self, components_settings):
+    def test_one_context_call_with_component_and_arg(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
@@ -419,8 +387,7 @@ class TestContextCalledOnce:
 
         assertHTMLEqual(rendered, '<p class="incrementer">value=4;calls=1</p>')
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_one_context_call_with_slot(self, components_settings):
+    def test_one_context_call_with_slot(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
@@ -442,8 +409,7 @@ class TestContextCalledOnce:
             rendered,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_one_context_call_with_slot_and_arg(self, components_settings):
+    def test_one_context_call_with_slot_and_arg(self):
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
@@ -466,18 +432,8 @@ class TestContextCalledOnce:
         )
 
 
-@djc_test
 class TestComponentsCanAccessOuterContext:
-    @djc_test(
-        parametrize=(
-            ["components_settings", "expected_value"],
-            [
-                [{}, ""],
-            ],
-            ["isolated"],
-        ),
-    )
-    def test_simple_component_can_use_outer_context(self, components_settings, expected_value):
+    def test_simple_component_can_use_outer_context(self):
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
@@ -487,16 +443,14 @@ class TestComponentsCanAccessOuterContext:
         rendered = template.render(Context({"variable": "outer_value"}))
         assertHTMLEqual(
             rendered,
-            f"""
-            Variable: <strong> {expected_value} </strong>
+            """
+            Variable: <strong>  </strong>
             """,
         )
 
 
-@djc_test
 class TestIsolatedContext:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_simple_component_can_pass_outer_context_in_args(self, components_settings):
+    def test_simple_component_can_pass_outer_context_in_args(self):
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
@@ -506,8 +460,7 @@ class TestIsolatedContext:
         rendered = template.render(Context({"variable": "outer_value"})).strip()
         assert "outer_value" in rendered
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_simple_component_cannot_use_outer_context(self, components_settings):
+    def test_simple_component_cannot_use_outer_context(self):
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
@@ -518,9 +471,7 @@ class TestIsolatedContext:
         assert "outer_value" not in rendered
 
 
-@djc_test
 class TestIsolatedContextSetting:
-    @djc_test
     def test_component_tag_includes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -533,7 +484,6 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" in rendered
 
-    @djc_test
     def test_component_tag_excludes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -546,7 +496,6 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" not in rendered
 
-    @djc_test
     def test_component_includes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -560,7 +509,6 @@ class TestIsolatedContextSetting:
         rendered = template.render(Context({"variable": "outer_value"}))
         assert "outer_value" in rendered
 
-    @djc_test
     def test_component_excludes_variable_with_isolated_context_from_settings(
         self,
     ):
@@ -575,10 +523,8 @@ class TestIsolatedContextSetting:
         assert "outer_value" not in rendered
 
 
-@djc_test
 class TestContextProcessors:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_context_in_template(self, components_settings):
+    def test_request_context_in_template(self):
         context_processors_data: dict | None = None
         inner_request: HttpRequest | None = None
 
@@ -607,8 +553,7 @@ class TestContextProcessors:
         assert list(context_processors_data.keys()) == ["csrf_token"]  # type: ignore[union-attr]
         assert inner_request == request
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_context_in_template_nested(self, components_settings):
+    def test_request_context_in_template_nested(self):
         context_processors_data = None
         context_processors_data_child = None
         parent_request: HttpRequest | None = None
@@ -653,8 +598,7 @@ class TestContextProcessors:
         assert parent_request == request
         assert child_request == request
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_context_in_template_slot(self, components_settings):
+    def test_request_context_in_template_slot(self):
         context_processors_data = None
         context_processors_data_child = None
         parent_request: HttpRequest | None = None
@@ -701,8 +645,7 @@ class TestContextProcessors:
         assert parent_request == request
         assert child_request == request
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_context_in_python(self, components_settings):
+    def test_request_context_in_python(self):
         context_processors_data = None
         inner_request: HttpRequest | None = None
 
@@ -724,8 +667,7 @@ class TestContextProcessors:
         assert list(context_processors_data.keys()) == ["csrf_token"]  # type: ignore[union-attr]
         assert inner_request == request
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_context_in_python_nested(self, components_settings):
+    def test_request_context_in_python_nested(self):
         context_processors_data: dict | None = None
         context_processors_data_child: dict | None = None
         parent_request: HttpRequest | None = None
@@ -764,8 +706,7 @@ class TestContextProcessors:
         assert parent_request == request
         assert child_request == request
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_in_python(self, components_settings):
+    def test_request_in_python(self):
         context_processors_data: dict | None = None
         inner_request: HttpRequest | None = None
 
@@ -786,8 +727,7 @@ class TestContextProcessors:
         assert list(context_processors_data.keys()) == ["csrf_token"]  # type: ignore[union-attr]
         assert inner_request == request
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_request_in_python_nested(self, components_settings):
+    def test_request_in_python_nested(self):
         context_processors_data: dict | None = None
         context_processors_data_child: dict | None = None
         parent_request: HttpRequest | None = None
@@ -826,8 +766,7 @@ class TestContextProcessors:
         assert child_request == request
 
     # No request, regular Context
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_no_context_processor_when_non_request_context_in_python(self, components_settings):
+    def test_no_context_processor_when_non_request_context_in_python(self):
         context_processors_data: dict | None = None
         inner_request: HttpRequest | None = None
 
@@ -848,8 +787,7 @@ class TestContextProcessors:
         assert inner_request is None
 
     # No request, no Context
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_no_context_processor_when_non_request_context_in_python_2(self, components_settings):
+    def test_no_context_processor_when_non_request_context_in_python_2(self):
         context_processors_data: dict | None = None
         inner_request: HttpRequest | None = None
 
@@ -870,8 +808,7 @@ class TestContextProcessors:
         assert inner_request is None
 
     # Yes request, regular Context
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_context_processor_when_regular_context_and_request_in_python(self, components_settings):
+    def test_context_processor_when_regular_context_and_request_in_python(self):
         context_processors_data: dict | None = None
         inner_request: HttpRequest | None = None
 
@@ -892,23 +829,21 @@ class TestContextProcessors:
         assert list(context_processors_data.keys()) == ["csrf_token"]  # type: ignore[union-attr]
         assert inner_request == request
 
-    @djc_test(
-        django_settings={
-            "TEMPLATES": [
-                {
-                    "BACKEND": "django.template.backends.django.DjangoTemplates",
-                    "DIRS": ["tests/templates/", "tests/components/"],
-                    "OPTIONS": {
-                        "builtins": [
-                            "django_components_lite.templatetags.component_tags",
-                        ],
-                        "context_processors": [
-                            "tests.test_context.dummy_context_processor",
-                        ],
-                    },
+    @override_settings(
+        TEMPLATES=[
+            {
+                "BACKEND": "django.template.backends.django.DjangoTemplates",
+                "DIRS": ["tests/templates/", "tests/components/"],
+                "OPTIONS": {
+                    "builtins": [
+                        "django_components_lite.templatetags.component_tags",
+                    ],
+                    "context_processors": [
+                        "tests.test_context.dummy_context_processor",
+                    ],
                 },
-            ],
-        },
+            },
+        ],
     )
     def test_data_generated_only_once(self):
         context_processors_data: dict | None = None
@@ -968,10 +903,8 @@ class TestContextProcessors:
         assert component.request == request
 
 
-@djc_test
 class TestOuterContextProperty:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_outer_context_property_with_component(self, components_settings):
+    def test_outer_context_property_with_component(self):
         @register("outer_context_component")
         class OuterContextComponent(Component):
             template: str = """
