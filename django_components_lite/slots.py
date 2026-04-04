@@ -404,7 +404,7 @@ html = Table.render(
         "header": "Hello, World!",
 
         # Safe string
-        "header": mark_safe("<i><am><safe>"),
+        "header": mark_safe("<i><am><safe>"),  # noqa: S308
 
         # Function
         "footer": lambda ctx: f"Page: {ctx.data['page_number']}!",
@@ -455,7 +455,7 @@ class SlotFallback:
 
     # Render the slot when the template coerces SlotFallback to string
     def __str__(self) -> str:
-        return mark_safe(self._slot.nodelist.render(self._context))
+        return mark_safe(self._slot.nodelist.render(self._context))  # noqa: S308
 
 
 name_escape_re = re.compile(r"[^\w]")
@@ -1298,7 +1298,7 @@ def _extract_fill_content(
     captured_fills: list[FillWithData] = []
 
     with _extends_context_reset(context), context.update({FILL_GEN_CONTEXT_KEY: captured_fills}):
-        content = mark_safe(nodes.render(context).strip())
+        content = mark_safe(nodes.render(context).strip())  # noqa: S308
 
     # If we did not encounter any fills (not accounting for those nested in other
     # {% componenet %} tags), then we treat the content as default slot.

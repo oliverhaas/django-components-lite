@@ -1884,7 +1884,7 @@ class Component(metaclass=ComponentMeta):
             if dep_tags:
                 html = dep_tags + "\n" + html
 
-        return mark_safe(html) if html is not None else ""
+        return mark_safe(html) if html is not None else ""  # noqa: S308
 
     def get_context_data(self, **kwargs: Any) -> dict:
         """

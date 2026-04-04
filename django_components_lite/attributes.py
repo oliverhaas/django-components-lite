@@ -118,7 +118,7 @@ def format_attributes(attributes: Mapping[str, Any]) -> str:
         else:
             attr_list.append(format_html('{}="{}"', key, value))
 
-    return mark_safe(SafeString(" ").join(attr_list))
+    return mark_safe(SafeString(" ").join(attr_list))  # noqa: S308
 
 
 def merge_attributes(*attrs: dict) -> dict:
