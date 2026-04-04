@@ -4,14 +4,8 @@ from django_components_lite.attributes import HtmlAttrsNode
 from django_components_lite.component import ComponentNode
 from django_components_lite.slots import FillNode, SlotNode
 
-# Tag name constants
-COMPONENT_TAG = "component"
+# Self-closing component tag name (easy to rename later)
 COMPONENT_SC_TAG = "componentsc"
-COMPONENT_END_TAG = "endcomponent"
-SLOT_TAG = "slot"
-SLOT_END_TAG = "endslot"
-FILL_TAG = "fill"
-FILL_END_TAG = "endfill"
 
 # NOTE: Variable name `register` is required by Django to recognize this as a template tag library
 # See https://docs.djangoproject.com/en/5.2/howto/custom-template-tags
@@ -39,13 +33,7 @@ html_attrs = HtmlAttrsNode.parse
 slot = SlotNode.parse
 
 __all__ = [
-    "COMPONENT_END_TAG",
     "COMPONENT_SC_TAG",
-    "COMPONENT_TAG",
-    "FILL_END_TAG",
-    "FILL_TAG",
-    "SLOT_END_TAG",
-    "SLOT_TAG",
     "component",
     "componentsc",
     "fill",

@@ -180,7 +180,7 @@ class TestHtmlAttrs:
         with pytest.raises(
             TypeError,
             match=re.escape(
-                "Invalid parameters for tag 'html_attrs': takes 2 positional argument(s) but more were given",
+                "Invalid parameters for tag 'html_attrs': takes 2 positional argument(s) but 3 were given",
             ),
         ):
             template.render(Context({"my_attrs": my_attrs}))
