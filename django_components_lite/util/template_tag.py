@@ -15,14 +15,14 @@ from django.template.exceptions import TemplateSyntaxError
 from django_components_lite.util.tag_parser import TagAttr, parse_tag
 
 
-def process_aggregate_kwargs(params):
+def process_aggregate_kwargs(params: list) -> list:
     """
     Aggregate "prefixed" kwargs into dicts. "Prefixed" kwargs start with
     some prefix delimited with `:` (e.g. `attrs:`).
 
     Example: {"attrs:class": "red", "attrs:id": "x"} -> {"attrs": {"class": "red", "id": "x"}}
     """
-    aggregated = {}
+    aggregated: dict[str, dict] = {}
     result_params = []
 
     for param in params:
@@ -36,7 +36,7 @@ def process_aggregate_kwargs(params):
 
     # Add aggregated dicts as params - just use the dict directly as the value
     for prefix, subdict in aggregated.items():
-        result_params.append(TagAttr(key=prefix, value=subdict, start_index=0))
+        result_params.append(TagAttr(key=prefix, value=subdict, start_index=0))  # type: ignore[arg-type]
 
     return result_params
 

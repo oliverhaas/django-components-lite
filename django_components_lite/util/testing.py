@@ -323,7 +323,7 @@ def djc_test(
                     _clear_djc_global_state(
                         gen_id_patcher,
                         csrf_token_patcher,
-                        _all_components,  # type: ignore[arg-type]
+                        _all_components,
                         _all_registries_copies,
                         gc_collect,
                     )

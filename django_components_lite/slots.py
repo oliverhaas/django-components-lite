@@ -1484,7 +1484,7 @@ def _nodelist_to_slot(
         return rendered
 
     return Slot(
-        content_func=cast("SlotFunc", render_func),
+        content_func=render_func,
         component_name=component_name,
         slot_name=slot_name,
         nodelist=nodelist,

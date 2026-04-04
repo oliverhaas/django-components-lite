@@ -39,7 +39,7 @@ See `parse_tag()` for details.
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Literal, Union, cast
+from typing import Any, Literal, Union
 
 from django.template.base import FilterExpression, Parser
 from django.template.context import Context
@@ -527,7 +527,7 @@ def parse_tag(text: str, parser: Parser | None) -> tuple[str, list[TagAttr]]:
             if curr_struct.type == "simple" and key is not None:
                 raise TemplateSyntaxError("Spread syntax '...' cannot follow a key ('key=...attrs')")
 
-            taken_n(len(cast("str", spread_token)))  # ... or * or **
+            taken_n(len(spread_token))  # ... or * or **
             # Allow whitespace between spread and the variable, but only for the Python-like syntax
             # (lists and dicts). E.g.:
             # `{% component key=[ * spread ] %}` or `{% component key={ ** spread } %}`

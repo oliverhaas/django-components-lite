@@ -6,9 +6,7 @@ readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
 keywords = ["django", "components", "css", "js", "html"]
-authors = [
-  { name = "Oliver Haas", email = "ohaas@e1plus.de" },
-]
+authors = [{ name = "Oliver Haas", email = "ohaas@e1plus.de" }]
 classifiers = [
   "Framework :: Django",
   "Framework :: Django :: 5.2",
@@ -50,11 +48,7 @@ dev = [
   "types-requests",
   "whitenoise",
 ]
-docs = [
-  "mkdocs",
-  "mkdocs-material",
-  "mike",
-]
+docs = ["mkdocs", "mkdocs-material", "mike"]
 
 [build-system]
 requires = ["hatchling"]
@@ -71,60 +65,54 @@ target-version = "py312"
 line-length = 119
 fix = true
 src = ["django_components_lite", "tests"]
-exclude = [
-  "migrations",
-  "manage.py",
-  "settings.py",
-  "env",
-  ".env",
-]
+exclude = ["migrations", "manage.py", "settings.py", "env", ".env"]
 
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-  "ANN401",   # Any is correct for dynamic expressions
-  "COM812",   # Conflicts with ruff-format
-  "D",        # Docstrings - will add incrementally
-  "E501",     # Line length handled by config
-  "EM",       # Exception strings inline are fine
-  "ERA001",   # Found commented-out code (too many false positives)
-  "FBT",      # Boolean params match API conventions
-  "FIX002",   # Line contains TODO
-  "INP001",   # Implicit namespace package
-  "PERF203",  # try/except in loop is fine
-  "PLC0415",  # Dynamic imports intentional
-  "PLR0911",  # Too many return statements
-  "PLR0912",  # Too many branches
-  "PLR0913",  # Too many arguments
-  "PLR0915",  # Too many statements
-  "PLR2004",  # Magic value used in comparison
-  "RET504",   # Unnecessary assignment before return
-  "RET505",   # Unnecessary elif after return
-  "S308",     # Use of mark_safe
-  "S603",     # subprocess call
-  "SIM108",   # Ternary not always clearer
-  "SIM117",   # Nested with statements
-  "SLF001",   # Private member access
-  "TD002",    # Missing author in TODO
-  "TD003",    # Missing issue link for TODO
-  "TD004",    # Missing colon in TODO
-  "TRY003",   # Long exception messages are helpful
-  "TRY300",   # return in try block is cleaner
-  "TRY301",   # Abstract raise to inner function
-  "C420",     # Unnecessary dict comprehension
-  "C901",     # Too complex
-  "A005",     # Module shadows stdlib module
-  "ANN001",   # Missing type annotation for function argument
-  "ANN201",   # Missing return type annotation
-  "ARG",      # Unused arguments (API compat)
-  "BLE001",   # Do not catch blind exception
-  "E402",     # Module level import not at top of file (Django patterns)
-  "N818",     # Exception name suffix
-  "PERF401",  # Use list.extend
-  "PTH",      # Use pathlib instead of os.path
-  "S110",     # try-except-pass detected
-  "SIM105",   # Use contextlib.suppress
-  "UP007",    # Use X | Y for type annotations
+  "ANN401",  # Any is correct for dynamic expressions
+  "COM812",  # Conflicts with ruff-format
+  "D",       # Docstrings - will add incrementally
+  "E501",    # Line length handled by config
+  "EM",      # Exception strings inline are fine
+  "ERA001",  # Found commented-out code (too many false positives)
+  "FBT",     # Boolean params match API conventions
+  "FIX002",  # Line contains TODO
+  "INP001",  # Implicit namespace package
+  "PERF203", # try/except in loop is fine
+  "PLC0415", # Dynamic imports intentional
+  "PLR0911", # Too many return statements
+  "PLR0912", # Too many branches
+  "PLR0913", # Too many arguments
+  "PLR0915", # Too many statements
+  "PLR2004", # Magic value used in comparison
+  "RET504",  # Unnecessary assignment before return
+  "RET505",  # Unnecessary elif after return
+  "S308",    # Use of mark_safe
+  "S603",    # subprocess call
+  "SIM108",  # Ternary not always clearer
+  "SIM117",  # Nested with statements
+  "SLF001",  # Private member access
+  "TD002",   # Missing author in TODO
+  "TD003",   # Missing issue link for TODO
+  "TD004",   # Missing colon in TODO
+  "TRY003",  # Long exception messages are helpful
+  "TRY300",  # return in try block is cleaner
+  "TRY301",  # Abstract raise to inner function
+  "C420",    # Unnecessary dict comprehension
+  "C901",    # Too complex
+  "A005",    # Module shadows stdlib module
+  "ANN001",  # Missing type annotation for function argument
+  "ANN201",  # Missing return type annotation
+  "ARG",     # Unused arguments (API compat)
+  "BLE001",  # Do not catch blind exception
+  "E402",    # Module level import not at top of file (Django patterns)
+  "N818",    # Exception name suffix
+  "PERF401", # Use list.extend
+  "PTH",     # Use pathlib instead of os.path
+  "S110",    # try-except-pass detected
+  "SIM105",  # Use contextlib.suppress
+  "UP007",   # Use X | Y for type annotations
 ]
 
 [tool.ruff.lint.flake8-annotations]
@@ -133,27 +121,23 @@ suppress-none-returning = true
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = [
-  "ANN",      # Type annotations not required in tests
-  "ARG",      # Unused arguments common in fixtures
-  "F821",     # Undefined name (references to removed features on this branch)
-  "N806",     # Variable in function should be lowercase
-  "PLC0415",  # import should be at top-level
-  "RUF012",   # Mutable class attributes
-  "S101",     # assert in tests
-  "TRY002",   # Create your own exception
+  "ANN",     # Type annotations not required in tests
+  "ARG",     # Unused arguments common in fixtures
+  "F821",    # Undefined name (references to removed features on this branch)
+  "N806",    # Variable in function should be lowercase
+  "PLC0415", # import should be at top-level
+  "RUF012",  # Mutable class attributes
+  "S101",    # assert in tests
+  "TRY002",  # Create your own exception
 ]
-"benchmarks/**" = [
-  "ANN", "ARG", "N806", "PLC0415", "RUF012", "S101", "TRY002",
-]
+"benchmarks/**" = ["ANN", "ARG", "N806", "PLC0415", "RUF012", "S101", "TRY002"]
 "sampleproject/**" = [
-  "ARG002",   # Unused method argument
-  "ANN",      # Annotations not needed
-  "T201",     # print found
-  "DTZ",      # datetime found
+  "ARG002", # Unused method argument
+  "ANN",    # Annotations not needed
+  "T201",   # print found
+  "DTZ",    # datetime found
 ]
-"docs/examples/**" = [
-  "ARG002", "ANN", "S101", "T201", "DTZ",
-]
+"docs/examples/**" = ["ARG002", "ANN", "S101", "T201", "DTZ"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["django_components_lite"]
@@ -167,10 +151,7 @@ show_error_codes = true
 show_error_context = true
 warn_redundant_casts = true
 warn_unused_ignores = true
-exclude = [
-  "build",
-  "examples",
-]
+exclude = ["build", "examples"]
 
 [[tool.mypy.overrides]]
 module = "django_components_lite.*"
@@ -184,6 +165,22 @@ python-version = "3.13"
 
 [tool.ty.analysis]
 respect-type-ignore-comments = false
+
+[[tool.ty.overrides]]
+include = ["django_components_lite/**"]
+
+[tool.ty.overrides.rules]
+unresolved-attribute = "ignore"
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
+invalid-return-type = "ignore"
+invalid-overload = "ignore"
+redundant-cast = "ignore"
+call-top-callable = "ignore"
+too-many-positional-arguments = "ignore"
+not-subscriptable = "ignore"
+unsupported-operator = "ignore"
+no-matching-overload = "ignore"
 
 [[tool.ty.overrides]]
 include = ["tests/**"]

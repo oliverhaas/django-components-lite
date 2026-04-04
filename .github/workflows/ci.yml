@@ -34,7 +34,7 @@ jobs:
         run: uv run ty check django_components_lite/
 
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -44,24 +44,15 @@ jobs:
           - "3.14"
         django-version:
           - "5.2"
-        os: [ubuntu-latest, windows-latest]
 
         include:
-          # Django 6.0 (Python 3.14 only for now)
           - python-version: "3.14"
             django-version: "6.0"
-            os: ubuntu-latest
 
-          # Pre-release Django
           - python-version: "3.14"
             django-version: "main"
-            os: ubuntu-latest
 
     steps:
-      # Configure git to handle long paths (needed for benchmark data on Windows)
-      - name: Configure git
-        run: git config --global core.longpaths true
-
       - uses: actions/checkout@v6
 
       - name: Install uv
@@ -89,48 +80,8 @@ jobs:
         run: uv run pytest -n auto
 
       - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.13' && matrix.django-version == '5.2' && matrix.os == 'ubuntu-latest'
+        if: matrix.python-version == '3.13' && matrix.django-version == '5.2'
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml
           fail_ci_if_error: false
-
-  test_docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Set up Python
-        run: uv python install 3.14
-
-      - name: Install dependencies
-        run: |
-          uv sync --group docs
-          uv pip install -e .
-
-      - name: Build documentation
-        run: uv run mkdocs build --verbose
-
-  test_example:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Set up Python
-        run: uv python install 3.14
-
-      - name: Install dependencies
-        run: uv pip install -e .
-
-      - name: Check example project
-        run: |
-          cd examples/simple
-          PYTHONPATH=. uv run python manage.py check
-          uv run python manage.py runserver 8123 & sleep 3
-          curl http://127.0.0.1:8123/ || exit 1

@@ -196,7 +196,7 @@ class NodeMeta(type):
 
         # Wrap cls.render() so we resolve the args and kwargs and pass them to the
         # actual render method.
-        cls.render = wrapper_render  # type: ignore[assignment]
+        cls.render = wrapper_render  # type: ignore[method-assign]
         cls.render._djc_wrapped = True  # type: ignore[attr-defined]
 
         return cls

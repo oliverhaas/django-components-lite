@@ -290,7 +290,7 @@ def _get_component_name(cls: type["Component"], registered_name: str | None = No
 class ComponentTemplateNameDescriptor:
     def __get__(self, instance: Optional["Component"], cls: type["Component"]) -> Any:
         obj = default(instance, cls)
-        return obj.template_file  # type: ignore[attr-defined]
+        return obj.template_file
 
     def __set__(self, instance_or_cls: Union["Component", type["Component"]], value: Any) -> None:
         cls = instance_or_cls if isinstance(instance_or_cls, type) else instance_or_cls.__class__
@@ -886,7 +886,7 @@ class Component(metaclass=ComponentMeta):
         cls.class_id = hash_comp_cls(cls)
         comp_cls_id_mapping[cls.class_id] = cls
 
-        ALL_COMPONENTS.append(cached_ref(cls))  # type: ignore[arg-type]
+        ALL_COMPONENTS.append(cached_ref(cls))
 
     ########################################
     # INSTANCE PROPERTIES
@@ -2073,7 +2073,7 @@ class ComponentNode(BaseNode):
             )
 
         # Call `BaseNode.parse()` as if with the context of subcls.
-        node: ComponentNode = super(cls, cached_subcls).parse(  # type: ignore[attr-defined]
+        node: ComponentNode = super(cls, cached_subcls).parse(
             parser,
             token,
             registry=cached_registry,

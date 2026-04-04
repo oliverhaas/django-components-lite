@@ -58,7 +58,7 @@ def monkeypatch_template_init(template_cls: type[Template]) -> None:
 
         # Calling original `Template.__init__` should also compile the template into a Nodelist
         # via `Template.compile_nodelist()`.
-        original_init(self, template_string, origin, name, *args, **kwargs)  # type: ignore[misc]
+        original_init(self, template_string, origin, name, *args, **kwargs)
 
     template_cls.__init__ = __init__
 
@@ -223,7 +223,7 @@ def monkeypatch_inclusion_init(inclusion_node_cls: type[Node]) -> None:
         *future_args: Any,
         **future_kwargs: Any,
     ) -> None:
-        original_init(self, func, takes_context, args, kwargs, filename, *future_args, **future_kwargs)  # type: ignore[misc]
+        original_init(self, func, takes_context, args, kwargs, filename, *future_args, **future_kwargs)
 
         orig_func = self.func
 
