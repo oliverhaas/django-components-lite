@@ -120,51 +120,6 @@ class ComponentsSettings(NamedTuple):
     ```
     """
 
-    libraries: list[str] | None = None
-    """
-    Configure extra python modules that should be loaded.
-
-    This may be useful if you are not using the [autodiscovery feature](../concepts/fundamentals/autodiscovery.md),
-    or you need to load components from non-standard locations. Thus you can have
-    a structure of components that is independent from your apps.
-
-    Expects a list of python module paths. Defaults to empty list.
-
-    **Example:**
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        libraries=[
-            "mysite.components.forms",
-            "mysite.components.buttons",
-            "mysite.components.cards",
-        ],
-    )
-    ```
-
-    This would be the equivalent of importing these modules from within Django's
-    [`AppConfig.ready()`](https://docs.djangoproject.com/en/5.2/ref/applications/#django.apps.AppConfig.ready):
-
-    ```python
-    class MyAppConfig(AppConfig):
-        def ready(self):
-            import "mysite.components.forms"
-            import "mysite.components.buttons"
-            import "mysite.components.cards"
-    ```
-
-    # Manually loading libraries
-
-    In the rare case that you need to manually trigger the import of libraries, you can use
-    the [`import_libraries()`](./api.md#django_components_lite.import_libraries) function:
-
-    ```python
-    from django_components_lite import import_libraries
-
-    import_libraries()
-    ```
-    """
-
     multiline_tags: bool | None = None
     """
     Enable / disable
@@ -319,7 +274,6 @@ defaults = ComponentsSettings(
     dirs=Dynamic(lambda: [Path(settings.BASE_DIR) / "components"]),  # type: ignore[arg-type]
     # App-level "components" dirs, e.g. `[app]/components/`
     app_dirs=["components"],
-    libraries=[],  # E.g. ["mysite.components.forms", ...]
     multiline_tags=True,
     reload_on_file_change=False,
     static_files_allowed=[
@@ -371,7 +325,6 @@ class InternalSettings:
             cache=default(components_settings.cache, defaults.cache),
             dirs=default(components_settings.dirs, dirs_default),
             app_dirs=default(components_settings.app_dirs, defaults.app_dirs),
-            libraries=default(components_settings.libraries, defaults.libraries),
             multiline_tags=default(components_settings.multiline_tags, defaults.multiline_tags),
             reload_on_file_change=self._prepare_reload_on_file_change(components_settings),
             static_files_allowed=default(components_settings.static_files_allowed, defaults.static_files_allowed),
@@ -404,10 +357,6 @@ class InternalSettings:
     @property
     def APP_DIRS(self) -> Sequence[str]:
         return self._get_settings().app_dirs  # type: ignore[return-value]
-
-    @property
-    def LIBRARIES(self) -> list[str]:
-        return self._get_settings().libraries  # type: ignore[return-value]
 
     @property
     def MULTILINE_TAGS(self) -> bool:

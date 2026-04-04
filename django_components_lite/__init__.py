@@ -4,7 +4,7 @@
 # isort: off
 from django_components_lite.app_settings import ComponentsSettings
 from django_components_lite.attributes import format_attributes, merge_attributes
-from django_components_lite.autodiscovery import autodiscover, import_libraries
+from django_components_lite.autodiscovery import autodiscover
 from django_components_lite.component import (
     Component,
     ComponentInput,
@@ -76,7 +76,6 @@ __all__ = [
     "get_component_by_class_id",
     "get_component_dirs",
     "get_component_files",
-    "import_libraries",
     "merge_attributes",
     "register",
     "registry",

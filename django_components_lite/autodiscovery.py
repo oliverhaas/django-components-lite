@@ -47,47 +47,6 @@ def autodiscover(
     return _import_modules([entry.dot_path for entry in modules], map_module)
 
 
-def import_libraries(
-    map_module: Callable[[str], str] | None = None,
-) -> list[str]:
-    """
-    Import modules set in
-    [`COMPONENTS.libraries`](../settings#django_components_lite.app_settings.ComponentsSettings.libraries)
-    setting.
-
-    See [Autodiscovery](../../concepts/fundamentals/autodiscovery).
-
-    Args:
-        map_module (Callable[[str], str], optional): Map the module paths with `map_module` function.\
-        This serves as an escape hatch for when you need to use this function in tests.
-
-    Returns:
-        List[str]: A list of module paths of imported files.
-
-    **Examples:**
-
-    Normal usage - load libraries after Django has loaded
-    ```python
-    from django_components_lite import import_libraries
-
-    class MyAppConfig(AppConfig):
-        def ready(self):
-            import_libraries()
-    ```
-
-    Potential usage in tests
-    ```python
-    from django_components_lite import import_libraries
-
-    import_libraries(lambda path: path.replace("tests.", "myapp."))
-    ```
-
-    """
-    from django_components_lite.app_settings import app_settings
-
-    return _import_modules(app_settings.LIBRARIES, map_module)
-
-
 def _import_modules(
     modules: list[str],
     map_module: Callable[[str], str] | None = None,

@@ -16,7 +16,7 @@ class ComponentsConfig(AppConfig):
     # to Django's INSTALLED_APPS
     def ready(self) -> None:
         from django_components_lite.app_settings import app_settings
-        from django_components_lite.autodiscovery import autodiscover, import_libraries
+        from django_components_lite.autodiscovery import autodiscover
         from django_components_lite.util.django_monkeypatch import (
             monkeypatch_include_node,
             monkeypatch_inclusion_node,
@@ -35,9 +35,6 @@ class ComponentsConfig(AppConfig):
         # This makes django-components work with django-template-partials
         # NOTE: Delete when Django 5.2 reaches end of life
         monkeypatch_template_proxy_cls()
-
-        # Import modules set in `COMPONENTS.libraries` setting
-        import_libraries()
 
         if app_settings.AUTODISCOVER:
             autodiscover()

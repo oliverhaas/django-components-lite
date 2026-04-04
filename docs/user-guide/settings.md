@@ -9,7 +9,6 @@ COMPONENTS = ComponentsSettings(
     autodiscover=True,
     dirs=[BASE_DIR / "components"],
     app_dirs=["components"],
-    libraries=[],
     multiline_tags=True,
     reload_on_file_change=False,
     static_files_allowed=[".css", ".js"],
@@ -24,7 +23,6 @@ COMPONENTS = ComponentsSettings(
 | `autodiscover` | `True` | Automatically discover components in app directories |
 | `dirs` | `[BASE_DIR / "components"]` | Root-level directories to search for components |
 | `app_dirs` | `["components"]` | Subdirectory name within apps to search for components |
-| `libraries` | `[]` | Extra Python modules to load for component registration |
 | `multiline_tags` | `True` | Allow component tag arguments to span multiple lines |
 | `reload_on_file_change` | `False` | Reload dev server when component files change |
 | `static_files_allowed` | CSS, JS, images, fonts | File extensions served as static files |
