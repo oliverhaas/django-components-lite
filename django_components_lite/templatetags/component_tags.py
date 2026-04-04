@@ -18,7 +18,7 @@ SlotNode.register(register)
 
 # Register the self-closing component tag.
 # ComponentScNode is identical to ComponentNode, but without an end tag.
-ComponentScNode = type(
+ComponentScNode: type[ComponentNode] = type(
     "ComponentScNode",
     (ComponentNode,),
     {"tag": COMPONENT_SC_TAG, "end_tag": None},

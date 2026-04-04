@@ -2045,7 +2045,7 @@ class ComponentNode(BaseNode):
         registry: ComponentRegistry,
         name: str,
         start_tag: str,
-        end_tag: str,
+        end_tag: str | None,
     ) -> "ComponentNode":
         # Set the component-specific start and end tags by subclassing the BaseNode
         subcls_name = cls.__name__ + "_" + name

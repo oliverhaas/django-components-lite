@@ -45,7 +45,7 @@ FILL_BODY_KWARG = "body"
 
 
 # Public types
-SlotResult = str | SafeString
+type SlotResult = str | SafeString
 """
 Type representing the result of a slot render function.
 
@@ -368,7 +368,7 @@ class Slot[TSlotData: Mapping]:
 
 # NOTE: This must be defined here, so we don't have any forward references
 # otherwise Pydantic has problem resolving the types.
-SlotInput = SlotResult | SlotFunc[TSlotData] | Slot[TSlotData]
+type SlotInput[TSlotData: Mapping] = SlotResult | SlotFunc[TSlotData] | Slot[TSlotData]
 """
 Type representing all forms in which slot content can be passed to a component.
 
