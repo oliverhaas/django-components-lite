@@ -47,7 +47,7 @@ class TestSlot:
             # the same way as it does in templates - when in "isolated" mode, then the
             # slot fill has access only to the "root" context, but not to the data of
             # get_template_data() of SimpleComponent.
-            # Isolated context — slot fill has no access to get_template_data() output
+            # Isolated context  -  slot fill has no access to get_template_data() output
             assert context.get("the_arg") is None
             assert context.get("the_kwarg") is None
             assert context.get("kwargs") is None

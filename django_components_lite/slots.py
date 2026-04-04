@@ -873,7 +873,7 @@ class SlotNode(BaseNode):
         if not slot_is_filled:
             return context
 
-        # Filled slots use the outer (caller's) context — isolated behavior,
+        # Filled slots use the outer (caller's) context  -  isolated behavior,
         # matching Django's inclusion_tag convention.
         return outer_context if outer_context is not None else Context()
 

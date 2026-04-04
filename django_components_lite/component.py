@@ -2591,7 +2591,7 @@ class ComponentNode(BaseNode):
 
         slot_fills = resolve_fills(context, self, self.name)
 
-        # Components use isolated context — template only sees get_template_data() output,
+        # Components use isolated context  -  template only sees get_template_data() output,
         # like Django's inclusion_tag behavior.
         inner_context = make_isolated_context_copy(context)
 

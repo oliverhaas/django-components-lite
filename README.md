@@ -2,7 +2,7 @@
 
 **An exploratory, lightweight fork of [django-components](https://github.com/django-components/django-components).**
 
-This package strips django-components down to its core: simple, reusable template components for Django — nothing more. The goal is to see how a minimal django-components feels in practice.
+This package strips django-components down to its core: simple, reusable template components for Django  -  nothing more. The goal is to see how a minimal django-components feels in practice.
 
 ## Attribution
 
@@ -10,7 +10,7 @@ This project is built on the excellent work of the **[django-components](https:/
 
 **If you're looking for a mature, full-featured, and battle-tested component library for Django, use [django-components](https://github.com/django-components/django-components).** It has an active community, extensive documentation, and a rich feature set.
 
-This fork is an experiment — it deliberately removes features to explore what a leaner alternative looks like.
+This fork is an experiment  -  it deliberately removes features to explore what a leaner alternative looks like.
 
 ## What's different?
 
@@ -79,10 +79,10 @@ class Greeting(Component):
 
 ## Links
 
-- [django-components (original)](https://github.com/django-components/django-components) — the full-featured upstream project
+- [django-components (original)](https://github.com/django-components/django-components)  -  the full-featured upstream project
 - [Documentation](https://oliverhaas.github.io/django-components-lite/)
 - [Issues](https://github.com/oliverhaas/django-components-lite/issues)
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT  -  see [LICENSE](LICENSE).

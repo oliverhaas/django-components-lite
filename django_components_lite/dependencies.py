@@ -15,7 +15,7 @@ from django_components_lite.node import BaseNode
 if TYPE_CHECKING:
     from django_components_lite.component import Component
 
-# Kept for backwards compatibility — strategies are no longer used.
+# Kept for backwards compatibility  -  strategies are no longer used.
 DependenciesStrategy = Literal["document", "fragment", "simple", "prepend", "append", "ignore"]
 
 
@@ -46,7 +46,7 @@ def build_dependency_tags(comp_cls: type["Component"]) -> str:
 
 
 #########################################################
-# Template tags (no-ops — dependencies are now prepended
+# Template tags (no-ops  -  dependencies are now prepended
 # directly by each component's render)
 #########################################################
 

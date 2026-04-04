@@ -51,7 +51,7 @@ class ComponentRegistryEntry(NamedTuple):
 
 
 class RegistrySettings(NamedTuple):
-    """Configuration for a ComponentRegistry. Currently empty — reserved for future settings."""
+    """Configuration for a ComponentRegistry. Currently empty  -  reserved for future settings."""
 
 
 # We keep track of all registries that exist so that, when users want to

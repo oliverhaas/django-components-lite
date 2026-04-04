@@ -568,7 +568,7 @@ class TestExtendsCompat:
             </body>
         """
 
-        # Dependency tags are prepended directly to the component's HTML — DJC_DEPS_STRATEGY has no effect.
+        # Dependency tags are prepended directly to the component's HTML  -  DJC_DEPS_STRATEGY has no effect.
         expected = """
             <body>
                 <outer>
