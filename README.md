@@ -37,7 +37,7 @@ Compared to django-components, the following have been stripped out:
 - JS/CSS data methods and dependency management
 - Type validation (Args/Kwargs/Slots/TemplateData)
 - `on_render()` generator system and deferred rendering
-- `context_behavior` setting (always isolated)
+- `context_behavior` setting (always isolated, like Django's `inclusion_tag`)
 - Tag formatters
 - Component views and URLs
 - `libraries` setting and `import_libraries()`
