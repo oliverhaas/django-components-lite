@@ -65,7 +65,9 @@ class TestComponentDirs:
     @djc_test(
         django_settings={
             "BASE_DIR": Path(__file__).parent.resolve(),
-            "STATICFILES_DIRS": [
+        },
+        components_settings={
+            "dirs": [
                 Path(__file__).parent.resolve() / "components",
                 ("with_alias", Path(__file__).parent.resolve() / "components"),
                 ("too_many", Path(__file__).parent.resolve() / "components", Path(__file__).parent.resolve()),
@@ -262,9 +264,6 @@ class TestComponentFiles:
         assert file_paths[6].parts[-4:] == ("tests", "components", "staticfiles", "staticfiles.py")
         assert file_paths[7].parts[-3:] == ("tests", "components", "urls.py")
         assert file_paths[8].parts[-3:] == ("django_components_lite", "components", "__init__.py")
-        # REMOVED: Built-in components (dynamic.py, error_fallback.py)
-        # assert file_paths[9].parts[-3:] == ("django_components_lite", "components", "dynamic.py")
-        # assert file_paths[10].parts[-3:] == ("django_components_lite", "components", "error_fallback.py")
         assert file_paths[9].parts[-5:] == ("tests", "test_app", "components", "app_lvl_comp", "app_lvl_comp.py")
 
     @djc_test(

@@ -455,16 +455,6 @@ def _clear_djc_global_state(
             if isinstance(loader, Loader):
                 loader.reset()
 
-    # REMOVED: Template and component media cache clearing (caching removed)
-    # # NOTE: There are 1-2 tests which check Templates, so we need to clear the cache
-    # from django_components_lite.cache import component_media_cache, template_cache
-    #
-    # if template_cache:
-    #     template_cache.clear()
-    #
-    # if component_media_cache:
-    #     component_media_cache.clear()
-
     # Remove cached Node subclasses
     component_node_subclasses_by_name.clear()
 

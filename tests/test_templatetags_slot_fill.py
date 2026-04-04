@@ -4,7 +4,7 @@ import pytest
 from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, Slot, register, registry, types
+from django_components_lite import Component, Slot, register, registry
 from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
@@ -14,7 +14,7 @@ setup_test_config()
 
 def _gen_slotted_component():
     class SlottedComponent(Component):
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <custom-template>
                 <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -47,7 +47,7 @@ class TestComponentSlot:
                     "variable2": kwargs.get("variable2", "default"),
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test1" %}
                 {% fill "header" %}
@@ -78,7 +78,7 @@ class TestComponentSlot:
     def test_slotted_template_basic_self_closing(self, components_settings):
         @register("test1")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" / %}</header>
@@ -99,7 +99,7 @@ class TestComponentSlot:
                     "variable2": kwargs.get("variable2", "default"),
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test1" %}
                 {% fill "header" %}
@@ -130,7 +130,7 @@ class TestComponentSlot:
     def test_slotted_template_with_context_var(self):
         @register("test1")
         class SlottedComponentWithContext(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -142,7 +142,7 @@ class TestComponentSlot:
             def get_template_data(self, args, kwargs, slots, context):
                 return {"variable": kwargs["variable"]}
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% with my_first_variable="test123" %}
                 {% component "test1" variable="test456" %}
@@ -173,7 +173,7 @@ class TestComponentSlot:
     def test_slotted_template_no_slots_filled(self, components_settings):
         registry.register(name="test", component=_gen_slotted_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}{% endcomponent %}
         """
@@ -195,11 +195,11 @@ class TestComponentSlot:
     def test_slotted_template_without_slots(self, components_settings):
         @register("test")
         class SlottedComponentNoSlots(Component):
-            template: types.django_html = """
+            template: str = """
                 <custom-template></custom-template>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}{% endcomponent %}
         """
@@ -212,11 +212,11 @@ class TestComponentSlot:
     def test_slotted_template_without_slots_and_single_quotes(self, components_settings):
         @register("test")
         class SlottedComponentNoSlots(Component):
-            template: types.django_html = """
+            template: str = """
                 <custom-template></custom-template>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}{% endcomponent %}
         """
@@ -228,7 +228,7 @@ class TestComponentSlot:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_variable_fill_name(self, components_settings):
         registry.register(name="test", component=_gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% with slotname="header" %}
                 {% component 'test' %}
@@ -250,7 +250,7 @@ class TestComponentSlot:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_missing_required_slot_raises_error(self, components_settings):
         class Comp(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="header-box">
                     <h1>{% slot "title" required %}{% endslot %}</h1>
@@ -260,7 +260,7 @@ class TestComponentSlot:
 
         registry.register("test", Comp)
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}
             {% endcomponent %}
@@ -274,7 +274,7 @@ class TestComponentSlot:
     @djc_test(components_settings={})
     def test_slots_of_top_level_comps_can_access_full_outer_ctx(self):
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}Easy to override{% endslot %}</main>
@@ -288,7 +288,7 @@ class TestComponentSlot:
 
         registry.register("test", SlottedComponent)
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             <body>
                 {% component "test" %}
@@ -319,7 +319,7 @@ class TestComponentSlot:
     def test_target_default_slot_as_named(self, components_settings):
         @register("test")
         class Comp(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <h1>{% slot "title" default %}Default title{% endslot %}</h1>
@@ -327,7 +327,7 @@ class TestComponentSlot:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}
                 {% fill "default" %}Custom title{% endfill %}
@@ -350,7 +350,7 @@ class TestComponentSlot:
     def test_raises_on_doubly_filled_slot__same_name(self, components_settings):
         @register("test")
         class Comp(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="header-box">
                     <h1>{% slot "title" default %}Default title{% endslot %}</h1>
@@ -358,7 +358,7 @@ class TestComponentSlot:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}
                 {% fill "title" %}Custom title{% endfill %}
@@ -380,7 +380,7 @@ class TestComponentSlot:
     def test_raises_on_doubly_filled_slot__named_and_default(self, components_settings):
         @register("test")
         class Comp(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="header-box">
                     <h1>{% slot "title" default %}Default title{% endslot %}</h1>
@@ -388,7 +388,7 @@ class TestComponentSlot:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}
                 {% fill "default" %}Custom title{% endfill %}
@@ -409,7 +409,7 @@ class TestComponentSlot:
     def test_raises_on_doubly_filled_slot__named_and_default_2(self, components_settings):
         @register("test")
         class Comp(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="header-box">
                     <h1>{% slot "default" default %}Default title{% endslot %}</h1>
@@ -417,7 +417,7 @@ class TestComponentSlot:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}
                 {% fill "default" %}Custom title{% endfill %}
@@ -441,7 +441,7 @@ class TestComponentSlot:
             def get_template_data(self, args, kwargs, slots, context):
                 return {"required": kwargs["required"]}
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% if required %}
@@ -457,7 +457,6 @@ class TestComponentSlot:
             slots={
                 "main": "MAIN",
             },
-            deps_strategy="ignore",
         )
 
         # 2. Specify the non-required slot by the "default" name
@@ -466,7 +465,6 @@ class TestComponentSlot:
             slots={
                 "default": "MAIN",
             },
-            deps_strategy="ignore",
         )
 
         assertHTMLEqual(rendered1, "<div><div>MAIN</div></div>")
@@ -478,7 +476,6 @@ class TestComponentSlot:
             slots={
                 "main": "MAIN",
             },
-            deps_strategy="ignore",
         )
         assertHTMLEqual(rendered3, "<div><main>MAIN</main><div>MAIN</div></div>")
 
@@ -493,19 +490,18 @@ class TestComponentSlot:
                 slots={
                     "default": "MAIN",
                 },
-                deps_strategy="ignore",
             )
 
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_slot_in_include(self, components_settings):
         @register("slotted")
         class SlottedWithIncludeComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% include 'slotted_template.html' %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "slotted" %}
                 {% fill "header" %}Custom header{% endfill %}
@@ -529,12 +525,12 @@ class TestComponentSlot:
     def test_slot_in_include_raises_if_isolated(self, components_settings):
         @register("broken_component")
         class BrokenComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% include 'slotted_template.html' with context=None only %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "broken_component" %}
                 {% fill "header" %}Custom header {% endfill %}
@@ -556,14 +552,14 @@ class TestComponentSlotDefault:
     def test_default_slot_is_fillable_by_implicit_fill_content(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}Easy to override{% endslot %}</main>
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               <p>This fills the 'main' slot.</p>
@@ -585,14 +581,14 @@ class TestComponentSlotDefault:
     def test_default_slot_is_fillable_by_explicit_fill_content(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}Easy to override{% endslot %}</main>
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               {% fill "main" %}<p>This fills the 'main' slot.</p>{% endfill %}
@@ -613,7 +609,7 @@ class TestComponentSlotDefault:
     def test_multiple_default_slots_with_same_name(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}1{% endslot %}</main>
@@ -621,7 +617,7 @@ class TestComponentSlotDefault:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               {% fill "main" %}<p>This fills the 'main' slot.</p>{% endfill %}
@@ -641,7 +637,7 @@ class TestComponentSlotDefault:
     def test_multiple_default_slots_with_different_names(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}1{% endslot %}</main>
@@ -649,7 +645,7 @@ class TestComponentSlotDefault:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               {% fill "main" %}<p>This fills the 'main' slot.</p>{% endfill %}
@@ -669,7 +665,7 @@ class TestComponentSlotDefault:
     def test_error_raised_when_default_and_required_slot_not_filled(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultAndRequiredSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <header>{% slot "header" %}Your Header Here{% endslot %}</header>
@@ -677,7 +673,7 @@ class TestComponentSlotDefault:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
             {% endcomponent %}
@@ -696,14 +692,14 @@ class TestComponentSlotDefault:
 
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}Easy to override{% endslot %}</main>
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               {% component "slotted" %}
@@ -732,14 +728,14 @@ class TestComponentSlotDefault:
     def test_error_from_mixed_implicit_and_explicit_fill_content(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}Easy to override{% endslot %}</main>
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
                 {% fill "main" %}Main content{% endfill %}
@@ -758,14 +754,14 @@ class TestComponentSlotDefault:
     def test_comments_permitted_inside_implicit_fill_content(self, components_settings):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <main>{% slot "main" default %}Easy to override{% endslot %}</main>
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               <p>Main Content</p>
@@ -788,7 +784,7 @@ class TestComponentSlotDefault:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_implicit_fill_when_no_slot_marked_default(self, components_settings):
         registry.register("test_comp", _gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' %}
               <p>Component with no 'default' slot still accepts the fill, it just won't render it</p>
@@ -814,7 +810,7 @@ class TestComponentSlotDefault:
             def get_template_data(self, args, kwargs, slots, context):
                 return {"var": kwargs["var"]}
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     {% if var %}
@@ -825,7 +821,7 @@ class TestComponentSlotDefault:
                 </custom-template>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_comp' var=var %}
               123
@@ -863,7 +859,7 @@ class TestPassthroughSlots:
     def test_if_for(self, components_settings):
         @register("test")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -877,7 +873,7 @@ class TestPassthroughSlots:
                     "name": kwargs.get("name", None),
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% if slot_names %}
@@ -919,7 +915,7 @@ class TestPassthroughSlots:
     def test_with(self, components_settings):
         @register("test")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -933,7 +929,7 @@ class TestPassthroughSlots:
                     "name": kwargs.get("name", None),
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% with slot="header" %}
@@ -963,7 +959,7 @@ class TestPassthroughSlots:
     def test_if_for_raises_on_content_outside_fill(self, components_settings):
         @register("test")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -977,7 +973,7 @@ class TestPassthroughSlots:
                     "name": kwargs.get("name", None),
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% if slot_names %}
@@ -1013,7 +1009,7 @@ class TestPassthroughSlots:
                     "slots": ["header", "main", "footer"],
                 }
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% for slot_name in slots %}
                     <div>
@@ -1024,7 +1020,7 @@ class TestPassthroughSlots:
                 {% endfor %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test_comp" %}
                 {% fill "header" %}
@@ -1056,7 +1052,7 @@ class TestPassthroughSlots:
                     "slots": self.slots,
                 }
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% component "slotted" %}
@@ -1069,7 +1065,7 @@ class TestPassthroughSlots:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test_comp" %}
                 {% fill "header" %}
@@ -1107,7 +1103,7 @@ class TestPassthroughSlots:
                     "slots": self.slots,
                 }
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% component "slotted" %}
@@ -1120,7 +1116,7 @@ class TestPassthroughSlots:
                 </div>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test_comp" %}
                 {% fill "header1" %}
@@ -1151,7 +1147,7 @@ class TestPassthroughSlots:
 class TestNestedSlots:
     def _gen_nested_slots_component(self):
         class NestedSlots(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot 'wrapper' %}
                     <div>
@@ -1180,7 +1176,7 @@ class TestNestedSlots:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_empty(self, components_settings):
         registry.register("example", self._gen_nested_slots_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'example' %}
             {% endcomponent %}
@@ -1206,7 +1202,7 @@ class TestNestedSlots:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_override_outer(self, components_settings):
         registry.register("example", self._gen_nested_slots_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'example' %}
                 {% fill 'wrapper' %}
@@ -1228,7 +1224,7 @@ class TestNestedSlots:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_override_middle(self, components_settings):
         registry.register("example", self._gen_nested_slots_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'example' %}
                 {% fill 'parent1' %}
@@ -1256,7 +1252,7 @@ class TestNestedSlots:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_override_inner(self, components_settings):
         registry.register("example", self._gen_nested_slots_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'example' %}
                 {% fill 'child1' %}
@@ -1287,7 +1283,7 @@ class TestNestedSlots:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_override_all(self, components_settings):
         registry.register("example", self._gen_nested_slots_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'example' %}
                 {% fill 'child1' %}
@@ -1323,7 +1319,7 @@ class TestSlottedTemplateRegression:
     def test_slotted_template_that_uses_missing_variable(self, components_settings):
         @register("test")
         class SlottedComponentWithMissingVariable(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     {{ missing_context_variable }}
@@ -1333,7 +1329,7 @@ class TestSlottedTemplateRegression:
                 </custom-template>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' %}{% endcomponent %}
         """
@@ -1354,36 +1350,10 @@ class TestSlottedTemplateRegression:
 
 @djc_test
 class TestSlotFallback:
-    # TODO_v1 - REMOVE
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_basic_legacy(self, components_settings):
-        registry.register("test", _gen_slotted_component())
-        template_str: types.django_html = """
-            {% load component_tags %}
-            {% component "test" %}
-                {% fill "header" default="header" %}Before: {{ header }}{% endfill %}
-                {% fill "main" default="main" %}{{ main }}{% endfill %}
-                {% fill "footer" default="footer" %}{{ footer }}, after{% endfill %}
-            {% endcomponent %}
-        """
-        template = Template(template_str)
-        rendered = template.render(Context({}))
-
-        assertHTMLEqual(
-            rendered,
-            """
-            <custom-template>
-                <header>Before: Default header</header>
-                <main>Default main</main>
-                <footer>Default footer, after</footer>
-            </custom-template>
-            """,
-        )
-
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_basic(self, components_settings):
         registry.register("test", _gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "header" fallback="header" %}Before: {{ header }}{% endfill %}
@@ -1408,7 +1378,7 @@ class TestSlotFallback:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_multiple_calls(self, components_settings):
         registry.register("test", _gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "header" fallback="header" %}
@@ -1434,7 +1404,7 @@ class TestSlotFallback:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_under_if_and_forloop(self, components_settings):
         registry.register("test", _gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "header" fallback="header" %}
@@ -1465,7 +1435,7 @@ class TestSlotFallback:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_nested_fills(self, components_settings):
         registry.register("test", _gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "header" fallback="header1" %}
@@ -1517,7 +1487,7 @@ class TestScopedSlot:
     def test_slot_data(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1530,7 +1500,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
@@ -1552,7 +1522,7 @@ class TestScopedSlot:
     def test_slot_data_with_flags(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" default abc=abc var123=var123 required %}Default text{% endslot %}
@@ -1565,7 +1535,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
@@ -1587,7 +1557,7 @@ class TestScopedSlot:
     def test_slot_data_with_slot_fallback(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1600,7 +1570,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" fallback="fallback" %}
@@ -1624,7 +1594,7 @@ class TestScopedSlot:
     def test_slot_data_with_variable(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot slot_name abc=abc var123=var123 default required %}Default text{% endslot %}
@@ -1638,7 +1608,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
@@ -1660,7 +1630,7 @@ class TestScopedSlot:
     def test_slot_data_with_spread(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot ...slot_props default required %}Default text{% endslot %}
@@ -1676,7 +1646,7 @@ class TestScopedSlot:
                     },
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
@@ -1698,7 +1668,7 @@ class TestScopedSlot:
     def test_slot_data_and_fallback_on_default_slot(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     <b>{% slot "slot_a" abc=abc var123=var123 %} Default text A {% endslot %}</b>
@@ -1712,7 +1682,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill name="default" data="slot_data_in_fill" fallback="slot_var" %}
@@ -1735,7 +1705,7 @@ class TestScopedSlot:
     def test_slot_data_raises_on_slot_data_and_slot_fallback_same_var(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1748,7 +1718,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="slot_var" fallback="slot_var" %}
@@ -1768,7 +1738,7 @@ class TestScopedSlot:
     def test_slot_data_fill_without_data(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1781,7 +1751,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" %}
@@ -1797,14 +1767,14 @@ class TestScopedSlot:
     def test_slot_data_fill_without_slot_data(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" %}Default text{% endslot %}
                 </div>
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "my_slot" data="data" %}
@@ -1820,7 +1790,7 @@ class TestScopedSlot:
     def test_slot_data_no_fill(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1833,7 +1803,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
             {% endcomponent %}
@@ -1846,7 +1816,7 @@ class TestScopedSlot:
     def test_slot_data_fill_with_variables(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1859,7 +1829,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill fill_name data=data_var %}
@@ -1889,7 +1859,7 @@ class TestScopedSlot:
     def test_slot_data_fill_with_spread(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
@@ -1902,7 +1872,7 @@ class TestScopedSlot:
                     "var123": 456,
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill ...fill_props %}
@@ -1934,7 +1904,7 @@ class TestScopedSlot:
     def test_nested_fills(self, components_settings):
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div>
                     {% slot "my_slot" abc=abc input=input %}Default text{% endslot %}
@@ -1947,7 +1917,7 @@ class TestScopedSlot:
                     "input": kwargs["input"],
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" input=1 %}
                 {% fill "my_slot" data="data1" %}
@@ -1982,7 +1952,7 @@ class TestScopedSlot:
 class TestDuplicateSlot:
     def _gen_duplicate_slot_component(self):
         class DuplicateSlotComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <header>{% slot "header" %}Default header{% endslot %}</header>
                 {# Slot name 'header' used twice. #}
@@ -1999,7 +1969,7 @@ class TestDuplicateSlot:
 
     def _gen_duplicate_slot_nested_component(self):
         class DuplicateSlotNestedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "header" %}START{% endslot %}
                 <div class="dashboard-component">
@@ -2029,7 +1999,7 @@ class TestDuplicateSlot:
         class CalendarComponent(Component):
             """Nested in ComponentWithNestedComponent."""
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="calendar-component">
                 <h1>
@@ -2049,7 +2019,7 @@ class TestDuplicateSlot:
         registry.register(name="duplicate_slot", component=self._gen_duplicate_slot_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "duplicate_slot" name=comp_input %}
                 {% fill "header" %}
@@ -2077,7 +2047,7 @@ class TestDuplicateSlot:
         registry.register(name="duplicate_slot", component=self._gen_duplicate_slot_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "duplicate_slot" %}
             {% endcomponent %}
@@ -2100,7 +2070,7 @@ class TestDuplicateSlot:
         registry.register(name="duplicate_slot_nested", component=self._gen_duplicate_slot_nested_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "duplicate_slot_nested" items=items %}
                 {% fill "header" %}
@@ -2143,7 +2113,7 @@ class TestDuplicateSlot:
         registry.register(name="duplicate_slot_nested", component=self._gen_duplicate_slot_nested_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "duplicate_slot_nested" items=items %}
             {% endcomponent %}
@@ -2183,7 +2153,7 @@ class TestDuplicateSlot:
 class TestSlotFillTemplateSyntaxError:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_fill_with_no_parent_is_error(self, components_settings):
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% fill "header" %}contents{% endfill %}
         """
@@ -2199,7 +2169,7 @@ class TestSlotFillTemplateSyntaxError:
     def test_non_unique_fill_names_is_error(self, components_settings):
         registry.register("test", _gen_slotted_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "header" %}Custom header {% endfill %}
@@ -2219,7 +2189,7 @@ class TestSlotFillTemplateSyntaxError:
     def test_non_unique_fill_names_is_error_via_vars(self, components_settings):
         registry.register("test", _gen_slotted_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% with var1="header" var2="header" %}
                 {% component "test" %}
@@ -2244,7 +2214,7 @@ class TestSlotBehavior:
     # Django settings per test with `@override_settings` / `@djc_test`
     def make_template(self) -> Template:
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -2260,7 +2230,7 @@ class TestSlotBehavior:
 
         registry.register("test", SlottedComponent)
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" name='Igor' %}
                 {% fill "header" %}
@@ -2333,7 +2303,7 @@ class TestSlotInput:
 
         @register("test")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <header>{% slot "header" %}Default header{% endslot %}</header>
                 <main>{% slot "main" %}Default main header{% endslot %}</main>
@@ -2346,7 +2316,7 @@ class TestSlotInput:
 
         assert seen_slots == {}
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" input=1 %}
                 {% fill "header" data="data1" %}
@@ -2369,7 +2339,7 @@ class TestSlotInput:
 
         @register("test")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <header>{% slot "header" %}Default header{% endslot %}</header>
                 <main>{% slot "main" %}Default main header{% endslot %}</main>

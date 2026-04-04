@@ -12,8 +12,6 @@ from django.template import Context, NodeList
 from django.template.base import Parser, Token
 from django.template.exceptions import TemplateSyntaxError
 
-# REMOVED: Most expression enhancements, but kept attrs:key=value aggregation
-# from django_components_lite.expression import process_aggregate_kwargs
 from django_components_lite.util.tag_parser import TagAttr, parse_tag
 
 
@@ -265,7 +263,6 @@ def _extract_flags(
     return remaining_attrs, flags_dict
 
 
-# TODO_REMOVE_IN_V1 - Disallow specifying the same key multiple times once in v1.
 def merge_repeated_kwargs(params: list[TagParam]) -> list[TagParam]:
     resolved_params: list[TagParam] = []
     params_by_key: dict[str, TagParam] = {}

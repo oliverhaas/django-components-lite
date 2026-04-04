@@ -3,69 +3,15 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 from weakref import ReferenceType, ref
 
-from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, Origin, Template
 from django.template.loader import get_template as django_get_template
 
-# REMOVED: Component caching
-# from django_components_lite.cache import get_template_cache
 from django_components_lite.util.django_monkeypatch import is_cls_patched
 from django_components_lite.util.logger import trace_component_msg
 from django_components_lite.util.misc import get_module_info
 
 if TYPE_CHECKING:
     from django_components_lite.component import Component
-
-
-# TODO_V1 - Remove, won't be needed once we remove `get_template_string()`, `get_template_name()`, `get_template()`
-# Legacy logic for creating Templates from string
-def cached_template(
-    template_string: str,
-    template_cls: type[Template] | None = None,
-    origin: Origin | None = None,
-    name: str | None = None,
-    engine: Any | None = None,
-) -> Template:
-    """
-    DEPRECATED. Template caching will be removed in v1.
-
-    Create a Template instance that will be cached as per the
-    [`COMPONENTS.template_cache_size`](../settings#django_components_lite.app_settings.ComponentsSettings.template_cache_size)
-    setting.
-
-    Args:
-        template_string (str): Template as a string, same as the first argument to Django's\
-            [`Template`](https://docs.djangoproject.com/en/5.2/topics/templates/#template). Required.
-        template_cls (Type[Template], optional): Specify the Template class that should be instantiated.\
-            Defaults to Django's [`Template`](https://docs.djangoproject.com/en/5.2/topics/templates/#template) class.
-        origin (Type[Origin], optional): Sets \
-            [`Template.Origin`](https://docs.djangoproject.com/en/5.2/howto/custom-template-backend/#origin-api-and-3rd-party-integration).
-        name (Type[str], optional): Sets `Template.name`
-        engine (Type[Any], optional): Sets `Template.engine`
-
-    ```python
-    from django_components_lite import cached_template
-
-    template = cached_template("Variable: {{ variable }}")
-
-    # You can optionally specify Template class, and other Template inputs:
-    class MyTemplate(Template):
-        pass
-
-    template = cached_template(
-        "Variable: {{ variable }}",
-        template_cls=MyTemplate,
-        name=...
-        origin=...
-        engine=...
-    )
-    ```
-
-    """
-    # REMOVED: Template caching - create templates directly now
-    template_cls = template_cls or Template
-    template = template_cls(template_string, origin=origin, name=name, engine=engine)
-    return template
 
 
 ########################################################
@@ -176,7 +122,7 @@ def load_component_template(
         template = ensure_unique_template(component_cls, template)
 
     elif content is not None:
-        template = _create_template_from_string(component_cls, content, is_component_template=True)
+        template = _create_template_from_string(component_cls, content)
     else:
         raise ValueError("Received both `filepath` and `content`. These are mutually exclusive.")
 
@@ -205,71 +151,19 @@ def ensure_unique_template(component_cls: type["Component"], template: Template)
 def _get_component_template(component: "Component") -> Template | None:
     trace_component_msg("COMP_LOAD", component_name=component.name, component_id=component.id, slot_name=None)
 
-    # TODO_V1 - Remove, not needed once we remove `get_template_string()`, `get_template_name()`, `get_template()`
-    template_sources: dict[str, str | Template | None] = {}
+    template: Template | None = None
+    template_string: str | None = None
 
-    # TODO_V1 - Remove `get_template_name()` in v1
-    template_sources["get_template_name"] = component.get_template_name(component.context)
-
-    # TODO_V1 - Remove `get_template_string()` in v1
-    if hasattr(component, "get_template_string"):
-        template_string_getter = component.get_template_string
-        template_body_from_getter = template_string_getter(component.context)
-    else:
-        template_body_from_getter = None
-    template_sources["get_template_string"] = template_body_from_getter
-
-    # TODO_V1 - Remove `get_template()` in v1
-    template_sources["get_template"] = component.get_template(component.context)
-
-    # NOTE: `component.template` should be populated whether user has set `template` or `template_file`
-    #       so we discern between the two cases by checking `component.template_file`
     if component.template_file is not None:
-        template_sources["template_file"] = component.template_file
-    else:
-        template_sources["template"] = component.template
-
-    # TODO_V1 - Remove this check in v1
-    # Raise if there are multiple sources for the component template
-    sources_with_values = [k for k, v in template_sources.items() if v is not None]
-    if len(sources_with_values) > 1:
-        raise ImproperlyConfigured(
-            f"Component template was set multiple times in Component {component.name}. Sources: {sources_with_values}",
-        )
-
-    # Load the template based on the source
-    if template_sources["get_template_name"]:
-        template_name = template_sources["get_template_name"]
-        template: Template | None = _load_django_template(template_name)
-        template_string: str | None = None
-    elif template_sources["get_template_string"]:
-        template_string = template_sources["get_template_string"]
-        template = None
-    elif template_sources["get_template"]:
-        # `Component.get_template()` returns either string or Template instance
-        if hasattr(template_sources["get_template"], "render"):
-            template = template_sources["get_template"]
-            template_string = None
-        else:
-            template = None
-            template_string = template_sources["get_template"]
-    elif component.template or component.template_file:
         # Check if there's a cached Template instance on the class
         cached = getattr(component.__class__, "_cached_template", None)
         if cached is not None:
             template = cached
-            template_string = None
-        elif component.template_file:
+        else:
             template = _load_django_template(component.template_file)
             component.__class__._cached_template = template
-            template_string = None
-        elif component.template:
-            template = None
-            template_string = component.template
-    # No template
-    else:
-        template = None
-        template_string = None
+    elif component.template:
+        template_string = component.template
 
     # We already have a template instance, so we can return it
     if template is not None:
@@ -286,7 +180,6 @@ def _get_component_template(component: "Component") -> Template | None:
 def _create_template_from_string(
     component: type["Component"],
     template_string: str,
-    is_component_template: bool = False,
 ) -> Template:
     # Generate a valid Origin instance.
     # When an Origin instance is created by Django when using Django's loaders, it looks like this:
@@ -314,16 +207,7 @@ def _create_template_from_string(
 
     set_component_to_origin(origin, component)
 
-    if is_component_template:
-        template = Template(template_string, name=origin.template_name, origin=origin)
-    else:
-        # TODO_V1 - `cached_template()` won't be needed as there will be only 1 template per component
-        #           so we will be able to instead use `template_cache` to store the template
-        template = cached_template(
-            template_string=template_string,
-            name=origin.template_name,
-            origin=origin,
-        )
+    template = Template(template_string, name=origin.template_name, origin=origin)
 
     return template
 
@@ -334,14 +218,6 @@ def _create_template_from_string(
 # This may raise `TemplateDoesNotExist` if the template doesn't exist.
 # See https://docs.djangoproject.com/en/5.2/ref/templates/api/#template-loaders
 # And https://docs.djangoproject.com/en/5.2/ref/templates/api/#custom-template-loaders
-#
-# TODO_v3 - Instead of loading templates with Django's `get_template()`,
-#       we should simply read the files directly (same as we do for JS and CSS).
-#       This has the implications that:
-#       - We would no longer support Django's template loaders
-#       - Instead if users are using template loaders, they should re-create them as djc extensions
-#       - We would no longer need to set `TEMPLATES.OPTIONS.loaders` to include
-#         `django_components_lite.template_loader.Loader`
 def _load_django_template(template_name: str) -> Template:
     return django_get_template(template_name).template
 

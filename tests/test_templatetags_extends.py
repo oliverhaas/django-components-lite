@@ -3,7 +3,7 @@
 from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, register, registry, types
+from django_components_lite import Component, register, registry
 from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
@@ -27,7 +27,7 @@ def gen_blocked_and_slotted_component():
 
 def gen_component_inside_include():
     class ComponentInsideInclude(Component):
-        template: types.django_html = """<div>Hello</div>"""
+        template: str = """<div>Hello</div>"""
         css_file = "style.css"
         js_file = "script.js"
 
@@ -47,14 +47,14 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -92,14 +92,14 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -151,7 +151,7 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
@@ -160,14 +160,14 @@ class TestExtendsCompat:
 
         @register("second_extended_component")
         class _SecondExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -220,7 +220,7 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
@@ -229,14 +229,14 @@ class TestExtendsCompat:
 
         @register("second_extended_component")
         class _SecondExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template_2.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -285,14 +285,14 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <!DOCTYPE html>
             <html lang="en">
@@ -328,14 +328,14 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <!DOCTYPE html>
             <html lang="en">
@@ -383,14 +383,14 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "blocked_and_slotted_template.html" %}
                 {% block before_custom %}
                     <div>BLOCK OVERRIDEN</div>
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -442,7 +442,7 @@ class TestExtendsCompat:
         class _ExtendedComponent(Component):
             template_file = "included.html"
 
-        template: types.django_html = """
+        template: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -491,11 +491,11 @@ class TestExtendsCompat:
 
         @register("slot_inside_extends")
         class SlotInsideExtendsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "block_in_slot_in_component.html" %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "slot_inside_extends" %}
                 {% fill "body" %}
@@ -524,11 +524,11 @@ class TestExtendsCompat:
 
         @register("slot_inside_include")
         class SlotInsideIncludeComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% include "block_in_slot_in_component.html" %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "slot_inside_include" %}
                 {% fill "body" %}
@@ -559,7 +559,7 @@ class TestExtendsCompat:
     def test_component_with_media_inside_include(self, components_settings):
         registry.register("test_component", gen_component_inside_include())
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <body>
                 <outer>
@@ -595,7 +595,7 @@ class TestExtendsCompat:
 
         @register("component_inside_include")
         class CompInsideIncludeComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 <body>
                     <outer>
                         {% include "component_inside_include_sub.html" %}
@@ -603,7 +603,7 @@ class TestExtendsCompat:
                 </body>
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <html>
                 {% component "component_inside_include" / %}
@@ -631,7 +631,7 @@ class TestExtendsCompat:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_component_inside_block(self, components_settings):
         registry.register("slotted_component", gen_slotted_component())
-        template: types.django_html = """
+        template: str = """
             {% extends "block.html" %}
             {% load component_tags %}
             {% block body %}
@@ -667,7 +667,7 @@ class TestExtendsCompat:
     def test_block_inside_component(self, components_settings):
         registry.register("slotted_component", gen_slotted_component())
 
-        template: types.django_html = """
+        template: str = """
             {% extends "block_in_component.html" %}
             {% block body %}
             <div>
@@ -700,7 +700,7 @@ class TestExtendsCompat:
         class BlockInCompParent(Component):
             template_file = "block_in_component_parent.html"
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "block_in_component_parent" %}{% endcomponent %}
         """
@@ -733,7 +733,7 @@ class TestExtendsCompat:
         class BlockInSlotInComponent(Component):
             template_file = "block_in_slot_in_component.html"
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "block_inside_slot_v1" %}
                 {% fill "body" %}
@@ -766,11 +766,11 @@ class TestExtendsCompat:
 
         @register("slot_inside_block")
         class _SlotInsideBlockComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "slot_inside_block.html" %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "slot_inside_block" %}{% endcomponent %}
         """
@@ -799,14 +799,14 @@ class TestExtendsCompat:
 
         @register("slot_inside_block")
         class _SlotInsideBlockComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "slot_inside_block.html" %}
                 {% block inner %}
                     INNER BLOCK OVERRIDEN
                 {% endblock %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "slot_inside_block" %}{% endcomponent %}
         """
@@ -834,11 +834,11 @@ class TestExtendsCompat:
 
         @register("slot_inside_block")
         class _SlotInsideBlockComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "slot_inside_block.html" %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "slot_inside_block" %}
                 {% fill "body" %}
@@ -870,7 +870,7 @@ class TestExtendsCompat:
 
         @register("slot_inside_block")
         class _SlotInsideBlockComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends "slot_inside_block.html" %}
                 {% block inner %}
                     {% load component_tags %}
@@ -881,7 +881,7 @@ class TestExtendsCompat:
 
         # NOTE: The "body" fill will NOT show up, because we override the `inner` block
         # with a different slot. But the "new_slot" WILL show up.
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "slot_inside_block" %}
                 {% fill "body" %}
@@ -916,35 +916,9 @@ class TestExtendsCompat:
         class RelativeFileComponentUsingTemplateFile(Component):
             template_file = "relative_extends.html"
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "relative_file_component_using_template_file" %}{% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-              <body>
-                <main role="main">
-                  <div class='container main-container'>
-                    BLOCK OVERRIDEN
-                  </div>
-                </main>
-              </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_using_get_template_name_extends_relative_file(self, components_settings):
-        @register("relative_file_component_using_get_template_name")
-        class RelativeFileComponentUsingGetTemplateName(Component):
-            def get_template_name(self, context):
-                return "relative_extends.html"
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "relative_file_component_using_get_template_name" %}{% endcomponent %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
@@ -967,7 +941,7 @@ class TestExtendsCompat:
     def test_nested_component_with_include_and_extends_in_slot(self, components_settings):
         @register("a_outer")
         class AOuterComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <p>This is the outer component.</p>
                 {% slot "a" default / %}
@@ -975,13 +949,13 @@ class TestExtendsCompat:
 
         @register("b_inner")
         class BInnerComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <p>This is the inner component.</p>
                 {% slot "b" default / %}
             """
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "a_outer" %}
                 {% component "b_inner" %}
@@ -1008,12 +982,12 @@ class TestExtendsCompat:
     ):
         @register("simple_component")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% slot 'content' / %}
             """
 
         # Confirm that this setup works in Django without components
-        template1: types.django_html = """
+        template1: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
@@ -1039,7 +1013,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered1, expected1)
 
-        template2: types.django_html = """
+        template2: str = """
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}

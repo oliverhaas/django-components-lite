@@ -5,7 +5,7 @@ from typing import NamedTuple
 from django.apps import apps
 from django.conf import settings
 
-from django_components_lite.app_settings import ComponentsSettings, app_settings
+from django_components_lite.app_settings import app_settings
 from django_components_lite.util.logger import logger
 
 
@@ -45,27 +45,6 @@ def get_component_dirs(include_apps: bool = True) -> list[Path]:
     # Allow to configure from settings which dirs should be checked for components
     component_dirs = app_settings.DIRS
 
-    # TODO_REMOVE_IN_V1
-    raw_component_settings = getattr(settings, "COMPONENTS", {})
-    if isinstance(raw_component_settings, dict):
-        raw_dirs_value = raw_component_settings.get("dirs", None)
-    elif isinstance(raw_component_settings, ComponentsSettings):
-        raw_dirs_value = raw_component_settings.dirs
-    else:
-        raw_dirs_value = None
-    is_component_dirs_set = raw_dirs_value is not None
-    is_legacy_paths = (
-        # Use value of `STATICFILES_DIRS` ONLY if `COMPONENT.dirs` not set
-        not is_component_dirs_set and getattr(settings, "STATICFILES_DIRS", None)
-    )
-    if is_legacy_paths:
-        # NOTE: For STATICFILES_DIRS, we use the defaults even for empty list.
-        # We don't do this for COMPONENTS.dirs, so user can explicitly specify "NO dirs".
-        component_dirs = settings.STATICFILES_DIRS or [settings.BASE_DIR / "components"]
-    # END TODO_REMOVE_IN_V1
-
-    source = "STATICFILES_DIRS" if is_legacy_paths else "COMPONENTS.dirs"
-
     logger.debug(
         "get_component_dirs will search for valid dirs from following options:\n"
         + "\n".join([f" - {d!s}" for d in component_dirs]),
@@ -92,13 +71,13 @@ def get_component_dirs(include_apps: bool = True) -> list[Path]:
             Path(component_dir)
         except TypeError:
             logger.warning(
-                f"{source} expected str, bytes or os.PathLike object, or tuple/list of length 2. "
+                f"COMPONENTS.dirs expected str, bytes or os.PathLike object, or tuple/list of length 2. "
                 f"See Django documentation for STATICFILES_DIRS. Got {type(component_dir)} : {component_dir}",
             )
             continue
 
         if not Path(component_dir).is_absolute():
-            raise ValueError(f"{source} must contain absolute paths, got '{component_dir}'")
+            raise ValueError(f"COMPONENTS.dirs must contain absolute paths, got '{component_dir}'")
         directories.add(Path(component_dir).resolve())
 
     logger.debug(

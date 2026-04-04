@@ -3,7 +3,7 @@
 from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, register, registry, types
+from django_components_lite import Component, register, registry
 from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
@@ -22,7 +22,7 @@ class TestMultilineTags:
     def test_multiline_tags(self, components_settings):
         @register("test_component")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 Variable: <strong>{{ variable }}</strong>
             """
 
@@ -32,7 +32,7 @@ class TestMultilineTags:
                     "variable2": kwargs.get("variable2", "default"),
                 }
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component
                 "test_component"
@@ -51,7 +51,7 @@ class TestMultilineTags:
 @djc_test
 class TestNestedTags:
     class SimpleComponent(Component):
-        template: types.django_html = """
+        template: str = """
             Variable: <strong>{{ var }}</strong>
         """
 
@@ -64,7 +64,7 @@ class TestNestedTags:
     def test_nested_quote_single(self, components_settings):
         registry.register("test", self.SimpleComponent)
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" var=_("organisation's") %} {% endcomponent %}
         """
@@ -78,7 +78,7 @@ class TestNestedTags:
     def test_nested_quote_single_self_closing(self, components_settings):
         registry.register("test", self.SimpleComponent)
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" var=_("organisation's") / %}
         """
@@ -92,7 +92,7 @@ class TestNestedTags:
     def test_nested_quote_double(self, components_settings):
         registry.register("test", self.SimpleComponent)
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" var=_('organisation"s') %} {% endcomponent %}
         """
@@ -106,7 +106,7 @@ class TestNestedTags:
     def test_nested_quote_double_self_closing(self, components_settings):
         registry.register("test", self.SimpleComponent)
 
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             {% component "test" var=_('organisation"s') / %}
         """

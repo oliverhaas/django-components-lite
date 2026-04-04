@@ -20,7 +20,6 @@ from django_components_lite import (
     all_components,
     get_component_by_class_id,
     register,
-    types,
 )
 from django_components_lite.testing import djc_test
 from django_components_lite.urls import urlpatterns as dc_urlpatterns
@@ -46,210 +45,6 @@ class CustomClient(Client):
 
 
 @djc_test
-class TestComponentLegacyApi:
-    # TODO_REMOVE_IN_V1 - Superseded by `self.get_template` in v1
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_get_template_string(self, components_settings):
-        class SimpleComponent(Component):
-            def get_template_string(self, context):
-                content: types.django_html = """
-                    Variable: <strong>{{ variable }}</strong>
-                """
-                return content
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "variable": kwargs.get("variable", None),
-                }
-
-        rendered = SimpleComponent.render(kwargs={"variable": "test"})
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong>
-            """,
-        )
-
-    # TODO_REMOVE_IN_V2 - `get_context_data()` was superseded by `self.get_template_data`
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_get_context_data(self, components_settings):
-        class SimpleComponent(Component):
-            template_file = "test_component/simple_variable.html"
-
-            def get_context_data(self, variable=None):
-                return {
-                    "variable": variable,
-                }
-
-        rendered = SimpleComponent.render(kwargs={"variable": "test"})
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong>
-            """,
-        )
-
-    # TODO_REMOVE_IN_V1 - Registry and registered name should be passed to `Component.render()`,
-    #                     not to the constructor.
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_instantiation(self, components_settings):
-        class SimpleComponent(Component):
-            template_file = "test_component/component-instantiation.html"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "name": self.name,
-                }
-
-        # Old syntax
-        rendered = SimpleComponent("simple").render()
-        assertHTMLEqual(
-            rendered,
-            """
-            <div>
-                Name: simple
-            </div>
-            """,
-        )
-
-        # New syntax
-        rendered = SimpleComponent.render(registered_name="simple")
-        assertHTMLEqual(
-            rendered,
-            """
-            <div>
-                Name: simple
-            </div>
-            """,
-        )
-
-        # Sanity check
-        rendered = SimpleComponent.render()
-        assertHTMLEqual(
-            rendered,
-            """
-            <div>
-                Name: SimpleComponent
-            </div>
-            """,
-        )
-
-    # TODO_v1 - Remove
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_get_template_name(self, components_settings):
-        class SvgComponent(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "name": kwargs.pop("name", None),
-                    "css_class": kwargs.pop("css_class", None),
-                    "title": kwargs.pop("title", None),
-                    **kwargs,
-                }
-
-            def get_template_name(self, context):
-                return f"dynamic_{context['name']}.svg"
-
-        assertHTMLEqual(
-            SvgComponent.render(kwargs={"name": "svg1"}),
-            """
-            <svg>Dynamic1</svg>
-            """,
-        )
-        assertHTMLEqual(
-            SvgComponent.render(kwargs={"name": "svg2"}),
-            """
-            <svg>Dynamic2</svg>
-            """,
-        )
-
-    # TODO_v1 - Remove
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_get_template__string(self, components_settings):
-        class SimpleComponent(Component):
-            def get_template(self, context):
-                content: types.django_html = """
-                    Variable: <strong>{{ variable }}</strong>
-                """
-                return content
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "variable": kwargs.get("variable", None),
-                }
-
-        rendered = SimpleComponent.render(kwargs={"variable": "test"})
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong>
-            """,
-        )
-
-    # TODO_v1 - Remove
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_get_template__template(self, components_settings):
-        class TestComponent(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "variable": kwargs.pop("variable", None),
-                }
-
-            def get_template(self, context):
-                template_str = "Variable: <strong>{{ variable }}</strong>"
-                return Template(template_str)
-
-        rendered = TestComponent.render(kwargs={"variable": "test"})
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong>
-            """,
-        )
-
-    # TODO_v1 - Remove
-    def test_input(self):
-        class TestComponent(Component):
-            template: types.django_html = """
-                {% load component_tags %}
-                Variable: <strong>{{ variable }}</strong>
-                {% slot 'my_slot' / %}
-            """
-
-            def get_template_data(self, args, kwargs, slots, context):
-                assert self.input.args == [123, "str"]
-                assert self.input.kwargs == {"variable": "test", "another": 1}
-                assert isinstance(self.input.context, Context)
-                assert list(self.input.slots.keys()) == ["my_slot"]
-                my_slot = self.input.slots["my_slot"]
-                assert my_slot() == "MY_SLOT"
-
-                return {
-                    "variable": kwargs["variable"],
-                }
-
-            def on_render_before(self, context, template):
-                assert self.input.args == [123, "str"]
-                assert self.input.kwargs == {"variable": "test", "another": 1}
-                assert isinstance(self.input.context, Context)
-                assert list(self.input.slots.keys()) == ["my_slot"]
-                my_slot = self.input.slots["my_slot"]
-                assert my_slot() == "MY_SLOT"
-
-        rendered = TestComponent.render(
-            kwargs={"variable": "test", "another": 1},
-            args=(123, "str"),
-            slots={"my_slot": "MY_SLOT"},
-        )
-
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong> MY_SLOT
-            """,
-        )
-
-
-@djc_test
 class TestComponent:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_empty_component(self, components_settings):
@@ -261,7 +56,7 @@ class TestComponent:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_template_string_static_inlined(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 Variable: <strong>{{ variable }}</strong>
             """
 
@@ -455,7 +250,7 @@ class TestComponentRenderAPI:
 
     def test_raw_input(self):
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 Variable: <strong>{{ variable }}</strong>
                 {% slot 'my_slot' / %}
@@ -548,7 +343,7 @@ class TestComponentRenderAPI:
                 nonlocal comp
                 comp = self
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             <div class="test-component">
                 {% component "test" / %}
@@ -618,8 +413,6 @@ class TestComponentRenderAPI:
             args=(),
             kwargs={},
             slots={},
-            deps_strategy="document",
-            render_dependencies=True,
             request=None,
             outer_context=Context(),
             registry=ComponentRegistry(),
@@ -643,7 +436,7 @@ class TestComponentRenderAPI:
 class TestComponentTemplateVars:
     def test_args_kwargs_slots__simple_untyped(self):
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="test-component">
                     {# Test whole objects #}
@@ -680,7 +473,7 @@ class TestComponentTemplateVars:
     def test_args_kwargs_slots__nested_untyped(self):
         @register("wrapper")
         class Wrapper(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="wrapper">
                     {% slot "content" default %}
@@ -690,7 +483,7 @@ class TestComponentTemplateVars:
             """
 
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="test-component">
                     {% component "wrapper" %}
@@ -731,7 +524,7 @@ class TestComponentTemplateVars:
     def test_args_kwargs_slots__nested_conditional_slots(self):
         @register("wrapper")
         class Wrapper(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="wrapper">
                     {% slot "content" default %}
@@ -741,7 +534,7 @@ class TestComponentTemplateVars:
             """
 
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div class="test-component">
                     {% component "wrapper" %}
@@ -776,7 +569,7 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_minimal(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 the_arg2: {{ the_arg2 }}
                 args: {{ args|safe }}
@@ -816,7 +609,7 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_full(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 the_arg: {{ the_arg }}
                 the_arg2: {{ the_arg2 }}
@@ -869,7 +662,7 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_to_response_full(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 the_arg: {{ the_arg }}
                 the_arg2: {{ the_arg2 }}
@@ -929,7 +722,7 @@ class TestComponentRender:
 
         class SimpleComponent(Component):
             response_class = MyResponse
-            template: types.django_html = "HELLO"
+            template: str = "HELLO"
 
         rendered = SimpleComponent.render_to_response()
         assert isinstance(rendered, MyResponse)
@@ -942,7 +735,7 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_with_include(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% include 'slotted_template.html' %}
             """
@@ -964,7 +757,7 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_with_include_and_context(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% include 'slotted_template.html' %}
             """
@@ -987,7 +780,7 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_with_include_and_request_context(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% include 'slotted_template.html' %}
             """
@@ -1007,7 +800,7 @@ class TestComponentRender:
     def request_context_ignores_context_when_already_a_context(self):
         @register("thing")
         class Thing(Component):
-            template: types.django_html = """
+            template: str = """
                 <p>CSRF token: {{ csrf_token|default:"<em>No CSRF token</em>" }}</p>
                 <p>Existing context: {{ existing_context|default:"<em>No existing context</em>" }}</p>
             """
@@ -1032,14 +825,14 @@ class TestComponentRender:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_with_extends(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% extends 'block.html' %}
                 {% block body %}
                     OVERRIDEN
                 {% endblock %}
             """
 
-        rendered = SimpleComponent.render(deps_strategy="ignore")
+        rendered = SimpleComponent.render()
         assertHTMLEqual(
             rendered,
             """
@@ -1130,7 +923,7 @@ class TestComponentRender:
 
         @register("broken")
         class Broken(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div> injected: {{ data|safe }} </div>
                 <main>
@@ -1149,7 +942,7 @@ class TestComponentRender:
             def get_template_data(self, args, kwargs, slots, context):
                 return {"data": kwargs["data"]}
 
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% component "broken" %}
                     {% slot "content" default / %}
@@ -1158,7 +951,7 @@ class TestComponentRender:
 
         @register("root")
         class Root(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% component "parent" data=123 %}
                     {% fill "content" %}
@@ -1185,7 +978,7 @@ class TestComponentHelpers:
 
         # Components don't have to be registered to be included in the list
         class TestComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 Hello from test
             """
 
@@ -1193,7 +986,7 @@ class TestComponentHelpers:
 
         @register("test2")
         class Test2Component(Component):
-            template: types.django_html = """
+            template: str = """
                 Hello from test2
             """
 

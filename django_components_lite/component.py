@@ -1,8 +1,6 @@
 # ruff: noqa: N804
 from collections.abc import Mapping
 from dataclasses import dataclass
-from inspect import signature
-from types import MethodType
 from typing import (
     Any,
     ClassVar,
@@ -25,7 +23,7 @@ from django_components_lite.component_registry import ComponentRegistry
 from django_components_lite.component_registry import registry as registry_
 from django_components_lite.constants import COMP_ID_PREFIX
 from django_components_lite.context import _COMPONENT_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY, make_isolated_context_copy
-from django_components_lite.dependencies import DependenciesStrategy, build_dependency_tags
+from django_components_lite.dependencies import build_dependency_tags
 from django_components_lite.node import BaseNode
 
 # Maps render_id -> ComponentContext. Used by slots to find their parent component during rendering.
@@ -33,8 +31,6 @@ component_context_cache: dict[str, "ComponentContext"] = {}
 
 from django_components_lite.slots import (
     Slot,
-    SlotIsFilled,
-    SlotName,
     SlotResult,
     _is_extracting_fill,
     normalize_slot_fills,
@@ -52,17 +48,6 @@ from django_components_lite.util.misc import (
 )
 from django_components_lite.util.template_tag import TagAttr
 from django_components_lite.util.weakref import cached_ref
-
-# TODO_REMOVE_IN_V1 - Users should use top-level import instead
-# isort: off
-from django_components_lite.component_registry import AlreadyRegistered as AlreadyRegistered  # noqa: PLC0414
-from django_components_lite.component_registry import ComponentRegistry as ComponentRegistry  # noqa: PLC0414,F811
-from django_components_lite.component_registry import NotRegistered as NotRegistered  # noqa: PLC0414
-from django_components_lite.component_registry import register as register  # noqa: PLC0414
-from django_components_lite.component_registry import registry as registry  # noqa: PLC0414
-
-# isort: on
-
 
 # NOTE: `ReferenceType` is NOT a generic pre-3.9
 AllComponents = list[ReferenceType[type["Component"]]]
@@ -123,41 +108,6 @@ def get_component_by_class_id(comp_cls_id: str) -> type["Component"]:
     NOTE: This is mainly intended for extensions.
     """
     return comp_cls_id_mapping[comp_cls_id]
-
-
-# TODO_v1 - Remove with `Component.input`
-@dataclass(frozen=True)
-class ComponentInput:
-    """
-    Deprecated. Will be removed in v1.
-
-    Object holding the inputs that were passed to [`Component.render()`](../api#django_components_lite.Component.render)
-    or the [`{% component %}`](../template_tags#component) template tag.
-
-    This object is available only during render under [`Component.input`](../api#django_components_lite.Component.input).
-
-    Read more about the [Render API](../../concepts/fundamentals/render_api).
-    """
-
-    context: Context
-    """
-    Django's [`Context`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context)
-    passed to `Component.render()`
-    """
-    args: list
-    """Positional arguments (as list) passed to `Component.render()`"""
-    kwargs: dict
-    """Keyword arguments (as dict) passed to `Component.render()`"""
-    slots: dict[SlotName, Slot]
-    """Slots (as dict) passed to `Component.render()`"""
-    deps_strategy: DependenciesStrategy
-    """Dependencies strategy passed to `Component.render()`"""
-    # TODO_v1 - Remove, superseded by `deps_strategy`
-    type: DependenciesStrategy
-    """Deprecated. Will be removed in v1. Use `deps_strategy` instead."""
-    # TODO_v1 - Remove, superseded by `deps_strategy`
-    render_dependencies: bool
-    """Deprecated. Will be removed in v1. Use `deps_strategy="ignore"` instead."""
 
 
 class ComponentVars(NamedTuple):
@@ -327,40 +277,6 @@ class ComponentVars(NamedTuple):
     ```
     """
 
-    # TODO_v1 - Remove, superseded by `component_vars.slots`
-    is_filled: dict[str, bool]
-    """
-    Deprecated. Will be removed in v1. Use [`component_vars.slots`](../template_vars#django_components_lite.component.ComponentVars.slots) instead.
-    Note that `component_vars.slots` no longer escapes the slot names.
-
-    Dictonary describing which component slots are filled (`True`) or are not (`False`).
-
-    <i>New in version 0.70</i>
-
-    Use as `{{ component_vars.is_filled }}`
-
-    Example:
-
-    ```django
-    {# Render wrapping HTML only if the slot is defined #}
-    {% if component_vars.is_filled.my_slot %}
-        <div class="slot-wrapper">
-            {% slot "my_slot" / %}
-        </div>
-    {% endif %}
-    ```
-
-    This is equivalent to checking if a given key is among the slot fills:
-
-    ```py
-    class MyTable(Component):
-        def get_template_data(self, args, kwargs, slots, context):
-            return {
-                "my_slot_filled": "my_slot" in slots
-            }
-    ```
-    """
-
 
 def _gen_component_id() -> str:
     return COMP_ID_PREFIX + gen_id()
@@ -413,23 +329,6 @@ class ComponentMeta(type):
         if attrs.get("template_file"):
             cache_component_template_file(cls)
 
-        # TODO_V1 - Remove. This is only for backwards compatibility with v0.139 and earlier,
-        #           where `on_render_after` had 4 parameters.
-        on_render_after_sig = signature(cls.on_render_after)
-        if len(on_render_after_sig.parameters) == 4:
-            orig_on_render_after = cls.on_render_after
-
-            def on_render_after_wrapper(
-                self: Component,
-                context: Context,
-                template: Template,
-                result: str,
-                _error: Exception | None,
-            ) -> SlotResult | None:
-                return orig_on_render_after(self, context, template, result)  # type: ignore[call-arg]
-
-            cls.on_render_after = on_render_after_wrapper  # type: ignore[assignment]
-
         return cls
 
 
@@ -469,10 +368,8 @@ class Component(metaclass=ComponentMeta):
 
     !!! warning
 
-        Only one of [`template_file`](../api#django_components_lite.Component.template_file),
-        [`get_template_name`](../api#django_components_lite.Component.get_template_name),
-        [`template`](../api#django_components_lite.Component.template)
-        or [`get_template`](../api#django_components_lite.Component.get_template) must be defined.
+        Only one of [`template_file`](../api#django_components_lite.Component.template_file)
+        or [`template`](../api#django_components_lite.Component.template) must be defined.
 
     **Example:**
 
@@ -522,49 +419,6 @@ class Component(metaclass=ComponentMeta):
     [`template_file`](../api#django_components_lite.Component.template_file).
     """
 
-    # TODO_v1 - Remove
-    def get_template_name(self, context: Context) -> str | None:
-        """
-        DEPRECATED: Use instead [`Component.template_file`](../api#django_components_lite.Component.template_file),
-        [`Component.template`](../api#django_components_lite.Component.template) or
-        [`Component.on_render()`](../api#django_components_lite.Component.on_render).
-        Will be removed in v1.
-
-        Same as [`Component.template_file`](../api#django_components_lite.Component.template_file),
-        but allows to dynamically resolve the template name at render time.
-
-        See [`Component.template_file`](../api#django_components_lite.Component.template_file)
-        for more info and examples.
-
-        !!! warning
-
-            The context is not fully populated at the point when this method is called.
-
-            If you need to access the context, either use
-            [`Component.on_render_before()`](../api#django_components_lite.Component.on_render_before) or
-            [`Component.on_render()`](../api#django_components_lite.Component.on_render).
-
-        !!! warning
-
-            Only one of
-            [`template_file`](../api#django_components_lite.Component.template_file),
-            [`get_template_name()`](../api#django_components_lite.Component.get_template_name),
-            [`template`](../api#django_components_lite.Component.template)
-            or
-            [`get_template()`](../api#django_components_lite.Component.get_template)
-            must be defined.
-
-        Args:
-            context (Context): The Django template\
-                [`Context`](https://docs.djangoproject.com/en/5.1/ref/templates/api/#django.template.Context)\
-                in which the component is rendered.
-
-        Returns:
-            Optional[str]: The filepath to the template.
-
-        """
-        return None
-
     template: str | None = None
     """
     Inlined Django template (as a plain string) associated with this component.
@@ -572,11 +426,8 @@ class Component(metaclass=ComponentMeta):
     !!! warning
 
         Only one of
-        [`template_file`](../api#django_components_lite.Component.template_file),
-        [`template`](../api#django_components_lite.Component.template),
-        [`get_template_name()`](../api#django_components_lite.Component.get_template_name),
-        or
-        [`get_template()`](../api#django_components_lite.Component.get_template)
+        [`template_file`](../api#django_components_lite.Component.template_file)
+        or [`template`](../api#django_components_lite.Component.template)
         must be defined.
 
     **Example:**
@@ -593,7 +444,7 @@ class Component(metaclass=ComponentMeta):
     **Syntax highlighting**
 
     When using the inlined template, you can enable syntax highlighting
-    with `django_components_lite.types.django_html`.
+    with `str`.
 
     Learn more about [syntax highlighting](../../concepts/fundamentals/single_file_components/#syntax-highlighting).
 
@@ -601,97 +452,13 @@ class Component(metaclass=ComponentMeta):
     from django_components_lite import Component, types
 
     class MyComponent(Component):
-        template: types.django_html = '''
+        template: str = '''
           <div>
             {{ my_var }}
           </div>
         '''
     ```
     """
-
-    # TODO_v1 - Remove
-    def get_template(self, context: Context) -> str | Template | None:
-        """
-        DEPRECATED: Use instead [`Component.template_file`](../api#django_components_lite.Component.template_file),
-        [`Component.template`](../api#django_components_lite.Component.template) or
-        [`Component.on_render()`](../api#django_components_lite.Component.on_render).
-        Will be removed in v1.
-
-        Same as [`Component.template`](../api#django_components_lite.Component.template),
-        but allows to dynamically resolve the template at render time.
-
-        The template can be either plain string or
-        a [`Template`](https://docs.djangoproject.com/en/5.1/topics/templates/#template) instance.
-
-        See [`Component.template`](../api#django_components_lite.Component.template) for more info and examples.
-
-        !!! warning
-
-            Only one of
-            [`template`](../api#django_components_lite.Component.template)
-            [`template_file`](../api#django_components_lite.Component.template_file),
-            [`get_template_name()`](../api#django_components_lite.Component.get_template_name),
-            or
-            [`get_template()`](../api#django_components_lite.Component.get_template)
-            must be defined.
-
-        !!! warning
-
-            The context is not fully populated at the point when this method is called.
-
-            If you need to access the context, either use
-            [`Component.on_render_before()`](../api#django_components_lite.Component.on_render_before) or
-            [`Component.on_render()`](../api#django_components_lite.Component.on_render).
-
-        Args:
-            context (Context): The Django template\
-            [`Context`](https://docs.djangoproject.com/en/5.1/ref/templates/api/#django.template.Context)\
-            in which the component is rendered.
-
-        Returns:
-            Optional[Union[str, Template]]: The inlined Django template string or\
-            a [`Template`](https://docs.djangoproject.com/en/5.1/topics/templates/#template) instance.
-
-        """
-        return None
-
-    # TODO_V2 - Remove this in v2
-    def get_context_data(self, *_args: Any, **_kwargs: Any) -> Mapping | None:
-        """
-        DEPRECATED: Use [`get_template_data()`](../api#django_components_lite.Component.get_template_data) instead.
-        Will be removed in v2.
-
-        Use this method to define variables that will be available in the template.
-
-        Receives the args and kwargs as they were passed to the Component.
-
-        This method has access to the [Render API](../../concepts/fundamentals/render_api).
-
-        Read more about [Template variables](../../concepts/fundamentals/html_js_css_variables).
-
-        **Example:**
-
-        ```py
-        class MyComponent(Component):
-            def get_context_data(self, name, *args, **kwargs):
-                return {
-                    "name": name,
-                    "id": self.id,
-                }
-
-            template = "Hello, {{ name }}!"
-
-        MyComponent.render(name="World")
-        ```
-
-        !!! warning
-
-            `get_context_data()` and [`get_template_data()`](../api#django_components_lite.Component.get_template_data)
-            are mutually exclusive.
-
-            If both methods return non-empty dictionaries, an error will be raised.
-        """
-        return None
 
     def get_template_data(self, args: Any, kwargs: Any, slots: Any, context: Context) -> Mapping | None:
         """
@@ -816,12 +583,6 @@ class Component(metaclass=ComponentMeta):
                 )
         ```
 
-        !!! warning
-
-            `get_template_data()` and [`get_context_data()`](../api#django_components_lite.Component.get_context_data)
-            are mutually exclusive.
-
-            If both methods return non-empty dictionaries, an error will be raised.
         """
         return None
 
@@ -844,7 +605,7 @@ class Component(metaclass=ComponentMeta):
     **Syntax highlighting**
 
     When using the inlined template, you can enable syntax highlighting
-    with `django_components_lite.types.js`.
+    with `str`.
 
     Learn more about [syntax highlighting](../../concepts/fundamentals/single_file_components/#syntax-highlighting).
 
@@ -852,7 +613,7 @@ class Component(metaclass=ComponentMeta):
     from django_components_lite import Component, types
 
     class MyComponent(Component):
-        js: types.js = '''
+        js: str = '''
           console.log('Hello, World!');
         '''
     ```
@@ -1072,12 +833,6 @@ class Component(metaclass=ComponentMeta):
     This is derived from the component class' module import path, e.g. `path.to.my.MyComponent`.
     """
 
-    # TODO_V1 - Remove this in v1
-    @property
-    def _class_hash(self) -> str:
-        """Deprecated. Use `Component.class_id` instead."""
-        return self.class_id
-
     _template: Template | None = None
     """
     Cached [`Template`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Template)
@@ -1087,7 +842,6 @@ class Component(metaclass=ComponentMeta):
     [`Component.template_file`](#django_components_lite.Component.template_file).
     """
 
-    # TODO_v3 - Django-specific property to prevent calling the instance as a function.
     do_not_call_in_templates: ClassVar[bool] = True
     """
     Django special property to prevent calling the instance as a function
@@ -1097,7 +851,6 @@ class Component(metaclass=ComponentMeta):
     [`do_not_call_in_templates`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#variables-and-lookups).
     """
 
-    # TODO_v1 - Change params order to match `Component.render()`
     def __init__(
         self,
         registered_name: str | None = None,
@@ -1107,53 +860,10 @@ class Component(metaclass=ComponentMeta):
         args: Any | None = None,
         kwargs: Any | None = None,
         slots: Any | None = None,
-        deps_strategy: DependenciesStrategy | None = None,
         request: HttpRequest | None = None,
         node: Optional["ComponentNode"] = None,
         id: str | None = None,  # noqa: A002
     ) -> None:
-        # TODO_v1 - Remove this whole block in v1. This is for backwards compatibility with pre-v0.140
-        #           where one could do:
-        #           `MyComp("my_comp").render(kwargs={"a": 1})`.
-        #           Instead, the new syntax is:
-        #           `MyComp.render(registered_name="my_comp", kwargs={"a": 1})`.
-        # NOTE: We check for `id` as a proxy to decide if the component was instantiated by django-components
-        #       or by the user. The `id` is set when a Component is instantiated from within `Component.render()`.
-        if id is None:
-            # Update the `render()` and `render_to_response()` methods to so they use the `registered_name`,
-            # `outer_context`, and `registry` as passed to the constructor.
-            #
-            # To achieve that, we want to re-assign the class methods as instance methods that pass the instance
-            # attributes to the class methods.
-            # For that we have to "unwrap" the class methods via __func__.
-            # See https://stackoverflow.com/a/76706399/9788634
-            def primed_render(self: Component, *args: Any, **kwargs: Any) -> Any:
-                return self.__class__.render(
-                    *args,
-                    **{
-                        "registered_name": registered_name,
-                        "outer_context": outer_context,
-                        "registry": registry,
-                        **kwargs,
-                    },
-                )
-
-            def primed_render_to_response(self: Component, *args: Any, **kwargs: Any) -> Any:
-                return self.__class__.render_to_response(
-                    *args,
-                    **{
-                        "registered_name": registered_name,
-                        "outer_context": outer_context,
-                        "registry": registry,
-                        **kwargs,
-                    },
-                )
-
-            self.render_to_response = MethodType(primed_render_to_response, self)  # type: ignore[method-assign]
-            self.render = MethodType(primed_render, self)  # type: ignore[method-assign]
-
-        deps_strategy = cast("DependenciesStrategy", default(deps_strategy, "document"))
-
         self.id = default(id, _gen_component_id, factory=True)  # type: ignore[arg-type]
         self.name = _get_component_name(self.__class__, registered_name)
         self.registered_name: str | None = registered_name
@@ -1164,22 +874,6 @@ class Component(metaclass=ComponentMeta):
         self.raw_kwargs: dict[str, Any] = self.kwargs if isinstance(self.kwargs, dict) else to_dict(self.kwargs)
         self.raw_slots: dict[str, Slot] = self.slots if isinstance(self.slots, dict) else to_dict(self.slots)
         self.context = default(context, Context())
-        # TODO_v1 - Remove `is_filled`, superseded by `Component.slots`
-        self.is_filled = SlotIsFilled(to_dict(self.slots))
-        # TODO_v1 - Remove `Component.input`
-        self.input = ComponentInput(
-            context=self.context,
-            # NOTE: Convert args / kwargs / slots to plain lists / dicts
-            args=cast("list", args if isinstance(self.args, list) else list(self.args)),
-            kwargs=cast("dict", kwargs if isinstance(self.kwargs, dict) else to_dict(self.kwargs)),
-            slots=cast("dict", slots if isinstance(self.slots, dict) else to_dict(self.slots)),
-            deps_strategy=deps_strategy,
-            # TODO_v1 - Remove, superseded by `deps_strategy`
-            type=deps_strategy,
-            # TODO_v1 - Remove, superseded by `deps_strategy`
-            render_dependencies=deps_strategy != "ignore",
-        )
-        self.deps_strategy = deps_strategy
         self.request = request
         self.outer_context: Context | None = outer_context
         self.registry = default(registry, registry_)
@@ -1288,44 +982,6 @@ class Component(metaclass=ComponentMeta):
 
     MyComponent.render()
     # Rendering 'ab3c4d'
-    ```
-    """
-
-    # TODO_v1 - Remove `Component.input`
-    input: ComponentInput
-    """
-    Deprecated. Will be removed in v1.
-
-    Input holds the data that were passed to the current component at render time.
-
-    This includes:
-
-    - [`args`](../api/#django_components_lite.ComponentInput.args) - List of positional arguments
-    - [`kwargs`](../api/#django_components_lite.ComponentInput.kwargs) - Dictionary of keyword arguments
-    - [`slots`](../api/#django_components_lite.ComponentInput.slots) - Dictionary of slots. Values are normalized to
-        [`Slot`](../api/#django_components_lite.Slot) instances
-    - [`context`](../api/#django_components_lite.ComponentInput.context) -
-        [`Context`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context)
-        object that should be used to render the component
-    - And other kwargs passed to [`Component.render()`](../api/#django_components_lite.Component.render)
-        like `deps_strategy`
-
-    **Example:**
-
-    ```python
-    class Table(Component):
-        def get_template_data(self, args, kwargs, slots, context):
-            # Access component's inputs, slots and context
-            assert self.args == [123, "str"]
-            assert self.kwargs == {"variable": "test", "another": 1}
-            footer_slot = self.slots["footer"]
-            some_var = self.input.context["some_var"]
-
-    rendered = TestComponent.render(
-        kwargs={"variable": "test", "another": 1},
-        args=[123, "str"],
-        slots={"footer": "MY_SLOT"},
-    )
     ```
     """
 
@@ -1566,40 +1222,6 @@ class Component(metaclass=ComponentMeta):
         and data MUST be passed via component's args and kwargs.
     """
 
-    deps_strategy: DependenciesStrategy
-    """
-    Dependencies strategy defines how to handle JS and CSS dependencies of this and child components.
-
-    Read more about
-    [Dependencies rendering](../../concepts/fundamentals/rendering_components#dependencies-rendering).
-
-    This is part of the [Render API](../../concepts/fundamentals/render_api).
-
-    There are six strategies:
-
-    - [`"document"`](../../concepts/advanced/rendering_js_css#document) (default)
-        - Smartly inserts JS / CSS into placeholders or into `<head>` and `<body>` tags.
-        - Requires the HTML to be rendered in a JS-enabled browser.
-        - Inserts extra script for managing fragments.
-    - [`"fragment"`](../../concepts/advanced/rendering_js_css#fragment)
-        - A lightweight HTML fragment to be inserted into a document with AJAX.
-        - Fragment will fetch its own JS / CSS dependencies when inserted into the page.
-        - Requires the HTML to be rendered in a JS-enabled browser.
-    - [`"simple"`](../../concepts/advanced/rendering_js_css#simple)
-        - Smartly insert JS / CSS into placeholders or into `<head>` and `<body>` tags.
-        - No extra script loaded.
-    - [`"prepend"`](../../concepts/advanced/rendering_js_css#prepend)
-        - Insert JS / CSS before the rendered HTML.
-        - No extra script loaded.
-    - [`"append"`](../../concepts/advanced/rendering_js_css#append)
-        - Insert JS / CSS after the rendered HTML.
-        - No extra script loaded.
-    - [`"ignore"`](../../concepts/advanced/rendering_js_css#ignore)
-        - HTML is left as-is. You can still process it with a different strategy later with
-            [`render_dependencies()`](../api/#django_components_lite.render_dependencies).
-        - Used for inserting rendered HTML into other components.
-    """
-
     outer_context: Context | None
     """
     When a component is rendered with the [`{% component %}`](../template_tags#component) tag,
@@ -1653,7 +1275,7 @@ class Component(metaclass=ComponentMeta):
 
     ```djc_py
     class Parent(Component):
-        template: types.django_html = '''
+        template: str = '''
             <div>
                 {% component "my_component" / %}
             </div>
@@ -1672,22 +1294,6 @@ class Component(metaclass=ComponentMeta):
         [`Component.render()`](../api/#django_components_lite.Component.render)
         (but you can pass in the `node` kwarg yourself).
     """
-    # TODO_v1 - Remove, superseded by `Component.slots`
-    is_filled: SlotIsFilled
-    """
-    Deprecated. Will be removed in v1. Use [`Component.slots`](../api/#django_components_lite.Component.slots) instead.
-    Note that `Component.slots` no longer escapes the slot names.
-
-    Dictionary describing which slots have or have not been filled.
-
-    This attribute is available for use only within:
-
-    You can also access this variable from within the template as
-
-    [`{{ component_vars.is_filled.slot_name }}`](../template_vars#django_components_lite.component.ComponentVars.is_filled)
-
-    """
-
     request: HttpRequest | None
     """
     [HTTPRequest](https://docs.djangoproject.com/en/5.2/ref/request-response/#django.http.HttpRequest)
@@ -1781,14 +1387,8 @@ class Component(metaclass=ComponentMeta):
         args: Any | None = None,
         kwargs: Any | None = None,
         slots: Any | None = None,
-        deps_strategy: DependenciesStrategy = "document",
-        # TODO_v1 - Remove, superseded by `deps_strategy`
-        type: DependenciesStrategy | None = None,  # noqa: A002
-        # TODO_v1 - Remove, superseded by `deps_strategy="ignore"`
-        render_dependencies: bool = True,
         request: HttpRequest | None = None,
         outer_context: Context | None = None,
-        # TODO_v2 - Remove `registered_name` and `registry`
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
         node: Optional["ComponentNode"] = None,
@@ -1850,14 +1450,8 @@ class Component(metaclass=ComponentMeta):
             kwargs=kwargs,
             context=context,
             slots=slots,
-            deps_strategy=deps_strategy,
-            # TODO_v1 - Remove, superseded by `deps_strategy`
-            type=type,
-            # TODO_v1 - Remove, superseded by `deps_strategy`
-            render_dependencies=render_dependencies,
             request=request,
             outer_context=outer_context,
-            # TODO_v2 - Remove `registered_name` and `registry`
             registry=registry,
             registered_name=registered_name,
             node=node,
@@ -1871,14 +1465,8 @@ class Component(metaclass=ComponentMeta):
         args: Any | None = None,
         kwargs: Any | None = None,
         slots: Any | None = None,
-        deps_strategy: DependenciesStrategy = "document",
-        # TODO_v1 - Remove, superseded by `deps_strategy`
-        type: DependenciesStrategy | None = None,  # noqa: A002
-        # TODO_v1 - Remove, superseded by `deps_strategy="ignore"`
-        render_dependencies: bool = True,
         request: HttpRequest | None = None,
         outer_context: Context | None = None,
-        # TODO_v2 - Remove `registered_name` and `registry`
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
         node: Optional["ComponentNode"] = None,
@@ -1965,25 +1553,6 @@ class Component(metaclass=ComponentMeta):
             )
             ```
 
-            For advanced use cases, you can use `context` argument to "pre-render" the component in Python, and then
-            pass the rendered output as plain string to the template. With this, the inner component is rendered as if
-            it was within the template with [`{% component %}`](../template_tags#component).
-
-            ```py
-            class Button(Component):
-                def render(self, context, template):
-                    # Pass `context` to Icon component so it is rendered
-                    # as if nested within Button.
-                    icon = Icon.render(
-                        context=context,
-                        args=["icon-name"],
-                        deps_strategy="ignore",
-                    )
-                    # Update context with icon
-                    with context.update({"icon": icon}):
-                        return template.render(context)
-            ```
-
             Whether the variables defined in `context` are available to the template depends on the
             [context behavior mode](../settings#django_components_lite.app_settings.ComponentsSettings.context_behavior):
 
@@ -1991,33 +1560,6 @@ class Component(metaclass=ComponentMeta):
 
             - In `"isolated"` context behavior mode, the template will NOT have access to this context,
                 and data MUST be passed via component's args and kwargs.
-
-        - `deps_strategy` - Optional. Configure how to handle JS and CSS dependencies. Read more about
-            [Dependencies rendering](../../concepts/fundamentals/rendering_components#dependencies-rendering).
-
-            There are six strategies:
-
-            - [`"document"`](../../concepts/advanced/rendering_js_css#document) (default)
-                - Smartly inserts JS / CSS into placeholders or into `<head>` and `<body>` tags.
-                - Requires the HTML to be rendered in a JS-enabled browser.
-                - Inserts extra script for managing fragments.
-            - [`"fragment"`](../../concepts/advanced/rendering_js_css#fragment)
-                - A lightweight HTML fragment to be inserted into a document with AJAX.
-                - Fragment will fetch its own JS / CSS dependencies when inserted into the page.
-                - Requires the HTML to be rendered in a JS-enabled browser.
-            - [`"simple"`](../../concepts/advanced/rendering_js_css#simple)
-                - Smartly insert JS / CSS into placeholders or into `<head>` and `<body>` tags.
-                - No extra script loaded.
-            - [`"prepend"`](../../concepts/advanced/rendering_js_css#prepend)
-                - Insert JS / CSS before the rendered HTML.
-                - No extra script loaded.
-            - [`"append"`](../../concepts/advanced/rendering_js_css#append)
-                - Insert JS / CSS after the rendered HTML.
-                - No extra script loaded.
-            - [`"ignore"`](../../concepts/advanced/rendering_js_css#ignore)
-                - HTML is left as-is. You can still process it with a different strategy later with
-                  [`render_dependencies()`](../api/#django_components_lite.render_dependencies).
-                - Used for inserting rendered HTML into other components.
 
         - `request` - Optional. HTTPRequest object. Pass a request object directly to the component to apply
             [context processors](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context.update).
@@ -2065,28 +1607,13 @@ class Component(metaclass=ComponentMeta):
         )
         ```
         """
-        # TODO_v1 - Remove, superseded by `deps_strategy`
-        if type is not None:
-            if deps_strategy != "document":
-                raise ValueError(
-                    "Component.render() received both `type` and `deps_strategy` arguments. "
-                    "Only one should be given. The `type` argument is deprecated. Use `deps_strategy` instead.",
-                )
-            deps_strategy = type
-
-        # TODO_v1 - Remove, superseded by `deps_strategy="ignore"`
-        if not render_dependencies:
-            deps_strategy = "ignore"
-
         return cls._render_with_error_trace(
             context=context,
             args=args,
             kwargs=kwargs,
             slots=slots,
-            deps_strategy=deps_strategy,
             request=request,
             outer_context=outer_context,
-            # TODO_v2 - Remove `registered_name` and `registry`
             registry=registry,
             registered_name=registered_name,
             node=node,
@@ -2100,10 +1627,8 @@ class Component(metaclass=ComponentMeta):
         args: Any | None = None,
         kwargs: Any | None = None,
         slots: Any | None = None,
-        deps_strategy: DependenciesStrategy = "document",
         request: HttpRequest | None = None,
         outer_context: Context | None = None,
-        # TODO_v2 - Remove `registered_name` and `registry`
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
         node: Optional["ComponentNode"] = None,
@@ -2120,10 +1645,8 @@ class Component(metaclass=ComponentMeta):
                     args=args,
                     kwargs=kwargs,
                     slots=slots,
-                    deps_strategy=deps_strategy,
                     request=request,
                     outer_context=outer_context,
-                    # TODO_v2 - Remove `registered_name` and `registry`
                     registry=registry,
                     registered_name=registered_name,
                     node=node,
@@ -2139,10 +1662,8 @@ class Component(metaclass=ComponentMeta):
         args: Any | None = None,
         kwargs: Any | None = None,
         slots: Any | None = None,
-        deps_strategy: DependenciesStrategy = "document",
         request: HttpRequest | None = None,
         outer_context: Context | None = None,
-        # TODO_v2 - Remove `registered_name` and `registry`
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
         node: Optional["ComponentNode"] = None,
@@ -2192,9 +1713,7 @@ class Component(metaclass=ComponentMeta):
             slots=slots_dict,
             context=context,
             request=request,
-            deps_strategy=deps_strategy,
             outer_context=outer_context,
-            # TODO_v2 - Remove `registered_name` and `registry`
             registry=registry,
             registered_name=registered_name,
             node=node,
@@ -2240,7 +1759,6 @@ class Component(metaclass=ComponentMeta):
         # This is data that will be accessible (internally) from within the component's template.
         # NOTE: Be careful with the context - Do not store a strong reference to the component,
         #       because that would prevent the component from being garbage collected.
-        # TODO: Test that ComponentContext and Component are garbage collected after render.
         component_ctx = ComponentContext(
             component=ref(component),
             component_path=component_path,
@@ -2268,7 +1786,7 @@ class Component(metaclass=ComponentMeta):
         # 3. Call data methods
         ######################################
 
-        template_data = component._call_data_methods(args_list, kwargs_dict)
+        template_data = component._call_data_methods()
 
         #############################################################################
         # 4. Make Context copy
@@ -2278,18 +1796,6 @@ class Component(metaclass=ComponentMeta):
         #       but instead can render one component at a time.
         #############################################################################
 
-        # TODO_v1 - Currently we have to pass `template_data` to `prepare_component_template()`,
-        #     so that `get_template_string()`, `get_template_name()`, and `get_template()`
-        #     have access to the data from `get_template_data()`.
-        #
-        #     Because of that there is one layer of `Context.update()` called inside `prepare_component_template()`.
-        #
-        #     Once `get_template_string()`, `get_template_name()`, and `get_template()` are removed,
-        #     we can remove that layer of `Context.update()`, and NOT pass `template_data`
-        #     to `prepare_component_template()`.
-        #
-        #     Then we can simply apply `template_data` to the context in the same layer
-        #     where we apply `context_processor_data` and `component_vars`.
         with prepare_component_template(component, template_data) as template:
             # Set `_DJC_COMPONENT_IS_NESTED` based on whether we're currently INSIDE
             # the `{% extends %}` tag.
@@ -2316,12 +1822,6 @@ class Component(metaclass=ComponentMeta):
                         args=component.args,
                         kwargs=component.kwargs,
                         slots=component.slots,
-                        # TODO_v1 - Remove this, superseded by `component_vars.slots`
-                        #
-                        # For users, we expose boolean variables that they may check
-                        # to see if given slot was filled, e.g.:
-                        # `{% if variable > 8 and component_vars.is_filled.header %}`
-                        is_filled=component.is_filled,
                     ),
                 },
             ):
@@ -2386,25 +1886,9 @@ class Component(metaclass=ComponentMeta):
 
         return mark_safe(html) if html is not None else ""
 
-    def _call_data_methods(
-        self,
-        # TODO_V2 - Remove `raw_args` and `raw_kwargs` in v2
-        raw_args: list,
-        raw_kwargs: dict,
-    ) -> dict:
+    def _call_data_methods(self) -> dict:
         maybe_template_data = self.get_template_data(self.args, self.kwargs, self.slots, self.context)
-        new_template_data = to_dict(default(maybe_template_data, {}))
-
-        # TODO_V2 - Remove this in v2
-        legacy_template_data = to_dict(default(self.get_context_data(*raw_args, **raw_kwargs), {}))
-        if legacy_template_data and new_template_data:
-            raise RuntimeError(
-                f"Component {self.name} has both `get_context_data()` and `get_template_data()` methods. "
-                "Please remove one of them.",
-            )
-        template_data = new_template_data or legacy_template_data
-
-        return template_data
+        return to_dict(default(maybe_template_data, {}))
 
 
 # Perf
@@ -2600,9 +2084,6 @@ class ComponentNode(BaseNode):
             args=args,
             kwargs=kwargs,
             slots=slot_fills,
-            # NOTE: When we render components inside the template via template tags,
-            # do NOT render deps, because this may be decided by outer component
-            deps_strategy="ignore",
             registered_name=self.name,
             outer_context=context,
             registry=self.registry,

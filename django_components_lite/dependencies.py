@@ -5,23 +5,12 @@ Components' JS/CSS files are served via Django's static files system.
 Each component prepends its own <link>/<script> tags to its rendered HTML.
 """
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
-from django.template import Context
 from django.templatetags.static import static
-
-from django_components_lite.node import BaseNode
 
 if TYPE_CHECKING:
     from django_components_lite.component import Component
-
-# Kept for backwards compatibility  -  strategies are no longer used.
-DependenciesStrategy = Literal["document", "fragment", "simple", "prepend", "append", "ignore"]
-
-
-def render_dependencies(content: str, strategy: DependenciesStrategy = "document") -> str:
-    """No-op for backwards compatibility. Dependencies are now prepended by each component."""
-    return content
 
 
 def build_dependency_tags(comp_cls: type["Component"]) -> str:
@@ -43,31 +32,3 @@ def build_dependency_tags(comp_cls: type["Component"]) -> str:
         tags.append(f'<script src="{url}"></script>')
 
     return "\n".join(tags)
-
-
-#########################################################
-# Template tags (no-ops  -  dependencies are now prepended
-# directly by each component's render)
-#########################################################
-
-
-class ComponentCssDependenciesNode(BaseNode):
-    """No-op. Kept for backwards compatibility with existing templates."""
-
-    tag = "component_css_dependencies"
-    end_tag = None
-    allowed_flags = ()
-
-    def render(self, context: Context) -> str:
-        return ""
-
-
-class ComponentJsDependenciesNode(BaseNode):
-    """No-op. Kept for backwards compatibility with existing templates."""
-
-    tag = "component_js_dependencies"
-    end_tag = None
-    allowed_flags = ()
-
-    def render(self, context: Context) -> str:
-        return ""

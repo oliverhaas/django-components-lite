@@ -4,7 +4,7 @@ import pytest
 from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, NotRegistered, register, registry, types
+from django_components_lite import Component, NotRegistered, register, registry
 from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
@@ -21,7 +21,7 @@ def gen_slotted_component():
 
 def gen_slotted_component_with_context():
     class SlottedComponentWithContext(Component):
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <custom-template>
                 <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -44,7 +44,7 @@ def gen_slotted_component_with_context():
 @djc_test
 class TestComponentTemplateTag:
     class SimpleComponent(Component):
-        template: types.django_html = """
+        template: str = """
             Variable: <strong>{{ variable }}</strong>
         """
 
@@ -58,7 +58,7 @@ class TestComponentTemplateTag:
     def test_single_component(self, components_settings):
         registry.register(name="test", component=self.SimpleComponent)
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% component "test" variable="variable" %}{% endcomponent %}
         """
@@ -71,7 +71,7 @@ class TestComponentTemplateTag:
     def test_single_component_self_closing(self, components_settings):
         registry.register(name="test", component=self.SimpleComponent)
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% component "test" variable="variable" /%}
         """
@@ -84,7 +84,7 @@ class TestComponentTemplateTag:
     def test_call_with_invalid_name(self, components_settings):
         registry.register(name="test_one", component=self.SimpleComponent)
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% component "test" variable="variable" %}{% endcomponent %}
         """
@@ -97,7 +97,7 @@ class TestComponentTemplateTag:
     def test_component_called_with_positional_name(self, components_settings):
         registry.register(name="test", component=self.SimpleComponent)
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% component "test" variable="variable" %}{% endcomponent %}
         """
@@ -110,7 +110,7 @@ class TestComponentTemplateTag:
     def test_call_component_with_two_variables(self, components_settings):
         @register("test")
         class IffedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 Variable: <strong>{{ variable }}</strong>
                 {% if variable2 != "default" %}
                     Variable2: <strong>{{ variable2 }}</strong>
@@ -123,7 +123,7 @@ class TestComponentTemplateTag:
                     "variable2": kwargs.get("variable2", "default"),
                 }
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% component "test" variable="variable" variable2="hej" %}{% endcomponent %}
         """
@@ -142,7 +142,7 @@ class TestComponentTemplateTag:
     def test_component_called_with_singlequoted_name(self, components_settings):
         registry.register(name="test", component=self.SimpleComponent)
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% component 'test' variable="variable" %}{% endcomponent %}
         """
@@ -155,7 +155,7 @@ class TestComponentTemplateTag:
     def test_raises_on_component_called_with_variable_as_name(self, components_settings):
         registry.register(name="test", component=self.SimpleComponent)
 
-        simple_tag_template: types.django_html = """
+        simple_tag_template: str = """
             {% load component_tags %}
             {% with component_name="test" %}
                 {% component component_name variable="variable" %}{% endcomponent %}
@@ -172,7 +172,7 @@ class TestComponentTemplateTag:
     def test_component_accepts_provided_and_default_parameters(self, components_settings):
         @register("test")
         class ComponentWithProvidedAndDefaultParameters(Component):
-            template: types.django_html = """
+            template: str = """
                 Provided variable: <strong>{{ variable }}</strong>
                 Default: <p>{{ default_param }}</p>
             """
@@ -183,7 +183,7 @@ class TestComponentTemplateTag:
                     "default_param": kwargs.get("default_param", "default text"),
                 }
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" variable="provided value" %}
             {% endcomponent %}
@@ -206,7 +206,7 @@ class TestMultiComponent:
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'first_component' %}
             {% endcomponent %}
@@ -241,7 +241,7 @@ class TestMultiComponent:
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'first_component' %}
                 {% fill "header" %}<p>Slot #1</p>{% endfill %}
@@ -278,7 +278,7 @@ class TestMultiComponent:
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'first_component' %}
                 {% fill "header" %}<p>Slot #1</p>{% endfill %}
@@ -314,7 +314,7 @@ class TestMultiComponent:
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'first_component' %}
             {% endcomponent %}
@@ -352,7 +352,7 @@ class TestComponentIsolation:
     def test_instances_of_component_do_not_share_slots(self, components_settings):
         @register("test")
         class SlottedComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <custom-template>
                     <header>{% slot "header" %}Default header{% endslot %}</header>
@@ -361,7 +361,7 @@ class TestComponentIsolation:
                 </custom-template>
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% fill "header" %}Override header{% endfill %}
@@ -408,7 +408,7 @@ class TestComponentTemplateSyntaxError:
         # As of v0.28 this is valid, provided the component registered under "test"
         # contains a slot tag marked as 'default'. This is verified outside
         # template compilation time.
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {{ anything }}
@@ -422,7 +422,7 @@ class TestComponentTemplateSyntaxError:
         # As of v0.28 this is valid, provided the component registered under "test"
         # contains a slot tag marked as 'default'. This is verified outside
         # template compilation time.
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 Text
@@ -433,7 +433,7 @@ class TestComponentTemplateSyntaxError:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_text_outside_fill_tag_is_error_when_fill_tags(self, components_settings):
         registry.register("test", gen_slotted_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
                 {% lorem 3 w random %}
@@ -454,7 +454,7 @@ class TestComponentTemplateSyntaxError:
     def test_unclosed_component_is_error(self, components_settings):
         registry.register("test", gen_slotted_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
             {% fill "header" %}{% endfill %}

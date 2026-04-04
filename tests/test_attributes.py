@@ -5,7 +5,7 @@ from django.template import Context, Template
 from django.utils.safestring import SafeString, mark_safe
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, register, types
+from django_components_lite import Component, register
 from django_components_lite.attributes import format_attributes, merge_attributes, parse_string_style
 from django_components_lite.testing import djc_test
 
@@ -129,7 +129,7 @@ class TestMergeAttributes:
 
 @djc_test
 class TestHtmlAttrs:
-    template_str: types.django_html = """
+    template_str: str = """
         {% load component_tags %}
         {% component "test" attrs:@click.stop="dispatch('click_event')" attrs:x-data="{hello: 'world'}" attrs:class=class_var %}
         {% endcomponent %}
@@ -139,7 +139,7 @@ class TestHtmlAttrs:
     def test_tag_positional_args(self, components_settings):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs defaults class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -167,7 +167,7 @@ class TestHtmlAttrs:
     def test_tag_raises_on_extra_positional_args(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs defaults class %}>
                     content
@@ -194,7 +194,7 @@ class TestHtmlAttrs:
     def test_tag_kwargs(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs=attrs defaults=defaults class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -222,7 +222,7 @@ class TestHtmlAttrs:
     def test_tag_kwargs_2(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs class="added_class" class="another-class" data-id=123 defaults=defaults attrs=attrs %}>
                     content
@@ -250,7 +250,7 @@ class TestHtmlAttrs:
     def test_tag_spread(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs ...props class="another-class" %}>
                     content
@@ -282,7 +282,7 @@ class TestHtmlAttrs:
     def test_tag_aggregate_args(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs:class="from_agg_key" attrs:type="submit" defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -315,7 +315,7 @@ class TestHtmlAttrs:
     def test_tag_raises_on_aggregate_and_positional_args_for_attrs(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs attrs:class="from_agg_key" defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -336,7 +336,7 @@ class TestHtmlAttrs:
     def test_tag_no_attrs(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -360,7 +360,7 @@ class TestHtmlAttrs:
     def test_tag_no_defaults(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -370,7 +370,7 @@ class TestHtmlAttrs:
             def get_template_data(self, args, kwargs, slots, context):
                 return {"attrs": kwargs["attrs"]}
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" attrs:@click.stop="dispatch('click_event')" attrs:x-data="{hello: 'world'}" attrs:class=class_var %}
             {% endcomponent %}
@@ -390,7 +390,7 @@ class TestHtmlAttrs:
     def test_tag_no_attrs_no_defaults(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs class="added_class" class="another-class" data-id=123 %}>
                     content
@@ -415,7 +415,7 @@ class TestHtmlAttrs:
     def test_tag_empty(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs %}>
                     content
@@ -443,7 +443,7 @@ class TestHtmlAttrs:
     def test_tag_null_attrs_and_defaults(self):
         @register("test")
         class AttrsComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 <div {% html_attrs attrs defaults %}>
                     content

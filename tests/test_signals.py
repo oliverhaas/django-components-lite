@@ -2,7 +2,7 @@ from functools import wraps
 
 from django.template import Context, Template
 
-from django_components_lite import Component, registry, types
+from django_components_lite import Component, registry
 from django_components_lite.testing import djc_test
 
 from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
@@ -71,7 +71,7 @@ class TestTemplateSignal:
     def test_template_rendered(self, components_settings):
         registry.register("test_component", self.gen_slotted_component())
         registry.register("inner_component", self.gen_inner_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_component' %}{% endcomponent %}
         """
@@ -84,7 +84,7 @@ class TestTemplateSignal:
     def test_template_rendered_nested_components(self, components_settings):
         registry.register("test_component", self.gen_slotted_component())
         registry.register("inner_component", self.gen_inner_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test_component' %}
               {% fill "header" %}
@@ -105,7 +105,7 @@ class TestTemplateSignal:
 
         registry.register("empty", EmptyComponent)
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'empty' / %}
         """

@@ -22,9 +22,9 @@ from django.template.exceptions import TemplateSyntaxError
 from django.utils.html import conditional_escape
 from django.utils.safestring import SafeString, mark_safe
 
+from django_components_lite.component import component_context_cache
 from django_components_lite.context import _COMPONENT_CONTEXT_KEY, _INJECT_CONTEXT_KEY_PREFIX, COMPONENT_IS_NESTED_KEY
 from django_components_lite.node import BaseNode
-from django_components_lite.component import component_context_cache
 from django_components_lite.util.exception import add_slot_to_error_message
 from django_components_lite.util.logger import trace_component_msg
 from django_components_lite.util.misc import default, get_last_index, is_identifier
@@ -418,13 +418,6 @@ html = Table.render(
 )
 ```
 """
-# TODO_V1 - REMOVE, superseded by SlotInput
-SlotContent = SlotInput[TSlotData]
-"""
-DEPRECATED: Use [`SlotInput`](../api#django_components_lite.SlotInput) instead. Will be removed in v1.
-"""
-
-
 # Internal type aliases
 SlotName = str
 
@@ -465,41 +458,7 @@ class SlotFallback:
         return mark_safe(self._slot.nodelist.render(self._context))
 
 
-# TODO_v1 - REMOVE - superseded by SlotFallback
-SlotRef = SlotFallback
-"""
-DEPRECATED: Use [`SlotFallback`](../api#django_components_lite.SlotFallback) instead. Will be removed in v1.
-"""
-
-
 name_escape_re = re.compile(r"[^\w]")
-
-
-# TODO_v1 - Remove, superseded by `Component.slots` and `component_vars.slots`
-class SlotIsFilled(dict):
-    """Dictionary that returns `True` if the slot is filled (key is found), `False` otherwise."""
-
-    def __init__(self, fills: dict, *args: Any, **kwargs: Any) -> None:
-        escaped_fill_names = {self._escape_slot_name(fill_name): True for fill_name in fills}
-        super().__init__(escaped_fill_names, *args, **kwargs)
-
-    def __missing__(self, key: Any) -> bool:
-        return False
-
-    def _escape_slot_name(self, name: str) -> str:
-        """
-        Users may define slots with names which are invalid identifiers like 'my slot'.
-        But these cannot be used as keys in the template context, e.g. `{{ component_vars.is_filled.'my slot' }}`.
-        So as workaround, we instead use these escaped names which are valid identifiers.
-
-        So e.g. `my slot` should be escaped as `my_slot`.
-        """
-        # NOTE: Do a simple substitution where we replace all non-identifier characters with `_`.
-        # Identifiers consist of alphanum (a-zA-Z0-9) and underscores.
-        # We don't check if these escaped names conflict with other existing slots in the template,
-        # we leave this obligation to the user.
-        escaped_name = name_escape_re.sub("_", name)
-        return escaped_name
 
 
 class SlotNode(BaseNode):
@@ -673,7 +632,7 @@ class SlotNode(BaseNode):
         component = component_ctx.component()
         if component is None:
             raise RuntimeError(
-                f"Component with id '{component_id}' was garbage collected before its slots could be rendered."
+                f"Component with id '{component_id}' was garbage collected before its slots could be rendered.",
             )
         component_name = component.name
         component_path = component_ctx.component_path
@@ -1038,18 +997,7 @@ class FillNode(BaseNode):
         data: str | None = None,
         fallback: str | None = None,
         body: SlotInput | None = None,
-        # TODO_V1: Use `fallback` kwarg instead of `default`
-        default: str | None = None,
     ) -> str:
-        # TODO_V1: Use `fallback` kwarg instead of `default`
-        if fallback is not None and default is not None:
-            raise TemplateSyntaxError(
-                f"Fill tag received both 'default' and '{FILL_FALLBACK_KWARG}' kwargs. "
-                f"Use '{FILL_FALLBACK_KWARG}' instead.",
-            )
-        if fallback is None and default is not None:
-            fallback = default
-
         if not _is_extracting_fill(context):
             raise TemplateSyntaxError(
                 "FillNode.render() (AKA {% fill ... %} block) cannot be rendered outside of a Component context. "
@@ -1517,10 +1465,6 @@ def _nodelist_to_slot(
         if index_of_last_component_layer is None:
             index_of_last_component_layer = 0
 
-        # TODO_V1: Currently there's one more layer before the `_COMPONENT_CONTEXT_KEY` layer, which is
-        #       pushed in `_prepare_template()` in `component.py`.
-        #       That layer should be removed when `Component.get_template()` is removed, after which
-        #       the following line can be removed.
         index_of_last_component_layer -= 1
 
         # Insert the `extra_context` layer BEFORE the layer that defines the variables from get_template_data.
@@ -1529,10 +1473,7 @@ def _nodelist_to_slot(
 
         trace_component_msg("RENDER_NODELIST", component_name, component_id=None, slot_name=slot_name)
 
-        # NOTE 1: We wrap the slot nodelist in Template. However, we also override Django's `Template.render()`
-        #     to call `render_dependencies()` on the results. So we need to set the strategy to `ignore`
-        #     so that the dependencies are processed only once the whole component tree is rendered.
-        # NOTE 2: We also set `_DJC_COMPONENT_IS_NESTED` to `True` so that the template can access
+        # NOTE: We also set `_DJC_COMPONENT_IS_NESTED` to `True` so that the template can access
         #     current RenderContext layer.
         with context.push({"DJC_DEPS_STRATEGY": "ignore", COMPONENT_IS_NESTED_KEY: True}):
             rendered = template.render(context)

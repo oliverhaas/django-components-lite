@@ -7,7 +7,6 @@ from django_components_lite.attributes import format_attributes, merge_attribute
 from django_components_lite.autodiscovery import autodiscover
 from django_components_lite.component import (
     Component,
-    ComponentInput,
     ComponentNode,
     ComponentVars,
     all_components,
@@ -22,22 +21,18 @@ from django_components_lite.component_registry import (
     registry,
     all_registries,
 )
-from django_components_lite.dependencies import DependenciesStrategy, render_dependencies
+
 from django_components_lite.library import TagProtectedError
 from django_components_lite.slots import (
     FillNode,
     Slot,
-    SlotContent,
     SlotContext,
     SlotFallback,
     SlotFunc,
     SlotInput,
     SlotNode,
-    SlotRef,
     SlotResult,
 )
-from django_components_lite.template import cached_template
-import django_components_lite.types as types  # noqa: PLR0402
 from django_components_lite.util.loader import ComponentFileEntry, get_component_dirs, get_component_files
 from django_components_lite.util.types import Empty
 
@@ -48,30 +43,25 @@ __all__ = [
     "AlreadyRegistered",
     "Component",
     "ComponentFileEntry",
-    "ComponentInput",
     "ComponentNode",
     "ComponentRegistry",
     "ComponentVars",
     "ComponentsSettings",
-    "DependenciesStrategy",
     "Empty",
     "FillNode",
     "NotRegistered",
     "RegistrySettings",
     "Slot",
-    "SlotContent",
     "SlotContext",
     "SlotFallback",
     "SlotFunc",
     "SlotInput",
     "SlotNode",
-    "SlotRef",
     "SlotResult",
     "TagProtectedError",
     "all_components",
     "all_registries",
     "autodiscover",
-    "cached_template",
     "format_attributes",
     "get_component_by_class_id",
     "get_component_dirs",
@@ -79,6 +69,4 @@ __all__ = [
     "merge_attributes",
     "register",
     "registry",
-    "render_dependencies",
-    "types",
 ]

@@ -130,10 +130,6 @@ def gen_context_processors_data(context: BaseContext, request: HttpRequest) -> d
     if request in context_processors_data:
         return context_processors_data[request].copy()
 
-    # TODO_REMOVE_IN_V2 - In v2, if we still support context processors,
-    #     it should be set on our settings, so we wouldn't have to get the Engine for that.
-    #     In v2 it should be also possible to remove RequestContext, and use only Context,
-    #     since we're internalized the behaviour of RequestContext.
     default_engine = Engine.get_default()
 
     # NOTE: Compatibility with `RequestContext`, which accepts an optional

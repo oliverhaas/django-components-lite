@@ -11,7 +11,7 @@ from django.template.base import NodeList, TextNode
 from django.utils.safestring import mark_safe
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, register, types
+from django_components_lite import Component, register
 from django_components_lite.component import ComponentNode
 from django_components_lite.slots import FillNode, Slot, SlotContext, SlotFallback
 from django_components_lite.testing import djc_test
@@ -26,7 +26,7 @@ setup_test_config()
 class TestSlot:
     def test_render_slot_as_func(self):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required data1="abc" data2:hello="world" data2:one=123 %}
                     SLOT_DEFAULT
@@ -78,7 +78,7 @@ class TestSlot:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_render_raises_on_missing_slot(self, components_settings):
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -200,7 +200,7 @@ class TestSlot:
         captured_slots = {}
 
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -237,7 +237,7 @@ class TestSlot:
         captured_slots = {}
 
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -276,7 +276,7 @@ class TestSlot:
         captured_slots = {}
 
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -316,7 +316,7 @@ class TestSlot:
 
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
@@ -326,7 +326,7 @@ class TestSlot:
                 nonlocal captured_slots
                 captured_slots = slots
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               FROM_INSIDE_DEFAULT_SLOT
@@ -358,7 +358,7 @@ class TestSlot:
 
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
@@ -368,7 +368,7 @@ class TestSlot:
                 nonlocal captured_slots
                 captured_slots = slots
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               {% fill "first" %}
@@ -399,7 +399,7 @@ class TestSlot:
         captured_slots = {}
 
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -431,7 +431,7 @@ class TestSlot:
         captured_slots = {}
 
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -461,7 +461,7 @@ class TestSlot:
         captured_slots = {}
 
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" required %}
                 {% endslot %}
@@ -492,7 +492,7 @@ class TestSlot:
 
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
@@ -502,7 +502,7 @@ class TestSlot:
                 nonlocal captured_slots
                 captured_slots = slots
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               FROM_INSIDE_DEFAULT_SLOT
@@ -531,7 +531,7 @@ class TestSlot:
 
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
@@ -541,7 +541,7 @@ class TestSlot:
                 nonlocal captured_slots
                 captured_slots = slots
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               {% fill "first" %}
@@ -572,7 +572,7 @@ class TestSlot:
 
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
@@ -582,7 +582,7 @@ class TestSlot:
                 nonlocal captured_slots
                 captured_slots = slots
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               {% fill "first" body=my_slot / %}
@@ -609,13 +609,13 @@ class TestSlot:
     def test_pass_body_to_fill__slot(self):
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               {% fill "first" body=my_slot / %}
@@ -631,13 +631,13 @@ class TestSlot:
     def test_pass_body_to_fill__string(self):
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               {% fill "first" body=my_slot / %}
@@ -652,13 +652,13 @@ class TestSlot:
     def test_pass_body_to_fill_raises_on_body(self):
         @register("test")
         class SimpleComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "first" default %}
                 {% endslot %}
             """
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
               {% fill "first" body=my_slot %}
@@ -675,46 +675,3 @@ class TestSlot:
             match=re.escape("Fill 'first' received content both through 'body' kwarg and '{% fill %}' body."),
         ):
             template.render(Context({"my_slot": my_slot}))
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    @pytest.mark.skip(reason="REMOVED: Inline template strings - use template_file only")
-    def test_slot_call_outside_render_context(self, components_settings):
-        from django_components_lite import Component, register
-
-        seen_slots = []
-
-        @register("MyTopLevelComponent")
-        class MyTopLevelComponent(Component):
-            template_file = "test_slots/mytoplevelcomponent.html"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "words": ["apple", "car", "russia"],
-                }
-
-        @register("MyComponentBeingLooped")
-        class MyComponentBeingLooped(Component):
-            template_file = "test_slots/mycomponentbeinglooped.html"
-
-        @register("MyInnerComponent")
-        class MyInnerComponent(Component):
-            template_file = "test_slots/myinnercomponent.html"
-
-        @register("MyComponentWithASlot")
-        class MyComponentWithASlot(Component):
-            template_file = "test_slots/mycomponentwithaslot.html"
-
-            def get_template_data(self, args, kwargs, slots, context):
-                seen_slots.append(self.slots["my_slot"])
-
-        MyTopLevelComponent.render()
-
-        assert len(seen_slots) == 3
-
-        results = [slot().strip() for slot in seen_slots]
-
-        assert results == [
-            "Hello!",
-            "Hello!",
-            "Hello!",
-        ]

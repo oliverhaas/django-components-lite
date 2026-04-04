@@ -9,7 +9,7 @@ from django.template.base import TextNode, VariableNode
 from django.template.defaulttags import IfNode, LoremNode
 from django.template.exceptions import TemplateSyntaxError
 
-from django_components_lite import Component, types
+from django_components_lite import Component
 from django_components_lite.node import BaseNode
 from django_components_lite.templatetags import component_tags
 from django_components_lite.testing import djc_test
@@ -40,7 +40,7 @@ class TestNode:
         TestNode.register(component_tags.register)
 
         # Works with end tag and self-closing
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
@@ -52,7 +52,7 @@ class TestNode:
         assert rendered.strip() == "Hello, John!\n            Shorthand: Hello, Mary!"
 
         # But raises if missing end tag
-        template_str2: types.django_html = """
+        template_str2: str = """
             {% load component_tags %}
             {% mytag 'John' %}
         """
@@ -71,7 +71,7 @@ class TestNode:
         TestNode.register(component_tags.register)
 
         # Raises with end tag or self-closing
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
@@ -81,7 +81,7 @@ class TestNode:
             Template(template_str)
 
         # Works when missing end tag
-        template_str2: types.django_html = """
+        template_str2: str = """
             {% load component_tags %}
             {% mytag 'John' %}
         """
@@ -420,7 +420,7 @@ class TestSignatureBasedValidation:
         TestNode.register(component_tags.register)
 
         # Works with end tag and self-closing
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
@@ -432,7 +432,7 @@ class TestSignatureBasedValidation:
         assert rendered.strip() == "Hello, John!\n            Shorthand: Hello, Mary!"
 
         # But raises if missing end tag
-        template_str2: types.django_html = """
+        template_str2: str = """
             {% load component_tags %}
             {% mytag 'John' %}
         """
@@ -455,7 +455,7 @@ class TestSignatureBasedValidation:
         TestNode.register(component_tags.register)
 
         # Raises with end tag or self-closing
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
@@ -468,7 +468,7 @@ class TestSignatureBasedValidation:
             Template(template_str)
 
         # Works when missing end tag
-        template_str2: types.django_html = """
+        template_str2: str = """
             {% load component_tags %}
             {% mytag 'John' %}
         """

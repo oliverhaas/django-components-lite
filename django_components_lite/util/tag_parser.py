@@ -45,18 +45,6 @@ from django.template.base import FilterExpression, Parser
 from django.template.context import Context
 from django.template.exceptions import TemplateSyntaxError
 
-# REMOVED: Template expression enhancements
-# from django_components_lite.expression import DynamicFilterExpression, is_dynamic_expression
-
-
-# Stubs - no longer support dynamic expressions
-def is_dynamic_expression(serialized) -> bool:
-    return False
-
-
-# Not used since is_dynamic_expression always returns False
-DynamicFilterExpression = None
-
 TAG_WHITESPACE = (" ", "\t", "\n", "\r", "\f")
 TAG_FILTER = ("|", ":")
 TAG_SPREAD = ("*", "**", "...")
@@ -124,11 +112,7 @@ class TagValue:
             spread_token_offset = len(spread_token) if spread_token else 0
             serialized = serialized[spread_token_offset:]
 
-        # Allow to use dynamic expressions as args, e.g. `"{{ }}"` inside of strings
-        if is_dynamic_expression(serialized):
-            self.compiled = DynamicFilterExpression(parser, serialized)
-        else:
-            self.compiled = FilterExpression(serialized, parser)
+        self.compiled = FilterExpression(serialized, parser)
 
     def resolve(self, context: Context) -> Any:
         if self.compiled is None:

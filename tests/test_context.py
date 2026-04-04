@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.template import Context, RequestContext, Template
 from pytest_django.asserts import assertHTMLEqual, assertInHTML
 
-from django_components_lite import Component, register, registry, types
+from django_components_lite import Component, register, registry
 from django_components_lite.testing import djc_test
 from django_components_lite.util.misc import gen_id
 
@@ -26,7 +26,7 @@ def dummy_context_processor(request):
 
 def gen_simple_component():
     class SimpleComponent(Component):
-        template: types.django_html = """
+        template: str = """
             Variable: <strong>{{ variable }}</strong>
         """
 
@@ -38,7 +38,7 @@ def gen_simple_component():
 
 def gen_variable_display_component():
     class VariableDisplay(Component):
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <h1>Shadowing variable = {{ shadowing_variable }}</h1>
             <h1>Uniquely named variable = {{ unique_variable }}</h1>
@@ -57,7 +57,7 @@ def gen_variable_display_component():
 
 def gen_incrementer_component():
     class IncrementerComponent(Component):
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <p class="incrementer">value={{ value }};calls={{ calls }}</p>
             {% slot 'content' %}{% endslot %}
@@ -80,7 +80,7 @@ def gen_incrementer_component():
 
 def gen_parent_component():
     class ParentComponent(Component):
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <div>
                 <h1>Parent content</h1>
@@ -104,7 +104,7 @@ def gen_parent_component():
 
 def gen_parent_component_with_args():
     class ParentComponentWithArgs(Component):
-        template: types.django_html = """
+        template: str = """
             {% load component_tags %}
             <div>
                 <h1>Parent content</h1>
@@ -141,7 +141,7 @@ class TestContext:
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_component' %}{% endcomponent %}
         """
@@ -160,7 +160,7 @@ class TestContext:
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_component' %}{% endcomponent %}
         """
@@ -178,7 +178,7 @@ class TestContext:
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_component' %}
                 {% fill 'content' %}
@@ -199,7 +199,7 @@ class TestContext:
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_component' %}
                 {% fill 'content' %}
@@ -222,7 +222,7 @@ class TestContext:
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_component' %}{% endcomponent %}
         """
@@ -241,7 +241,7 @@ class TestContext:
         registry.register(name="variable_display", component=gen_variable_display_component())
         registry.register(name="parent_component", component=gen_parent_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_component' %}
                 {% fill 'content' %}
@@ -266,7 +266,7 @@ class TestParentArgs:
         registry.register(name="parent_with_args", component=gen_parent_component_with_args())
         registry.register(name="variable_display", component=gen_variable_display_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_with_args' parent_value=parent_value %}
             {% endcomponent %}
@@ -296,7 +296,7 @@ class TestParentArgs:
         registry.register(name="parent_with_args", component=gen_parent_component_with_args())
         registry.register(name="variable_display", component=gen_variable_display_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_with_args' parent_value='passed_in' %}{%endcomponent %}
         """
@@ -334,7 +334,7 @@ class TestParentArgs:
         registry.register(name="parent_with_args", component=gen_parent_component_with_args())
         registry.register(name="variable_display", component=gen_variable_display_component())
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'parent_with_args' parent_value='passed_in' %}
                 {% fill 'content' %}
@@ -367,7 +367,7 @@ class TestContextCalledOnce:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_simple_component(self, components_settings):
         registry.register(name="incrementer", component=gen_incrementer_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'incrementer' %}{% endcomponent %}
         """
@@ -381,7 +381,7 @@ class TestContextCalledOnce:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_simple_component_and_arg(self, components_settings):
         registry.register(name="incrementer", component=gen_incrementer_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'incrementer' value='2' %}{% endcomponent %}
         """
@@ -398,7 +398,7 @@ class TestContextCalledOnce:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_component(self, components_settings):
         registry.register(name="incrementer", component=gen_incrementer_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'incrementer' %}{% endcomponent %}
         """
@@ -410,7 +410,7 @@ class TestContextCalledOnce:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_component_and_arg(self, components_settings):
         registry.register(name="incrementer", component=gen_incrementer_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'incrementer' value='3' %}{% endcomponent %}
         """
@@ -422,7 +422,7 @@ class TestContextCalledOnce:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_slot(self, components_settings):
         registry.register(name="incrementer", component=gen_incrementer_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'incrementer' %}
                 {% fill 'content' %}
@@ -445,7 +445,7 @@ class TestContextCalledOnce:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_one_context_call_with_slot_and_arg(self, components_settings):
         registry.register(name="incrementer", component=gen_incrementer_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'incrementer' value='3' %}
                 {% fill 'content' %}
@@ -479,7 +479,7 @@ class TestComponentsCanAccessOuterContext:
     )
     def test_simple_component_can_use_outer_context(self, components_settings, expected_value):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' %}{% endcomponent %}
         """
@@ -498,7 +498,7 @@ class TestIsolatedContext:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_simple_component_can_pass_outer_context_in_args(self, components_settings):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' variable=variable %}{% endcomponent %}
         """
@@ -509,7 +509,7 @@ class TestIsolatedContext:
     @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_simple_component_cannot_use_outer_context(self, components_settings):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' %}{% endcomponent %}
         """
@@ -525,7 +525,7 @@ class TestIsolatedContextSetting:
         self,
     ):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' variable=variable %}{% endcomponent %}
         """
@@ -538,7 +538,7 @@ class TestIsolatedContextSetting:
         self,
     ):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' %}{% endcomponent %}
         """
@@ -551,7 +551,7 @@ class TestIsolatedContextSetting:
         self,
     ):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' variable=variable %}
             {% endcomponent %}
@@ -565,7 +565,7 @@ class TestIsolatedContextSetting:
         self,
     ):
         registry.register(name="simple_component", component=gen_simple_component())
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'simple_component' %}
             {% endcomponent %}
@@ -584,7 +584,7 @@ class TestContextProcessors:
 
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data
@@ -592,7 +592,7 @@ class TestContextProcessors:
                 context_processors_data = self.context_processors_data
                 inner_request = self.request
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test" %}
             {% endcomponent %}
@@ -616,7 +616,7 @@ class TestContextProcessors:
 
         @register("test_parent")
         class TestParentComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% component "test_child" / %}
             """
@@ -629,7 +629,7 @@ class TestContextProcessors:
 
         @register("test_child")
         class TestChildComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data_child
@@ -637,7 +637,7 @@ class TestContextProcessors:
                 context_processors_data_child = self.context_processors_data
                 child_request = self.request
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test_parent" / %}
         """
@@ -662,7 +662,7 @@ class TestContextProcessors:
 
         @register("test_parent")
         class TestParentComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% slot "content" default / %}
             """
@@ -675,7 +675,7 @@ class TestContextProcessors:
 
         @register("test_child")
         class TestChildComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data_child
@@ -683,7 +683,7 @@ class TestContextProcessors:
                 context_processors_data_child = self.context_processors_data
                 child_request = self.request
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test_parent" %}
                 {% component "test_child" / %}
@@ -708,7 +708,7 @@ class TestContextProcessors:
 
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data
@@ -733,7 +733,7 @@ class TestContextProcessors:
 
         @register("test_parent")
         class TestParentComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% component "test_child" / %}
             """
@@ -746,7 +746,7 @@ class TestContextProcessors:
 
         @register("test_child")
         class TestChildComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data_child
@@ -771,7 +771,7 @@ class TestContextProcessors:
 
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data
@@ -795,7 +795,7 @@ class TestContextProcessors:
 
         @register("test_parent")
         class TestParentComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% component "test_child" / %}
             """
@@ -808,7 +808,7 @@ class TestContextProcessors:
 
         @register("test_child")
         class TestChildComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data_child
@@ -833,7 +833,7 @@ class TestContextProcessors:
 
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data
@@ -855,7 +855,7 @@ class TestContextProcessors:
 
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data
@@ -877,7 +877,7 @@ class TestContextProcessors:
 
         @register("test")
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data
@@ -916,7 +916,7 @@ class TestContextProcessors:
 
         @register("test_parent")
         class TestParentComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 {% load component_tags %}
                 {% component "test_child" / %}
             """
@@ -927,7 +927,7 @@ class TestContextProcessors:
 
         @register("test_child")
         class TestChildComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
             def get_template_data(self, args, kwargs, slots, context):
                 nonlocal context_processors_data_child
@@ -950,7 +950,7 @@ class TestContextProcessors:
 
     def test_context_processors_data_outside_of_rendering(self):
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
         request = HttpRequest()
         component = TestComponent(request=request)
@@ -960,7 +960,7 @@ class TestContextProcessors:
 
     def test_request_outside_of_rendering(self):
         class TestComponent(Component):
-            template: types.django_html = """{% csrf_token %}"""
+            template: str = """{% csrf_token %}"""
 
         request = HttpRequest()
         component = TestComponent(request=request)
@@ -974,276 +974,17 @@ class TestOuterContextProperty:
     def test_outer_context_property_with_component(self, components_settings):
         @register("outer_context_component")
         class OuterContextComponent(Component):
-            template: types.django_html = """
+            template: str = """
                 Variable: <strong>{{ variable }}</strong>
             """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return self.outer_context.flatten()  # type: ignore[union-attr]
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'outer_context_component' %}{% endcomponent %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
         assert "outer_value" in rendered
-
-
-# TODO_v1: Remove, superseded by `component_vars.slots`
-@djc_test
-class TestContextVarsIsFilled:
-    class IsFilledVarsComponent(Component):
-        template: types.django_html = """
-            {% load component_tags %}
-            <div class="frontmatter-component">
-                {% slot "title" default / %}
-                {% slot "my-title" / %}
-                {% slot "my-title-1" / %}
-                {% slot "my-title-2" / %}
-                {% slot "escape this: #$%^*()" / %}
-
-                title: {{ component_vars.is_filled.title }}
-                my_title: {{ component_vars.is_filled.my_title }}
-                my_title_1: {{ component_vars.is_filled.my_title_1 }}
-                my_title_2: {{ component_vars.is_filled.my_title_2 }}
-                escape_this_________: {{ component_vars.is_filled.escape_this_________ }}
-            </div>
-        """
-
-    class ComponentWithConditionalSlots(Component):
-        template: types.django_html = """
-            {# Example from django-components/issues/98 #}
-            {% load component_tags %}
-            <div class="frontmatter-component">
-                <div class="title">{% slot "title" %}Title{% endslot %}</div>
-                {% if component_vars.is_filled.subtitle %}
-                    <div class="subtitle">
-                        {% slot "subtitle" %}Optional subtitle
-                        {% endslot %}
-                    </div>
-                {% endif %}
-            </div>
-        """
-
-    class ComponentWithComplexConditionalSlots(Component):
-        template: types.django_html = """
-            {# Example from django-components/issues/98 #}
-            {% load component_tags %}
-            <div class="frontmatter-component">
-                <div class="title">{% slot "title" %}Title{% endslot %}</div>
-                {% if component_vars.is_filled.subtitle %}
-                    <div class="subtitle">{% slot "subtitle" %}Optional subtitle{% endslot %}</div>
-                {% elif component_vars.is_filled.alt_subtitle %}
-                    <div class="subtitle">{% slot "alt_subtitle" %}Why would you want this?{% endslot %}</div>
-                {% else %}
-                <div class="warning">Nothing filled!</div>
-                {% endif %}
-            </div>
-        """
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_is_filled_vars(self, components_settings):
-        registry.register("is_filled_vars", self.IsFilledVarsComponent)
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "is_filled_vars" %}
-                {% fill "title" / %}
-                {% fill "my-title-2" / %}
-                {% fill "escape this: #$%^*()" / %}
-            {% endcomponent %}
-        """
-
-        rendered = Template(template).render(Context())
-
-        expected = """
-            <div class="frontmatter-component">
-                title: True
-                my_title: False
-                my_title_1: False
-                my_title_2: True
-                escape_this_________: True
-            </div>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_is_filled_vars_default(self, components_settings):
-        registry.register("is_filled_vars", self.IsFilledVarsComponent)
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "is_filled_vars" %}
-                bla bla
-            {% endcomponent %}
-        """
-        rendered = Template(template).render(Context())
-        expected = """
-            <div class="frontmatter-component">
-                bla bla
-                title: False
-                my_title: False
-                my_title_1: False
-                my_title_2: False
-                escape_this_________: False
-            </div>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_simple_component_with_conditional_slot(self, components_settings):
-        registry.register("conditional_slots", self.ComponentWithConditionalSlots)
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "conditional_slots" %}{% endcomponent %}
-        """
-        expected = """
-            <div class="frontmatter-component">
-            <div class="title">
-            Title
-            </div>
-            </div>
-        """
-        rendered = Template(template).render(Context({}))
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_with_filled_conditional_slot(self, components_settings):
-        registry.register("conditional_slots", self.ComponentWithConditionalSlots)
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "conditional_slots" %}
-                {% fill "subtitle" %} My subtitle {% endfill %}
-            {% endcomponent %}
-        """
-        expected = """
-            <div class="frontmatter-component">
-                <div class="title">
-                    Title
-                </div>
-                <div class="subtitle">
-                    My subtitle
-                </div>
-            </div>
-        """
-        rendered = Template(template).render(Context({}))
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_elif_of_complex_conditional_slots(self, components_settings):
-        registry.register(
-            "complex_conditional_slots",
-            self.ComponentWithComplexConditionalSlots,
-        )
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "complex_conditional_slots" %}
-                {% fill "alt_subtitle" %} A different subtitle {% endfill %}
-            {% endcomponent %}
-        """
-        expected = """
-           <div class="frontmatter-component">
-             <div class="title">
-                Title
-             </div>
-             <div class="subtitle">
-                A different subtitle
-             </div>
-           </div>
-        """
-        rendered = Template(template).render(Context({}))
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_else_of_complex_conditional_slots(self, components_settings):
-        registry.register(
-            "complex_conditional_slots",
-            self.ComponentWithComplexConditionalSlots,
-        )
-
-        template: types.django_html = """
-           {% load component_tags %}
-           {% component "complex_conditional_slots" %}
-           {% endcomponent %}
-        """
-        expected = """
-           <div class="frontmatter-component">
-             <div class="title">
-             Title
-             </div>
-            <div class="warning">Nothing filled!</div>
-           </div>
-        """
-        rendered = Template(template).render(Context({}))
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_with_negated_conditional_slot(self, components_settings):
-        @register("negated_conditional_slot")
-        class ComponentWithNegatedConditionalSlot(Component):
-            template: types.django_html = """
-                {# Example from django-components/issues/98 #}
-                {% load component_tags %}
-                <div class="frontmatter-component">
-                    <div class="title">{% slot "title" %}Title{% endslot %}</div>
-                    {% if not component_vars.is_filled.subtitle %}
-                    <div class="warning">Subtitle not filled!</div>
-                    {% else %}
-                        <div class="subtitle">{% slot "alt_subtitle" %}Why would you want this?{% endslot %}</div>
-                    {% endif %}
-                </div>
-            """
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "negated_conditional_slot" %}
-                {# Whoops! Forgot to fill a slot! #}
-            {% endcomponent %}
-        """
-        expected = """
-            <div class="frontmatter-component">
-                <div class="title">
-                Title
-                </div>
-                <div class="warning">Subtitle not filled!</div>
-            </div>
-        """
-        rendered = Template(template).render(Context({}))
-        assertHTMLEqual(rendered, expected)
-
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_is_filled_vars_in_hooks(self, components_settings):
-        captured_before = None
-        captured_after = None
-
-        @register("is_filled_vars")
-        class IsFilledVarsComponent(self.IsFilledVarsComponent):  # type: ignore[name-defined]
-            def on_render_before(self, context: Context, template: Template | None) -> None:
-                nonlocal captured_before
-                captured_before = self.is_filled.copy()
-
-            def on_render_after(
-                self,
-                context: Context,
-                template: Template | None,
-                content: str | None,
-                error: Exception | None,
-            ) -> None:
-                nonlocal captured_after
-                captured_after = self.is_filled.copy()
-
-        template: types.django_html = """
-            {% load component_tags %}
-            {% component "is_filled_vars" %}
-                bla bla
-            {% endcomponent %}
-        """
-        Template(template).render(Context())
-
-        expected = {"default": True}
-        assert captured_before == expected
-        assert captured_after == expected

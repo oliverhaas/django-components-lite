@@ -215,7 +215,6 @@ class ComponentsSettings(NamedTuple):
     """
 
 
-
 # NOTE: Some defaults depend on the Django settings, which may not yet be
 # initialized at the time that these settings are generated. For such cases
 # we define the defaults as a factory function, and use the `Dynamic` class to
@@ -304,9 +303,11 @@ class InternalSettings:
             self._load_settings()
         return cast("ComponentsSettings", self._settings)
 
-
     def _prepare_static_files_forbidden(self, new_settings: ComponentsSettings) -> list[str | re.Pattern]:
-        return default(new_settings.static_files_forbidden, cast("list[str | re.Pattern]", defaults.static_files_forbidden))
+        return default(
+            new_settings.static_files_forbidden,
+            cast("list[str | re.Pattern]", defaults.static_files_forbidden),
+        )
 
     @property
     def AUTODISCOVER(self) -> bool:

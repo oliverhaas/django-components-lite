@@ -1,1 +1,0 @@
-globalThis.testMsg = { hello: "world" };

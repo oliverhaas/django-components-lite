@@ -121,13 +121,6 @@ def format_attributes(attributes: Mapping[str, Any]) -> str:
     return mark_safe(SafeString(" ").join(attr_list))
 
 
-# TODO_V1 - Remove in v1, keep only `format_attributes` going forward
-attributes_to_string = format_attributes
-"""
-Deprecated. Use [`format_attributes`](../api#django_components_lite.format_attributes) instead.
-"""
-
-
 def merge_attributes(*attrs: dict) -> dict:
     """
     Merge a list of dictionaries into a single dictionary.

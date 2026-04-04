@@ -259,7 +259,6 @@ def format_as_ascii_table(
     return table
 
 
-# TODO - Convert to TypeGuard once Python 3.9 is dropped
 def is_generator(obj: Any) -> bool:
     """Check if an object is a generator with send method."""
     return hasattr(obj, "send")

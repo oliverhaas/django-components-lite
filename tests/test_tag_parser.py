@@ -6,7 +6,7 @@ from django.template import Context, Template, TemplateSyntaxError
 from django.template.base import Parser
 from django.template.engine import Engine
 
-from django_components_lite import Component, register, types
+from django_components_lite import Component, register
 from django_components_lite.testing import djc_test
 from django_components_lite.util.tag_parser import TagAttr, TagValue, TagValuePart, TagValueStruct, parse_tag
 
@@ -2860,7 +2860,7 @@ class TestResolver:
                 nonlocal captured
                 captured = kwargs
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component "test"
                 data={
@@ -2924,7 +2924,7 @@ class TestResolver:
                 nonlocal captured
                 captured = args, kwargs
 
-        template_str: types.django_html = """
+        template_str: str = """
             {% load component_tags %}
             {% component 'test' 42 myvar key='val' key2=val2 %}
             {% endcomponent %}
