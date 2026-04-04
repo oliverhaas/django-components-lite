@@ -65,7 +65,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% component "test" variable="variable" /%}
+            {% componentsc "test" variable="variable" %}
         """
 
         template = Template(simple_tag_template)

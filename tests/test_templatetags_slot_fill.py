@@ -73,9 +73,9 @@ class TestComponentSlot:
             template: str = """
                 {% load component_tags %}
                 <custom-template>
-                    <header>{% slot "header" / %}</header>
+                    <header>{% slot "header" %}{% endslot %}</header>
                     <main>{% slot "main" %}Default main{% endslot %}</main>
-                    <footer>{% slot "footer" / %}</footer>
+                    <footer>{% slot "footer" %}{% endslot %}</footer>
                 </custom-template>
             """
 
@@ -95,10 +95,10 @@ class TestComponentSlot:
             {% load component_tags %}
             {% component "test1" %}
                 {% fill "header" %}
-                    {% component "test2" variable="variable" / %}
+                    {% componentsc "test2" variable="variable" %}
                 {% endfill %}
-                {% fill "main" / %}
-                {% fill "footer" / %}
+                {% fill "main" %}{% endfill %}
+                {% fill "footer" %}{% endfill %}
             {% endcomponent %}
         """
         template = Template(template_str)
@@ -1020,7 +1020,7 @@ class TestPassthroughSlots:
                     {% component "slotted" %}
                         {% for slot_name in slots %}
                             {% fill name=slot_name %}
-                                {% slot name=slot_name / %}
+                                {% slot name=slot_name %}{% endslot %}
                             {% endfill %}
                         {% endfor %}
                     {% endcomponent %}
@@ -1070,7 +1070,7 @@ class TestPassthroughSlots:
                     {% component "slotted" %}
                         {% for slot_name in slots %}
                             {% fill name=slot_name %}
-                                {% slot name=slot_name / %}
+                                {% slot name=slot_name %}{% endslot %}
                             {% endfill %}
                         {% endfor %}
                     {% endcomponent %}
@@ -1569,23 +1569,19 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    def test_slot_data_with_spread(self):
+    def test_slot_data_with_named_slot(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
                 {% load component_tags %}
                 <div>
-                    {% slot ...slot_props default required %}Default text{% endslot %}
+                    {% slot "my_slot" default required abc="def" var123=var123 %}Default text{% endslot %}
                 </div>
             """
 
             def get_template_data(self, args, kwargs, slots, context):
                 return {
-                    "slot_props": {
-                        "name": "my_slot",
-                        "abc": "def",
-                        "var123": 456,
-                    },
+                    "var123": 456,
                 }
 
         template: str = """
@@ -1791,7 +1787,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    def test_slot_data_fill_with_spread(self):
+    def test_slot_data_fill_with_named_fill(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1810,22 +1806,13 @@ class TestScopedSlot:
         template: str = """
             {% load component_tags %}
             {% component "test" %}
-                {% fill ...fill_props %}
+                {% fill "my_slot" data="slot_data_in_fill" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
             {% endcomponent %}
         """
-        rendered = Template(template).render(
-            Context(
-                {
-                    "fill_props": {
-                        "name": "my_slot",
-                        "data": "slot_data_in_fill",
-                    },
-                },
-            ),
-        )
+        rendered = Template(template).render(Context())
 
         expected = """
             <div>
@@ -2244,7 +2231,7 @@ class TestSlotInput:
                 {% fill "header" data="data1" %}
                     data1_in_slot1: {{ data1|safe }}
                 {% endfill %}
-                {% fill "main" / %}
+                {% fill "main" %}{% endfill %}
             {% endcomponent %}
         """
         template = Template(template_str)

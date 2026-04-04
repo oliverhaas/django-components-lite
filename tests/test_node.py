@@ -5,14 +5,13 @@ from typing import cast
 
 import pytest
 from django.template import Context, Template
-from django.template.base import TextNode, VariableNode
+from django.template.base import FilterExpression, TextNode, VariableNode
 from django.template.defaulttags import IfNode, LoremNode
 from django.template.exceptions import TemplateSyntaxError
 
 from django_components_lite import Component
 from django_components_lite.node import BaseNode
 from django_components_lite.templatetags import component_tags
-from django_components_lite.util.tag_parser import TagAttr
 
 
 class TestNode:
@@ -33,17 +32,17 @@ class TestNode:
 
         TestNode.register(component_tags.register)
 
-        # Works with end tag and self-closing
+        # Works with end tag
         template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
-            Shorthand: {% mytag 'Mary' / %}
+            Second: {% mytag 'Mary' %}{% endmytag %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
 
-        assert rendered.strip() == "Hello, John!\n            Shorthand: Hello, Mary!"
+        assert rendered.strip() == "Hello, John!\n            Second: Hello, Mary!"
 
         # But raises if missing end tag
         template_str2: str = """
@@ -64,12 +63,11 @@ class TestNode:
 
         TestNode.register(component_tags.register)
 
-        # Raises with end tag or self-closing
+        # Raises with end tag
         template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
-            Shorthand: {% mytag 'Mary' / %}
         """
         with pytest.raises(TemplateSyntaxError, match=re.escape("Invalid block tag on line 4: 'endmytag'")):
             Template(template_str)
@@ -103,7 +101,8 @@ class TestNode:
 
         template_str = """
             {% load component_tags %}
-            {% mytag 'John' required / %}
+            {% mytag 'John' required %}
+            {% endmytag %}
         """
         template = Template(template_str)
         template.render(Context({}))
@@ -132,7 +131,7 @@ class TestNode:
 
         template_str = """
             {% load component_tags %}
-            {% mytag / %}
+            {% mytag %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"name": "John"}))
@@ -240,7 +239,8 @@ class TestNode:
         ):
             template6.render(Context({}))
 
-        # Extra args after kwargs
+        # Extra args after kwargs (new parser collects args/kwargs separately,
+        # so '123' maps to position 0 = 'name', but name='John' is also a kwarg)
         template6 = Template(
             """
             {% load component_tags %}
@@ -249,7 +249,7 @@ class TestNode:
         )
         with pytest.raises(
             TypeError,
-            match=re.escape("positional argument follows keyword argument"),
+            match=re.escape("Invalid parameters for tag 'mytag': got multiple values for argument 'name'"),
         ):
             template6.render(Context({}))
 
@@ -266,7 +266,7 @@ class TestNode:
         ):
             template7.render(Context({}))
 
-        # Extra kwargs - non-identifier or kwargs
+        # Extra kwargs - non-identifier or kwargs (render has no **kwargs, so rejected)
         template8 = Template(
             """
             {% load component_tags %}
@@ -279,7 +279,7 @@ class TestNode:
         ):
             template8.render(Context({}))
 
-        # Extra arg after special kwargs
+        # Special kwargs alongside positional args (data-id is an invalid identifier)
         template9 = Template(
             """
             {% load component_tags %}
@@ -287,8 +287,8 @@ class TestNode:
         """,
         )
         with pytest.raises(
-            SyntaxError,
-            match=re.escape("positional argument follows keyword argument"),
+            TypeError,
+            match=re.escape("Invalid parameters for tag 'mytag': got an unexpected keyword argument 'data-id'"),
         ):
             template9.render(Context({}))
 
@@ -412,17 +412,17 @@ class TestSignatureBasedValidation:
 
         TestNode.register(component_tags.register)
 
-        # Works with end tag and self-closing
+        # Works with end tag
         template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
-            Shorthand: {% mytag 'Mary' / %}
+            Second: {% mytag 'Mary' %}{% endmytag %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
 
-        assert rendered.strip() == "Hello, John!\n            Shorthand: Hello, Mary!"
+        assert rendered.strip() == "Hello, John!\n            Second: Hello, Mary!"
 
         # But raises if missing end tag
         template_str2: str = """
@@ -447,12 +447,11 @@ class TestSignatureBasedValidation:
 
         TestNode.register(component_tags.register)
 
-        # Raises with end tag or self-closing
+        # Raises with end tag
         template_str: str = """
             {% load component_tags %}
             {% mytag 'John' %}
             {% endmytag %}
-            Shorthand: {% mytag 'Mary' / %}
         """
         with pytest.raises(
             TemplateSyntaxError,
@@ -489,7 +488,8 @@ class TestSignatureBasedValidation:
 
         template_str = """
             {% load component_tags %}
-            {% mytag 'John' required / %}
+            {% mytag 'John' required %}
+            {% endmytag %}
         """
         template = Template(template_str)
         template.render(Context({}))
@@ -521,7 +521,7 @@ class TestSignatureBasedValidation:
                 )
                 return f"Hello, {name}!"
 
-        # Case 1 - Node with end tag and NOT self-closing
+        # Case 1 - Node with end tag and body content
         TestNodeWithEndTag.register(component_tags.register)
 
         template_str1 = """
@@ -534,8 +534,11 @@ class TestSignatureBasedValidation:
         template1.render(Context({}))
 
         params1, nodelist1, node_id1, contents1, template_name1, template_component1 = captured  # type: ignore[misc]
-        assert len(params1) == 1
-        assert isinstance(params1[0], TagAttr)
+        # params is now (args_list, kwargs_dict)
+        args1, kwargs1 = params1
+        assert len(args1) == 1
+        assert isinstance(args1[0], FilterExpression)
+        assert kwargs1 == {}
         # NOTE: The comment node is not included in the nodelist
         assert len(nodelist1) == 8
         assert isinstance(nodelist1[0], TextNode)
@@ -556,19 +559,21 @@ class TestSignatureBasedValidation:
 
         captured = None  # Reset captured
 
-        # Case 2 - Node with end tag and NOT self-closing
+        # Case 2 - Node with end tag and empty body
         template_str2 = """
             {% load component_tags %}
-            {% mytag 'John' / %}
+            {% mytag 'John' %}{% endmytag %}
         """
         template2 = Template(template_str2)
         template2.render(Context({}))
 
         params2, nodelist2, node_id2, contents2, template_name2, template_component2 = captured  # type: ignore[misc]
-        assert len(params2) == 1  # type: ignore[has-type]
-        assert isinstance(params2[0], TagAttr)  # type: ignore[has-type]
+        args2, kwargs2 = params2  # type: ignore[has-type]
+        assert len(args2) == 1  # type: ignore[has-type]
+        assert isinstance(args2[0], FilterExpression)  # type: ignore[has-type]
+        assert kwargs2 == {}  # type: ignore[has-type]
         assert len(nodelist2) == 0  # type: ignore[has-type]
-        assert contents2 is None  # type: ignore[has-type]
+        assert contents2 == ""  # type: ignore[has-type]
         assert node_id2 == "a1bc3f"  # type: ignore[has-type]
         assert template_name2 == "<unknown source>"  # type: ignore[has-type]
         assert template_component2 is None  # type: ignore[has-type]
@@ -602,15 +607,17 @@ class TestSignatureBasedValidation:
         template3.render(Context({}))
 
         params3, nodelist3, node_id3, contents3, template_name3, template_component3 = captured  # type: ignore[misc]
-        assert len(params3) == 1  # type: ignore[has-type]
-        assert isinstance(params3[0], TagAttr)  # type: ignore[has-type]
+        args3, kwargs3 = params3  # type: ignore[has-type]
+        assert len(args3) == 1  # type: ignore[has-type]
+        assert isinstance(args3[0], FilterExpression)  # type: ignore[has-type]
+        assert kwargs3 == {}  # type: ignore[has-type]
         assert len(nodelist3) == 0  # type: ignore[has-type]
         assert contents3 is None  # type: ignore[has-type]
         assert node_id3 == "a1bc40"  # type: ignore[has-type]
         assert template_name3 == "<unknown source>"  # type: ignore[has-type]
         assert template_component3 is None  # type: ignore[has-type]
 
-        # Case 4 - Node nested in Component end tag
+        # Case 4 - Node nested in Component
         class TestComponent(Component):
             template = """
                 {% load component_tags %}
@@ -620,8 +627,9 @@ class TestSignatureBasedValidation:
         TestComponent.render(Context({}))
 
         params4, nodelist4, node_id4, contents4, template_name4, template_component4 = captured  # type: ignore[misc]
-        assert len(params4) == 1  # type: ignore[has-type]
-        assert isinstance(params4[0], TagAttr)  # type: ignore[has-type]
+        args4, _kwargs4 = params4  # type: ignore[has-type]
+        assert len(args4) == 1  # type: ignore[has-type]
+        assert isinstance(args4[0], FilterExpression)  # type: ignore[has-type]
         assert len(nodelist4) == 0  # type: ignore[has-type]
         assert contents4 is None  # type: ignore[has-type]
         assert node_id4 == "a1bc42"  # type: ignore[has-type]
@@ -655,7 +663,7 @@ class TestSignatureBasedValidation:
 
         template_str = """
             {% load component_tags %}
-            {% mytag / %}
+            {% mytag %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"name": "John"}))
@@ -764,7 +772,8 @@ class TestSignatureBasedValidation:
         ):
             template6.render(Context({}))
 
-        # Extra args after kwargs
+        # Extra args after kwargs (new parser collects args/kwargs separately,
+        # so '123' maps to position 0 = 'name', but name='John' is also a kwarg)
         template6 = Template(
             """
             {% load component_tags %}
@@ -773,7 +782,7 @@ class TestSignatureBasedValidation:
         )
         with pytest.raises(
             TypeError,
-            match=re.escape("positional argument follows keyword argument"),
+            match=re.escape("Invalid parameters for tag 'mytag': got multiple values for argument 'name'"),
         ):
             template6.render(Context({}))
 
@@ -790,7 +799,7 @@ class TestSignatureBasedValidation:
         ):
             template7.render(Context({}))
 
-        # Extra kwargs - non-identifier or kwargs
+        # Extra kwargs - non-identifier or kwargs (render has no **kwargs, so rejected)
         template8 = Template(
             """
             {% load component_tags %}
@@ -803,7 +812,7 @@ class TestSignatureBasedValidation:
         ):
             template8.render(Context({}))
 
-        # Extra arg after special kwargs
+        # Special kwargs alongside positional args (data-id is an invalid identifier)
         template9 = Template(
             """
             {% load component_tags %}
@@ -811,8 +820,8 @@ class TestSignatureBasedValidation:
         """,
         )
         with pytest.raises(
-            SyntaxError,
-            match=re.escape("positional argument follows keyword argument"),
+            TypeError,
+            match=re.escape("Invalid parameters for tag 'mytag': got an unexpected keyword argument 'data-id'"),
         ):
             template9.render(Context({}))
 

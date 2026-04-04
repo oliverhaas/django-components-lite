@@ -3,7 +3,6 @@ import re
 from django.apps import AppConfig
 from django.template import Template
 from django.template.library import InclusionNode
-from django.template.loader_tags import IncludeNode
 
 
 class ComponentsConfig(AppConfig):
@@ -15,23 +14,16 @@ class ComponentsConfig(AppConfig):
         from django_components_lite.app_settings import app_settings
         from django_components_lite.autodiscovery import autodiscover
         from django_components_lite.util.django_monkeypatch import (
-            monkeypatch_include_node,
             monkeypatch_inclusion_node,
             monkeypatch_template_cls,
-            monkeypatch_template_proxy_cls,
         )
 
         # NOTE: This monkeypatch is applied here, before Django processes any requests.
         #       To make django-components work with django-debug-toolbar-template-profiler
         #       See https://github.com/django-components/django-components/discussions/819
         monkeypatch_template_cls(Template)
-        monkeypatch_include_node(IncludeNode)
         # Fixes https://github.com/django-components/django-components/pull/1390
         monkeypatch_inclusion_node(InclusionNode)
-
-        # This makes django-components work with django-template-partials
-        # NOTE: Delete when Django 5.2 reaches end of life
-        monkeypatch_template_proxy_cls()
 
         if app_settings.AUTODISCOVER:
             autodiscover()

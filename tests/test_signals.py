@@ -98,7 +98,7 @@ class TestTemplateSignal:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'empty' / %}
+            {% componentsc 'empty' %}
         """
         template = Template(template_str, name="root")
         templates_used = _get_templates_used_to_render(template)

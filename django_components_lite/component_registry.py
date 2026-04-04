@@ -419,34 +419,38 @@ class ComponentRegistry:
 
         # Define a tag function that pre-processes the tokens, extracting
         # the component name and passing the rest to the actual tag function.
-        def tag_fn(parser: Parser, token: Token) -> ComponentNode:
-            bits = token.split_contents()
-            _tag, *args = bits
+        def _make_tag_fn(start_tag: str, end_tag: str | None) -> Callable[[Parser, Token], ComponentNode]:
+            def tag_fn(parser: Parser, token: Token) -> ComponentNode:
+                bits = token.split_contents()
+                _tag, *args = bits
 
-            if not args:
-                raise TemplateSyntaxError("Component tag did not receive a component name")
+                if not args:
+                    raise TemplateSyntaxError("Component tag did not receive a component name")
 
-            comp_name_token = None if "=" in args[0] else args.pop(0)
-            if not comp_name_token:
-                raise TemplateSyntaxError("Component name must be a non-empty quoted string, e.g. 'my_comp'")
-            if not is_str_wrapped_in_quotes(comp_name_token):
-                raise TemplateSyntaxError(f"Component name must be a string 'literal', got: {comp_name_token}")
+                comp_name_token = None if "=" in args[0] else args.pop(0)
+                if not comp_name_token:
+                    raise TemplateSyntaxError("Component name must be a non-empty quoted string, e.g. 'my_comp'")
+                if not is_str_wrapped_in_quotes(comp_name_token):
+                    raise TemplateSyntaxError(f"Component name must be a string 'literal', got: {comp_name_token}")
 
-            parsed_name = comp_name_token[1:-1]
+                parsed_name = comp_name_token[1:-1]
 
-            # Reconstruct token contents without the component name
-            token.contents = " ".join([bits[0], *args])
+                # Reconstruct token contents without the component name
+                token.contents = " ".join([bits[0], *args])
 
-            return ComponentNode.parse(
-                parser,
-                token,
-                registry=registry,
-                name=parsed_name,
-                start_tag="component",
-                end_tag="endcomponent",
-            )
+                return ComponentNode.parse(
+                    parser,
+                    token,
+                    registry=registry,
+                    name=parsed_name,
+                    start_tag=start_tag,
+                    end_tag=end_tag,
+                )
 
-        register_tag(self.library, "component", tag_fn)
+            return tag_fn
+
+        register_tag(self.library, "component", _make_tag_fn("component", "endcomponent"))
+        self.library.tag("componentsc", _make_tag_fn("componentsc", None))
 
         return ComponentRegistryEntry(cls=component, tag="component")
 

@@ -5,14 +5,13 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from django.template import Context, Library
-from django.template.base import Node, NodeList, Parser, Token
+from django.template.base import FilterExpression, Node, NodeList, Parser, Token
+from django.template.exceptions import TemplateSyntaxError
 
 from django_components_lite.util.logger import trace_node_msg
 from django_components_lite.util.misc import gen_id
 from django_components_lite.util.template_tag import (
-    TagAttr,
-    parse_template_tag,
-    resolve_params,
+    TagParam,
     validate_params,
 )
 
@@ -93,94 +92,37 @@ class NodeMeta(type):
         def wrapper_render(self: "BaseNode", context: Context) -> str:
             trace_node_msg("RENDER", self.tag, self.node_id)
 
-            resolved_params = resolve_params(self.tag, self.params, context)
+            # Resolve FilterExpressions to actual values
+            raw_args, raw_kwargs = self.params
+            resolved_args = [arg.resolve(context) for arg in raw_args]
+            resolved_kwargs = {k: v.resolve(context) for k, v in raw_kwargs.items()}
 
+            # Build TagParam list for validation
             # Template tags may accept kwargs that are not valid Python identifiers, e.g.
             # `{% component data-id="John" class="pt-4" :href="myVar" %}`
             #
             # Passing them in is still useful, as user may want to pass in arbitrary data
-            # to their `{% component %}` tags as HTML attributes. E.g. example below passes
-            # `data-id`, `class` and `:href` as HTML attributes to the `<div>` element:
-            #
-            # ```py
-            # class MyComponent(Component):
-            #     def get_template_data(self, args, kwargs, slots, context) -> str:
-            #         return {
-            #             "name": kwargs.pop("name"),
-            #             "attrs": kwargs,
-            #         }
-            #     template = """
-            #         <div {% html_attrs attrs %}>
-            #             {{ name }}
-            #         </div>
-            #     """
-            # ```
-            #
-            # HOWEVER, these kwargs like `data-id`, `class` and `:href` may not be valid Python identifiers,
-            # or like in case of `class`, may be a reserved keyword. Thus, we cannot pass them in to the `render()`
-            # method as regular kwargs, because that will raise Python's native errors like
-            # `SyntaxError: invalid syntax`. E.g.
-            #
-            # ```python
-            # def render(self, context: Context, data-id: str, class: str, :href: str) -> str:
-            # ```
-            #
-            # So instead, we filter out any invalid kwargs, and pass those in through a dictionary spread.
-            # We can do so, because following is allowed in Python:
-            #
-            # ```python
-            # def x(**kwargs):
-            #     print(kwargs)
-            #
-            # d = {"data-id": 1}
-            # x(**d)
-            # # {'data-id': 1}
-            # ```
-            #
-            # See https://github.com/django-components/django-components/discussions/900#discussioncomment-11859970
-            resolved_params_without_invalid_kwargs = []
-            invalid_kwargs = {}
+            # to their `{% component %}` tags as HTML attributes.
+            resolved_params_without_invalid_kwargs: list[TagParam] = []
+            invalid_kwargs: dict[str, Any] = {}
             did_see_special_kwarg = False
-            for resolved_param in resolved_params:
-                key = resolved_param.key
-                if key is not None:
-                    # Case: Special kwargs
-                    if not key.isidentifier() or keyword.iskeyword(key):
-                        # NOTE: Since these keys are not part of signature validation,
-                        # we have to check ourselves if any args follow them.
-                        invalid_kwargs[key] = resolved_param.value
-                        did_see_special_kwarg = True
-                    else:
-                        # Case: Regular kwargs
-                        resolved_params_without_invalid_kwargs.append(resolved_param)
+
+            # First add positional args
+            for value in resolved_args:
+                if did_see_special_kwarg:
+                    raise SyntaxError("positional argument follows keyword argument")
+                resolved_params_without_invalid_kwargs.append(TagParam(key=None, value=value))
+
+            # Then add keyword args, separating valid from invalid Python identifiers
+            for key, value in resolved_kwargs.items():
+                if not key.isidentifier() or keyword.iskeyword(key):
+                    # Special kwargs (e.g. data-id, class, @click)
+                    invalid_kwargs[key] = value
+                    did_see_special_kwarg = True
                 else:
-                    # Case: Regular positional args
-                    if did_see_special_kwarg:
-                        raise SyntaxError("positional argument follows keyword argument")
-                    resolved_params_without_invalid_kwargs.append(resolved_param)
+                    resolved_params_without_invalid_kwargs.append(TagParam(key=key, value=value))
 
             # Validate the params against the signature
-            #
-            # This uses a signature that has been stripped of the `self` and `context` parameters. E.g.
-            #
-            # `def render(name: str, **kwargs: Any) -> None`
-            #
-            # If there are any errors in the input, this will trigger Python's
-            # native error handling (e.g. `TypeError: render() got multiple values for argument 'context'`)
-            #
-            # But because we stripped the two parameters, then these errors will correctly
-            # point to the actual error in the template tag.
-            #
-            # E.g. if we supplied one too many positional args,
-            # `{% mytag "John" 20 %}`
-            #
-            # Then without stripping the two parameters, then the error could be:
-            # `render() takes from 3 positional arguments but 4 were given`
-            #
-            # Which is confusing, because we supplied only two positional args.
-            #
-            # But cause we stripped the two parameters, then the error will be:
-            # `render() takes from 1 positional arguments but 2 were given`
             args, kwargs = validate_params(
                 orig_render,
                 validation_signature,
@@ -200,6 +142,39 @@ class NodeMeta(type):
         cls.render._djc_wrapped = True  # type: ignore[attr-defined]
 
         return cls
+
+
+# Similar to `parser.parse(parse_until=[end_tag])`, except:
+# 1. Does not remove the token it goes over (unlike `parser.parse()`, which mutates the parser state)
+# 2. Returns a string, instead of a NodeList
+#
+# This is used so we can access the contents of the tag body as strings.
+#
+# See https://github.com/django/django/blob/1fb3f57e81239a75eb8f873b392e11534c041fdc/django/template/base.py#L471
+def _extract_contents_until(parser: Parser, until_blocks: list[str]) -> str:
+    contents: list[str] = []
+    for token in reversed(parser.tokens):
+        # Use the raw values here for TokenType.* for a tiny performance boost.
+        token_type = token.token_type.value
+        if token_type == 0:  # TokenType.TEXT
+            contents.append(token.contents)
+        elif token_type == 1:  # TokenType.VAR
+            contents.append("{{ " + token.contents + " }}")
+        elif token_type == 2:  # TokenType.BLOCK
+            try:
+                command = token.contents.split()[0]
+            except IndexError:
+                contents.append("{% " + token.contents + " %}")
+                continue
+            if command in until_blocks:
+                return "".join(contents)
+            contents.append("{% " + token.contents + " %}")
+        elif token_type == 3:  # TokenType.COMMENT
+            contents.append("{# " + token.contents + " #}")
+        else:
+            raise ValueError(f"Unknown token type {token_type}")
+
+    return "".join(contents)
 
 
 class BaseNode(Node, metaclass=NodeMeta):
@@ -355,11 +330,12 @@ class BaseNode(Node, metaclass=NodeMeta):
     # Attributes
     # #####################################
 
-    params: list[TagAttr]
+    params: tuple[list[FilterExpression], dict[str, FilterExpression]]
     """
     The parameters to the tag in the template.
 
-    A single param represents an arg or kwarg of the template tag.
+    A tuple of (args, kwargs) where args is a list of FilterExpression objects
+    and kwargs is a dict mapping string keys to FilterExpression objects.
 
     E.g. the following tag:
 
@@ -367,11 +343,9 @@ class BaseNode(Node, metaclass=NodeMeta):
     {% component "my_comp" key=val key2='val2 two' %}
     ```
 
-    Has 3 params:
-
-    - Posiitonal arg `"my_comp"`
-    - Keyword arg `key=val`
-    - Keyword arg `key2='val2 two'`
+    Has params:
+    - args: [FilterExpression("my_comp")]
+    - kwargs: {"key": FilterExpression("val"), "key2": FilterExpression("'val2 two'")}
     """
 
     flags: dict[str, bool]
@@ -428,16 +402,11 @@ class BaseNode(Node, metaclass=NodeMeta):
     ```
 
     The `nodelist` will contain the `<div> ... </div>` part.
-
-    Unlike [`contents`](../api#django_components_lite.BaseNode.contents),
-    the `nodelist` contains the actual Nodes, not just the text.
     """
 
     contents: str | None
     """
-    The contents of the tag.
-
-    This is the text between the opening and closing tags, e.g.
+    The raw text contents between the opening and closing tags, e.g.
 
     ```django
     {% slot "content" default required %}
@@ -484,7 +453,7 @@ class BaseNode(Node, metaclass=NodeMeta):
 
     def __init__(
         self,
-        params: list[TagAttr],
+        params: tuple[list[FilterExpression], dict[str, FilterExpression]] | None = None,
         flags: dict[str, bool] | None = None,
         nodelist: NodeList | None = None,
         node_id: str | None = None,
@@ -492,7 +461,7 @@ class BaseNode(Node, metaclass=NodeMeta):
         template_name: str | None = None,
         template_component: type["Component"] | None = None,
     ) -> None:
-        self.params = params
+        self.params = params if params is not None else ([], {})
         self.flags = flags or dict.fromkeys(self.allowed_flags or [], False)
         self.nodelist = nodelist or NodeList()
         self.node_id = node_id or gen_id()
@@ -511,7 +480,7 @@ class BaseNode(Node, metaclass=NodeMeta):
         E.g. the following tag:
 
         ```django
-        {% slot "content" default required / %}
+        {% slot "content" default required %}
         ```
 
         Will have the following flags:
@@ -541,16 +510,54 @@ class BaseNode(Node, metaclass=NodeMeta):
         from django_components_lite.template import get_component_from_origin
 
         tag_id = gen_id()
-        tag = parse_template_tag(cls.tag, cls.end_tag, cls.allowed_flags, parser, token)
+        bits = token.split_contents()
+        tag_name = bits[0]
 
         trace_node_msg("PARSE", cls.tag, tag_id)
 
-        body, contents = tag.parse_body()
+        # Sanity check
+        if tag_name != cls.tag:
+            raise TemplateSyntaxError(f"Start tag parser received tag '{tag_name}', expected '{cls.tag}'")
+
+        # Extract flags (positional keywords like "default", "required")
+        flags: dict[str, bool] = {}
+        remaining_bits: list[str] = []
+        allowed_flags_set = set(cls.allowed_flags) if cls.allowed_flags else set()
+        for bit in bits[1:]:
+            if allowed_flags_set and bit in allowed_flags_set:
+                if bit in flags:
+                    raise TemplateSyntaxError(f"'{tag_name}' received flag '{bit}' multiple times")
+                flags[bit] = True
+            else:
+                remaining_bits.append(bit)
+
+        # Set all allowed flags, defaulting to False
+        all_flags = {f: flags.get(f, False) for f in (cls.allowed_flags or ())}
+
+        # Parse args and kwargs using Django's FilterExpression
+        args: list[FilterExpression] = []
+        tag_kwargs: dict[str, FilterExpression] = {}
+        for bit in remaining_bits:
+            if "=" in bit:
+                key, val = bit.split("=", 1)
+                tag_kwargs[key] = FilterExpression(val, parser)
+            else:
+                args.append(FilterExpression(bit, parser))
+
+        # Parse body (between start and end tag)
+        if cls.end_tag:
+            contents = _extract_contents_until(parser, [cls.end_tag])
+            nodelist = parser.parse(parse_until=[cls.end_tag])
+            parser.delete_first_token()
+        else:
+            nodelist = NodeList()
+            contents = None
+
         node = cls(
-            nodelist=body,
+            params=(args, tag_kwargs),
+            flags=all_flags,
+            nodelist=nodelist,
             node_id=tag_id,
-            params=tag.params,
-            flags=tag.flags,
             contents=contents,
             template_name=parser.origin.name if parser.origin else None,
             template_component=get_component_from_origin(parser.origin) if parser.origin else None,
