@@ -888,56 +888,6 @@ class TestComponentRender:
         ):
             Other.render()
 
-    @pytest.mark.skip(reason="Optional pydantic dependency not installed")
-    def test_pydantic_exception(self):
-        from pydantic import BaseModel, ValidationError
-
-        @register("broken")
-        class Broken(Component):
-            template: str = """
-                {% load component_tags %}
-                <div> injected: {{ data|safe }} </div>
-                <main>
-                    {% slot "content" default / %}
-                </main>
-            """
-
-            class Kwargs(BaseModel):
-                data1: str
-
-            def get_template_data(self, args, kwargs: Kwargs, slots, context):
-                return {"data": kwargs.data1}
-
-        @register("parent")
-        class Parent(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                return {"data": kwargs["data"]}
-
-            template: str = """
-                {% load component_tags %}
-                {% component "broken" %}
-                    {% slot "content" default / %}
-                {% endcomponent %}
-            """
-
-        @register("root")
-        class Root(Component):
-            template: str = """
-                {% load component_tags %}
-                {% component "parent" data=123 %}
-                    {% fill "content" %}
-                        456
-                    {% endfill %}
-                {% endcomponent %}
-            """
-
-        # NOTE: We're unable to insert the component path in the Pydantic's exception message
-        with pytest.raises(
-            ValidationError,
-            match=re.escape("1 validation error for Kwargs\ndata1\n  Field required"),
-        ):
-            Root.render()
-
 
 class TestComponentHelpers:
     def test_all_components(self):

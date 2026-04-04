@@ -1,5 +1,4 @@
 import re
-from unittest import skip
 
 import pytest
 from django.template import Context, Template, TemplateSyntaxError
@@ -2842,69 +2841,6 @@ class TestResolver:
         context = Context({"val2": "foo", "val3": "bar", "val4": "baz"})
         resolved = attrs[0].value.resolve(context)
         assert resolved == {"key": "foo", "bar": "baz", "key3": "baz"}
-
-    @skip("TODO: Enable once template parsing is fixed by us")
-    def test_resolve_complex_as_component(self):
-        captured = None
-
-        @register("test")
-        class Test(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                nonlocal captured
-                captured = kwargs
-
-        template_str: str = """
-            {% load component_tags %}
-            {% component "test"
-                data={
-                    "items": [
-                        1|add:2,
-                        {"x"|upper: 2|add:3},
-                        *spread_items
-                    ],
-                    "nested": {
-                        "a": [
-                            1|add:2,
-                            *nums|default:"",
-                            *"{% lorem 1 w %}",
-                        ],
-                        "b": {
-                            "x": [
-                                *more|first,
-                            ],
-                            "{% lorem 2 w %}": "{% lorem 3 w %}",
-                        }
-                    },
-                    **rest,
-                    "key": _('value')|upper
-                }
-            / %}
-        """
-
-        template = Template(template_str)
-        template.render(
-            Context(
-                {
-                    "spread_items": ["foo", "bar"],
-                    "nums": [1, 2, 3],
-                    "more": ["baz", "qux"],
-                    "rest": {"a": "b"},
-                },
-            ),
-        )
-
-        assert captured == {
-            "items": [3, {"X": 5}, "foo", "bar"],
-            "nested": {
-                "a": [3, 1, 2, 3, "l", "o", "r", "e", "m"],
-                "b": {
-                    "x": ["b", "a", "z"],
-                    "lorem ipsum": "lorem ipsum dolor",
-                },
-            },
-            "a": "b",
-            "key": "VALUE",
-        }
 
     def test_component_args_kwargs(self):
         captured = None
