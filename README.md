@@ -40,6 +40,9 @@ Compared to django-components, the following have been stripped out:
 - `context_behavior` setting (always isolated)
 - Tag formatters
 - Component views and URLs
+- `libraries` setting and `import_libraries()`
+- `reload_on_file_change` setting
+- All deprecated setting aliases
 
 ## Installation
 

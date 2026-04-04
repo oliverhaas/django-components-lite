@@ -19,4 +19,4 @@ An exploratory fork of [django-components](https://github.com/django-components/
 
 This project is built on the work of the [django-components](https://github.com/django-components/django-components) project by [Emil Stenstrom](https://github.com/EmilStenstrom), [Juro Oravec](https://github.com/JuroOravec), and [all contributors](https://github.com/django-components/django-components/graphs/contributors).
 
-**If you want a mature, full-featured component library for Django, use [django-components](https://github.com/django-components/django-components).**
+**If you want a mature, full-featured component library for Django with a longer history of maintaining it, use [django-components](https://github.com/django-components/django-components).**
