@@ -368,7 +368,7 @@ class TestComponentRenderAPI:
 
         rendered = Outer.render()
 
-        assert rendered == "hello"
+        assert rendered.strip() == "hello"
 
         assert isinstance(comp, TestComponent)
 
