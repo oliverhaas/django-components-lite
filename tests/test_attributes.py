@@ -121,9 +121,10 @@ class TestMergeAttributes:
 
 
 class TestHtmlAttrs:
+    # Simple component that passes attrs dict directly
     template_str: str = """
         {% load component_tags %}
-        {% component "test" attrs:@click.stop="dispatch('click_event')" attrs:x-data="{hello: 'world'}" attrs:class=class_var %}
+        {% component "test" attrs=my_attrs %}
         {% endcomponent %}
     """
 
@@ -132,7 +133,7 @@ class TestHtmlAttrs:
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs attrs defaults class="added_class" class="another-class" data-id=123 %}>
+                <div {% html_attrs attrs defaults class="added_class" data-id=123 %}>
                     content
                 </div>
             """
@@ -143,12 +144,13 @@ class TestHtmlAttrs:
                     "defaults": {"class": "override-me"},
                 }
 
+        my_attrs = {"@click.stop": "dispatch('click_event')", "x-data": "{hello: 'world'}", "class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
+            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class" data-id=123>
                 content
             </div>
             """,
@@ -160,7 +162,7 @@ class TestHtmlAttrs:
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs attrs defaults class %}>
+                <div {% html_attrs attrs defaults extra_arg %}>
                     content
                 </div>
             """
@@ -169,9 +171,10 @@ class TestHtmlAttrs:
                 return {
                     "attrs": kwargs["attrs"],
                     "defaults": {"class": "override-me"},
-                    "class": "123 457",
+                    "extra_arg": "123 457",
                 }
 
+        my_attrs = {"class": "padding-top-8"}
         template = Template(self.template_str)
 
         with pytest.raises(
@@ -180,14 +183,14 @@ class TestHtmlAttrs:
                 "Invalid parameters for tag 'html_attrs': takes 2 positional argument(s) but more were given",
             ),
         ):
-            template.render(Context({"class_var": "padding-top-8"}))
+            template.render(Context({"my_attrs": my_attrs}))
 
     def test_tag_kwargs(self):
         @register("test")
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs attrs=attrs defaults=defaults class="added_class" class="another-class" data-id=123 %}>
+                <div {% html_attrs attrs=attrs defaults=defaults class="added_class" data-id=123 %}>
                     content
                 </div>
             """
@@ -198,12 +201,13 @@ class TestHtmlAttrs:
                     "defaults": {"class": "override-me"},
                 }
 
+        my_attrs = {"@click.stop": "dispatch('click_event')", "x-data": "{hello: 'world'}", "class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-id="123" x-data="{hello: 'world'}">
+            <div @click.stop="dispatch('click_event')" class="padding-top-8 added_class" data-id="123" x-data="{hello: 'world'}">
                 content
             </div>
             """,
@@ -215,7 +219,7 @@ class TestHtmlAttrs:
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs class="added_class" class="another-class" data-id=123 defaults=defaults attrs=attrs %}>
+                <div {% html_attrs class="added_class" data-id=123 defaults=defaults attrs=attrs %}>
                     content
                 </div>
             """
@@ -226,123 +230,39 @@ class TestHtmlAttrs:
                     "defaults": {"class": "override-me"},
                 }
 
+        my_attrs = {"@click.stop": "dispatch('click_event')", "x-data": "{hello: 'world'}", "class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
+            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class" data-id=123>
                 content
             </div>
             """,
         )
         assert "override-me" not in rendered
-
-    def test_tag_spread(self):
-        @register("test")
-        class AttrsComponent(Component):
-            template: str = """
-                {% load component_tags %}
-                <div {% html_attrs ...props class="another-class" %}>
-                    content
-                </div>
-            """
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "props": {
-                        "attrs": kwargs["attrs"],
-                        "defaults": {"class": "override-me"},
-                        "class": "added_class",
-                        "data-id": 123,
-                    },
-                }
-
-        template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
-        assertHTMLEqual(
-            rendered,
-            """
-            <div @click.stop="dispatch('click_event')" class="added_class another-class padding-top-8" data-id="123" x-data="{hello: 'world'}">
-                content
-            </div>
-            """,
-        )
-        assert "override-me" not in rendered
-
-    def test_tag_aggregate_args(self):
-        @register("test")
-        class AttrsComponent(Component):
-            template: str = """
-                {% load component_tags %}
-                <div {% html_attrs attrs:class="from_agg_key" attrs:type="submit" defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
-                    content
-                </div>
-            """
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {"attrs": kwargs["attrs"]}
-
-        template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
-
-        # NOTE: The attrs from self.template_str should be ignored because they are not used.
-        assertHTMLEqual(
-            rendered,
-            """
-            <div class="added_class another-class from_agg_key" data-id="123" type="submit">
-                content
-            </div>
-            """,
-        )
-        assert "override-me" not in rendered
-
-    # Note: Because there's both `attrs:class` and `defaults:class`, the `attrs`,
-    # it's as if the template tag call was (ignoring the `class` and `data-id` attrs):
-    #
-    # `{% html_attrs attrs={"class": ...} defaults={"class": ...} attrs %}>content</div>`
-    #
-    # Which raises, because `attrs` is passed both as positional and as keyword argument.
-    def test_tag_raises_on_aggregate_and_positional_args_for_attrs(self):
-        @register("test")
-        class AttrsComponent(Component):
-            template: str = """
-                {% load component_tags %}
-                <div {% html_attrs attrs attrs:class="from_agg_key" defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
-                    content
-                </div>
-            """
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {"attrs": kwargs["attrs"]}
-
-        template = Template(self.template_str)
-
-        with pytest.raises(
-            TypeError,
-            match=re.escape("Invalid parameters for tag 'html_attrs': got multiple values for argument 'attrs'"),
-        ):
-            template.render(Context({"class_var": "padding-top-8"}))
 
     def test_tag_no_attrs(self):
         @register("test")
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs defaults:class="override-me" class="added_class" class="another-class" data-id=123 %}>
+                <div {% html_attrs defaults=defaults class="added_class" data-id=123 %}>
                     content
                 </div>
             """
 
             def get_template_data(self, args, kwargs, slots, context):
-                return {"attrs": kwargs["attrs"]}
+                return {"defaults": {"class": "override-me"}}
 
+        my_attrs = {"class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
-            <div class="added_class another-class override-me" data-id=123>
+            <div class="override-me added_class" data-id=123>
                 content
             </div>
             """,
@@ -353,7 +273,7 @@ class TestHtmlAttrs:
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs attrs class="added_class" class="another-class" data-id=123 %}>
+                <div {% html_attrs attrs class="added_class" data-id=123 %}>
                     content
                 </div>
             """
@@ -361,47 +281,42 @@ class TestHtmlAttrs:
             def get_template_data(self, args, kwargs, slots, context):
                 return {"attrs": kwargs["attrs"]}
 
-        template_str: str = """
-            {% load component_tags %}
-            {% component "test" attrs:@click.stop="dispatch('click_event')" attrs:x-data="{hello: 'world'}" attrs:class=class_var %}
-            {% endcomponent %}
-        """
-        template = Template(template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        my_attrs = {"@click.stop": "dispatch('click_event')", "x-data": "{hello: 'world'}", "class": "padding-top-8"}
+        template = Template(self.template_str)
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
-            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class another-class" data-id=123>
+            <div @click.stop="dispatch('click_event')" x-data="{hello: 'world'}" class="padding-top-8 added_class" data-id=123>
                 content
             </div>
             """,
         )
-        assert "override-me" not in rendered
 
     def test_tag_no_attrs_no_defaults(self):
         @register("test")
         class AttrsComponent(Component):
             template: str = """
                 {% load component_tags %}
-                <div {% html_attrs class="added_class" class="another-class" data-id=123 %}>
+                <div {% html_attrs class="added_class" data-id=123 %}>
                     content
                 </div>
             """
 
             def get_template_data(self, args, kwargs, slots, context):
-                return {"attrs": kwargs["attrs"]}
+                return {}
 
+        my_attrs = {"class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
-            <div class="added_class another-class" data-id="123">
+            <div class="added_class" data-id="123">
                 content
             </div>
             """,
         )
-        assert "override-me" not in rendered
 
     def test_tag_empty(self):
         @register("test")
@@ -414,13 +329,11 @@ class TestHtmlAttrs:
             """
 
             def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "attrs": kwargs["attrs"],
-                    "defaults": {"class": "override-me"},
-                }
+                return {}
 
+        my_attrs = {"class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """
@@ -429,7 +342,6 @@ class TestHtmlAttrs:
             </div>
             """,
         )
-        assert "override-me" not in rendered
 
     def test_tag_null_attrs_and_defaults(self):
         @register("test")
@@ -447,8 +359,9 @@ class TestHtmlAttrs:
                     "defaults": None,
                 }
 
+        my_attrs = {"class": "padding-top-8"}
         template = Template(self.template_str)
-        rendered = template.render(Context({"class_var": "padding-top-8"}))
+        rendered = template.render(Context({"my_attrs": my_attrs}))
         assertHTMLEqual(
             rendered,
             """

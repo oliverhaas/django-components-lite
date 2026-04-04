@@ -563,7 +563,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% component "test_child" / %}
+                {% componentsc "test_child" %}
             """
 
             def get_template_data(self, args, kwargs, slots, context):
@@ -584,7 +584,7 @@ class TestContextProcessors:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test_parent" / %}
+            {% componentsc "test_parent" %}
         """
         request = HttpRequest()
         request_context = RequestContext(request)
@@ -608,7 +608,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% slot "content" default / %}
+                {% slot "content" default %}{% endslot %}
             """
 
             def get_template_data(self, args, kwargs, slots, context):
@@ -630,7 +630,7 @@ class TestContextProcessors:
         template_str: str = """
             {% load component_tags %}
             {% component "test_parent" %}
-                {% component "test_child" / %}
+                {% componentsc "test_child" %}
             {% endcomponent %}
         """
         request = HttpRequest()
@@ -677,7 +677,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% component "test_child" / %}
+                {% componentsc "test_child" %}
             """
 
             def get_template_data(self, args, kwargs, slots, context):
@@ -737,7 +737,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% component "test_child" / %}
+                {% componentsc "test_child" %}
             """
 
             def get_template_data(self, args, kwargs, slots, context):
@@ -853,7 +853,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% component "test_child" / %}
+                {% componentsc "test_child" %}
             """
 
             def get_template_data(self, args, kwargs, slots, context):

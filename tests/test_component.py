@@ -239,7 +239,7 @@ class TestComponentRenderAPI:
             template: str = """
                 {% load component_tags %}
                 Variable: <strong>{{ variable }}</strong>
-                {% slot 'my_slot' / %}
+                {% slot 'my_slot' %}{% endslot %}
             """
 
             def get_template_data(self, args, kwargs, slots, context):
@@ -332,7 +332,7 @@ class TestComponentRenderAPI:
         template_str: str = """
             {% load component_tags %}
             <div class="test-component">
-                {% component "test" / %}
+                {% componentsc "test" %}
             </div>
         """
         template = Template(template_str)

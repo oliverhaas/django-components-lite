@@ -431,7 +431,7 @@ class TestExtendsCompat:
             {% load component_tags %}
             {% block body %}
                 {% include 'included.html' %}
-                {% component "extended_component" / %}
+                {% componentsc "extended_component" %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -586,7 +586,7 @@ class TestExtendsCompat:
         template: str = """
             {% load component_tags %}
             <html>
-                {% component "component_inside_include" / %}
+                {% componentsc "component_inside_include" %}
             </html>
         """
 
@@ -914,7 +914,7 @@ class TestExtendsCompat:
             template: str = """
                 {% load component_tags %}
                 <p>This is the outer component.</p>
-                {% slot "a" default / %}
+                {% slot "a" default %}{% endslot %}
             """
 
         @register("b_inner")
@@ -922,7 +922,7 @@ class TestExtendsCompat:
             template: str = """
                 {% load component_tags %}
                 <p>This is the inner component.</p>
-                {% slot "b" default / %}
+                {% slot "b" default %}{% endslot %}
             """
 
         template: str = """
@@ -951,7 +951,7 @@ class TestExtendsCompat:
         @register("simple_component")
         class SimpleComponent(Component):
             template: str = """
-                {% slot 'content' / %}
+                {% slot 'content' %}{% endslot %}
             """
 
         # Confirm that this setup works in Django without components

@@ -13,7 +13,7 @@ from typing import (
 from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 
 from django.http import HttpRequest, HttpResponse
-from django.template.base import NodeList, Parser, Template, Token
+from django.template.base import FilterExpression, NodeList, Parser, Template, Token
 from django.template.context import Context, RequestContext
 from django.template.loader_tags import BLOCK_CONTEXT_KEY, BlockContext
 from django.test.signals import template_rendered
@@ -47,7 +47,6 @@ from django_components_lite.util.misc import (
     hash_comp_cls,
     to_dict,
 )
-from django_components_lite.util.template_tag import TagAttr
 from django_components_lite.util.weakref import cached_ref
 
 # NOTE: `ReferenceType` is NOT a generic pre-3.9
@@ -2017,7 +2016,7 @@ class ComponentNode(BaseNode):
         name: str,
         registry: ComponentRegistry,
         # BaseNode inputs
-        params: list[TagAttr],
+        params: tuple[list[FilterExpression], dict[str, FilterExpression]] | None = None,
         flags: dict[str, bool] | None = None,
         nodelist: NodeList | None = None,
         node_id: str | None = None,

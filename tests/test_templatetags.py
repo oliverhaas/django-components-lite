@@ -69,7 +69,7 @@ class TestNestedTags:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" var=_("organisation's") / %}
+            {% componentsc "test" var=_("organisation's") %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -95,7 +95,7 @@ class TestNestedTags:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" var=_('organisation"s') / %}
+            {% componentsc "test" var=_('organisation"s') %}
         """
         rendered = Template(template).render(Context())
         expected = """

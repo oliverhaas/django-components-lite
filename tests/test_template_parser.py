@@ -148,12 +148,12 @@ class TestTemplateParser:
         assert token_tuples == expected_tokens
 
     def test_brackets_and_percent_in_text(self):
-        tokens = parse_template('{% component \'test\' \'"\' "{%}" bool_var="{% noop is_active %}" / %}')
+        tokens = parse_template('{% component \'test\' \'"\' "{%}" bool_var="{% noop is_active %}" %}')
 
         token_tuples = [token2tuple(token) for token in tokens]
 
         expected_tokens = [
-            (TokenType.BLOCK, 'component \'test\' \'"\' "{%}" bool_var="{% noop is_active %}" /', (0, 66), 1),
+            (TokenType.BLOCK, 'component \'test\' \'"\' "{%}" bool_var="{% noop is_active %}"', (0, 64), 1),
         ]
 
         assert token_tuples == expected_tokens

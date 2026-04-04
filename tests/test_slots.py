@@ -22,7 +22,7 @@ class TestSlot:
         class SimpleComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% slot "first" required data1="abc" data2:hello="world" data2:one=123 %}
+                {% slot "first" required data1="abc" hello="world" one=123 %}
                     SLOT_DEFAULT
                 {% endslot %}
             """
@@ -49,7 +49,8 @@ class TestSlot:
 
             slot_data_expected = {
                 "data1": "abc",
-                "data2": {"hello": "world", "one": 123},
+                "hello": "world",
+                "one": 123,
             }
             assert slot_data_expected == ctx.data
 
@@ -578,7 +579,7 @@ class TestSlot:
         template_str: str = """
             {% load component_tags %}
             {% component "test" %}
-              {% fill "first" body=my_slot / %}
+              {% fill "first" body=my_slot %}{% endfill %}
             {% endcomponent %}
         """
         template = Template(template_str)
@@ -611,7 +612,7 @@ class TestSlot:
         template_str: str = """
             {% load component_tags %}
             {% component "test" %}
-              {% fill "first" body=my_slot / %}
+              {% fill "first" body=my_slot %}{% endfill %}
             {% endcomponent %}
         """
         template = Template(template_str)
@@ -633,7 +634,7 @@ class TestSlot:
         template_str: str = """
             {% load component_tags %}
             {% component "test" %}
-              {% fill "first" body=my_slot / %}
+              {% fill "first" body=my_slot %}{% endfill %}
             {% endcomponent %}
         """
         template = Template(template_str)
