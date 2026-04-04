@@ -1,11 +1,6 @@
 from django.template.base import Token, TokenType
 
-from django_components_lite.testing import djc_test
 from django_components_lite.util.template_parser import parse_template
-
-from .testutils import setup_test_config
-
-setup_test_config()
 
 
 def token2tuple(token: Token):
@@ -17,7 +12,6 @@ def token2tuple(token: Token):
     )
 
 
-@djc_test
 class TestTemplateParser:
     def test_template_text(self):
         tokens = parse_template("Hello world")

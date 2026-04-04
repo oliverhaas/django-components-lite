@@ -3,12 +3,7 @@ from pathlib import Path
 
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.management.commands.collectstatic import Command
-
-from django_components_lite.testing import djc_test
-
-from .testutils import setup_test_config
-
-setup_test_config()
+from django.test import override_settings
 
 
 # This subclass allows us to call the `collectstatic` command from within Python.
@@ -80,18 +75,15 @@ COMPONENTS = {
 urlpatterns: list = []
 
 
-@djc_test
 class TestStaticFilesFinder:
-    @djc_test(
-        django_settings={
-            **common_settings,
-            "STATICFILES_FINDERS": [
-                # Default finders
-                "django.contrib.staticfiles.finders.FileSystemFinder",
-                "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-            ],
-        },
-        components_settings=COMPONENTS,
+    @override_settings(
+        **common_settings,
+        STATICFILES_FINDERS=[
+            # Default finders
+            "django.contrib.staticfiles.finders.FileSystemFinder",
+            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+        ],
+        COMPONENTS=COMPONENTS,
     )
     def test_python_and_html_included(self):
         collected = do_collect()
@@ -105,18 +97,16 @@ class TestStaticFilesFinder:
         assert collected["unmodified"] == []
         assert collected["post_processed"] == []
 
-    @djc_test(
-        django_settings={
-            **common_settings,
-            "STATICFILES_FINDERS": [
-                # Default finders
-                "django.contrib.staticfiles.finders.FileSystemFinder",
-                "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-                # Django components
-                "django_components_lite.finders.ComponentsFileSystemFinder",
-            ],
-        },
-        components_settings=COMPONENTS,
+    @override_settings(
+        **common_settings,
+        STATICFILES_FINDERS=[
+            # Default finders
+            "django.contrib.staticfiles.finders.FileSystemFinder",
+            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+            # Django components
+            "django_components_lite.finders.ComponentsFileSystemFinder",
+        ],
+        COMPONENTS=COMPONENTS,
     )
     def test_python_and_html_omitted(self):
         collected = do_collect()
@@ -130,18 +120,16 @@ class TestStaticFilesFinder:
         assert collected["unmodified"] == []
         assert collected["post_processed"] == []
 
-    @djc_test(
-        django_settings={
-            **common_settings,
-            "STATICFILES_FINDERS": [
-                # Default finders
-                "django.contrib.staticfiles.finders.FileSystemFinder",
-                "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-                # Django components
-                "django_components_lite.finders.ComponentsFileSystemFinder",
-            ],
-        },
-        components_settings={
+    @override_settings(
+        **common_settings,
+        STATICFILES_FINDERS=[
+            # Default finders
+            "django.contrib.staticfiles.finders.FileSystemFinder",
+            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+            # Django components
+            "django_components_lite.finders.ComponentsFileSystemFinder",
+        ],
+        COMPONENTS={
             **COMPONENTS,
             "static_files_allowed": [
                 ".js",
@@ -161,18 +149,16 @@ class TestStaticFilesFinder:
         assert collected["unmodified"] == []
         assert collected["post_processed"] == []
 
-    @djc_test(
-        django_settings={
-            **common_settings,
-            "STATICFILES_FINDERS": [
-                # Default finders
-                "django.contrib.staticfiles.finders.FileSystemFinder",
-                "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-                # Django components
-                "django_components_lite.finders.ComponentsFileSystemFinder",
-            ],
-        },
-        components_settings={
+    @override_settings(
+        **common_settings,
+        STATICFILES_FINDERS=[
+            # Default finders
+            "django.contrib.staticfiles.finders.FileSystemFinder",
+            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+            # Django components
+            "django_components_lite.finders.ComponentsFileSystemFinder",
+        ],
+        COMPONENTS={
             **COMPONENTS,
             "static_files_allowed": [
                 re.compile(r".*"),
@@ -194,18 +180,16 @@ class TestStaticFilesFinder:
         assert collected["unmodified"] == []
         assert collected["post_processed"] == []
 
-    @djc_test(
-        django_settings={
-            **common_settings,
-            "STATICFILES_FINDERS": [
-                # Default finders
-                "django.contrib.staticfiles.finders.FileSystemFinder",
-                "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-                # Django components
-                "django_components_lite.finders.ComponentsFileSystemFinder",
-            ],
-        },
-        components_settings={
+    @override_settings(
+        **common_settings,
+        STATICFILES_FINDERS=[
+            # Default finders
+            "django.contrib.staticfiles.finders.FileSystemFinder",
+            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+            # Django components
+            "django_components_lite.finders.ComponentsFileSystemFinder",
+        ],
+        COMPONENTS={
             **COMPONENTS,
             "static_files_allowed": [
                 ".js",
@@ -236,18 +220,16 @@ class TestStaticFilesFinder:
     #
     # See https://github.com/django/django/blob/5.2/django/contrib/staticfiles/finders.py#L58C9-L58C37
     # And https://github.com/django-components/django-components/issues/1119
-    @djc_test(
-        django_settings={
-            **common_settings,
-            "STATICFILES_FINDERS": [
-                # Default finders
-                "django.contrib.staticfiles.finders.FileSystemFinder",
-                "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-                # Django components
-                "django_components_lite.finders.ComponentsFileSystemFinder",
-            ],
-        },
-        components_settings=COMPONENTS,
+    @override_settings(
+        **common_settings,
+        STATICFILES_FINDERS=[
+            # Default finders
+            "django.contrib.staticfiles.finders.FileSystemFinder",
+            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+            # Django components
+            "django_components_lite.finders.ComponentsFileSystemFinder",
+        ],
+        COMPONENTS=COMPONENTS,
     )
     def test_find_compat(self):
         # NOTE: This would raise an error in Django 5.2 without a fix

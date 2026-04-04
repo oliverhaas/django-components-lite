@@ -5,11 +5,6 @@ from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, NotRegistered, register, registry
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
 def gen_slotted_component():
@@ -41,7 +36,6 @@ def gen_slotted_component_with_context():
 #######################
 
 
-@djc_test
 class TestComponentTemplateTag:
     class SimpleComponent(Component):
         template: str = """
@@ -54,8 +48,7 @@ class TestComponentTemplateTag:
                 "variable2": kwargs.get("variable2", "default"),
             }
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_single_component(self, components_settings):
+    def test_single_component(self):
         registry.register(name="test", component=self.SimpleComponent)
 
         simple_tag_template: str = """
@@ -67,8 +60,7 @@ class TestComponentTemplateTag:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_single_component_self_closing(self, components_settings):
+    def test_single_component_self_closing(self):
         registry.register(name="test", component=self.SimpleComponent)
 
         simple_tag_template: str = """
@@ -80,8 +72,7 @@ class TestComponentTemplateTag:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_call_with_invalid_name(self, components_settings):
+    def test_call_with_invalid_name(self):
         registry.register(name="test_one", component=self.SimpleComponent)
 
         simple_tag_template: str = """
@@ -93,8 +84,7 @@ class TestComponentTemplateTag:
         with pytest.raises(NotRegistered):
             template.render(Context({}))
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_called_with_positional_name(self, components_settings):
+    def test_component_called_with_positional_name(self):
         registry.register(name="test", component=self.SimpleComponent)
 
         simple_tag_template: str = """
@@ -106,8 +96,7 @@ class TestComponentTemplateTag:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_call_component_with_two_variables(self, components_settings):
+    def test_call_component_with_two_variables(self):
         @register("test")
         class IffedComponent(Component):
             template: str = """
@@ -138,8 +127,7 @@ class TestComponentTemplateTag:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_called_with_singlequoted_name(self, components_settings):
+    def test_component_called_with_singlequoted_name(self):
         registry.register(name="test", component=self.SimpleComponent)
 
         simple_tag_template: str = """
@@ -151,8 +139,7 @@ class TestComponentTemplateTag:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, "Variable: <strong>variable</strong>\n")
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_raises_on_component_called_with_variable_as_name(self, components_settings):
+    def test_raises_on_component_called_with_variable_as_name(self):
         registry.register(name="test", component=self.SimpleComponent)
 
         simple_tag_template: str = """
@@ -168,8 +155,7 @@ class TestComponentTemplateTag:
         ):
             Template(simple_tag_template)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_accepts_provided_and_default_parameters(self, components_settings):
+    def test_component_accepts_provided_and_default_parameters(self):
         @register("test")
         class ComponentWithProvidedAndDefaultParameters(Component):
             template: str = """
@@ -199,10 +185,8 @@ class TestComponentTemplateTag:
         )
 
 
-@djc_test
 class TestMultiComponent:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_both_components_render_correctly_with_no_slots(self, components_settings):
+    def test_both_components_render_correctly_with_no_slots(self):
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
@@ -236,8 +220,7 @@ class TestMultiComponent:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_both_components_render_correctly_with_slots(self, components_settings):
+    def test_both_components_render_correctly_with_slots(self):
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
@@ -273,8 +256,7 @@ class TestMultiComponent:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_both_components_render_correctly_when_only_first_has_slots(self, components_settings):
+    def test_both_components_render_correctly_when_only_first_has_slots(self):
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
@@ -309,8 +291,7 @@ class TestMultiComponent:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_both_components_render_correctly_when_only_second_has_slots(self, components_settings):
+    def test_both_components_render_correctly_when_only_second_has_slots(self):
         registry.register("first_component", gen_slotted_component())
         registry.register("second_component", gen_slotted_component_with_context())
 
@@ -346,10 +327,8 @@ class TestMultiComponent:
         )
 
 
-@djc_test
 class TestComponentIsolation:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_instances_of_component_do_not_share_slots(self, components_settings):
+    def test_instances_of_component_do_not_share_slots(self):
         @register("test")
         class SlottedComponent(Component):
             template: str = """
@@ -400,10 +379,8 @@ class TestComponentIsolation:
         )
 
 
-@djc_test
 class TestComponentTemplateSyntaxError:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_variable_outside_fill_tag_compiles_w_out_error(self, components_settings):
+    def test_variable_outside_fill_tag_compiles_w_out_error(self):
         registry.register("test", gen_slotted_component())
         # As of v0.28 this is valid, provided the component registered under "test"
         # contains a slot tag marked as 'default'. This is verified outside
@@ -416,8 +393,7 @@ class TestComponentTemplateSyntaxError:
         """
         Template(template_str)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_text_outside_fill_tag_is_not_error_when_no_fill_tags(self, components_settings):
+    def test_text_outside_fill_tag_is_not_error_when_no_fill_tags(self):
         registry.register("test", gen_slotted_component())
         # As of v0.28 this is valid, provided the component registered under "test"
         # contains a slot tag marked as 'default'. This is verified outside
@@ -430,8 +406,7 @@ class TestComponentTemplateSyntaxError:
         """
         Template(template_str)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_text_outside_fill_tag_is_error_when_fill_tags(self, components_settings):
+    def test_text_outside_fill_tag_is_error_when_fill_tags(self):
         registry.register("test", gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -450,8 +425,7 @@ class TestComponentTemplateSyntaxError:
         ):
             template.render(Context())
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_unclosed_component_is_error(self, components_settings):
+    def test_unclosed_component_is_error(self):
         registry.register("test", gen_slotted_component())
 
         template_str: str = """

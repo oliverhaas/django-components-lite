@@ -7,12 +7,7 @@ from django.template.base import Parser
 from django.template.engine import Engine
 
 from django_components_lite import Component, register
-from django_components_lite.testing import djc_test
 from django_components_lite.util.tag_parser import TagAttr, TagValue, TagValuePart, TagValueStruct, parse_tag
-
-from .testutils import setup_test_config
-
-setup_test_config()
 
 
 # NOTE: We have to define the parser to be able to resolve filters
@@ -26,7 +21,6 @@ def _get_parser() -> Parser:
     )
 
 
-@djc_test
 class TestTagParser:
     def test_args_kwargs(self):
         _, attrs = parse_tag("component 'my_comp' key=val key2='val2 two' ", None)
@@ -2814,7 +2808,6 @@ class TestTagParser:
         assert attrs == expected_attrs
 
 
-@djc_test
 class TestResolver:
     def test_resolve_simple(self):
         _, attrs = parse_tag("123", None)

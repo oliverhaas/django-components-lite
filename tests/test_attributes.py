@@ -7,14 +7,8 @@ from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, register
 from django_components_lite.attributes import format_attributes, merge_attributes, parse_string_style
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
-@djc_test
 class TestFormatAttributes:
     def test_simple_attribute(self):
         assert format_attributes({"foo": "bar"}) == 'foo="bar"'
@@ -44,7 +38,6 @@ class TestFormatAttributes:
         assert format_attributes({"required": True}) == "required"
 
 
-@djc_test
 class TestMergeAttributes:
     def test_single_dict(self):
         assert merge_attributes({"foo": "bar"}) == {"foo": "bar"}
@@ -127,7 +120,6 @@ class TestMergeAttributes:
         ) == {"style": ""}
 
 
-@djc_test
 class TestHtmlAttrs:
     template_str: str = """
         {% load component_tags %}
@@ -135,8 +127,7 @@ class TestHtmlAttrs:
         {% endcomponent %}
     """
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_tag_positional_args(self, components_settings):
+    def test_tag_positional_args(self):
         @register("test")
         class AttrsComponent(Component):
             template: str = """
@@ -469,7 +460,6 @@ class TestHtmlAttrs:
         assert "override-me" not in rendered
 
 
-@djc_test
 class TestParseStringStyle:
     def test_single_style(self):
         assert parse_string_style("color: red;") == {"color": "red"}

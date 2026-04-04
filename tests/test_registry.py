@@ -10,11 +10,6 @@ from django_components_lite import (
     register,
     registry,
 )
-from django_components_lite.testing import djc_test
-
-from .testutils import setup_test_config
-
-setup_test_config()
 
 
 class MockComponent(Component):
@@ -30,7 +25,6 @@ class MockComponentView(Component):
         pass
 
 
-@djc_test
 class TestComponentRegistry:
     def test_register_class_decorator(self):
         assert not registry.has("decorated_component")
@@ -137,7 +131,6 @@ class TestComponentRegistry:
             custom_registry.unregister(name="testcomponent")
 
 
-@djc_test
 class TestRegistryHelpers:
     def test_all_registries(self):
         # Default registry

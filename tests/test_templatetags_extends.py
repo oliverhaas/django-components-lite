@@ -4,11 +4,6 @@ from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, register, registry
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
 def gen_slotted_component():
@@ -39,10 +34,8 @@ def gen_component_inside_include():
 #######################
 
 
-@djc_test
 class TestExtendsCompat:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_double_extends_on_main_template_and_component_one_component(self, components_settings):
+    def test_double_extends_on_main_template_and_component_one_component(self):
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
         @register("extended_component")
@@ -86,8 +79,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_double_extends_on_main_template_and_component_two_identical_components(self, components_settings):
+    def test_double_extends_on_main_template_and_component_two_identical_components(self):
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
         @register("extended_component")
@@ -142,10 +134,8 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_double_extends_on_main_template_and_component_two_different_components_same_parent(
         self,
-        components_settings,
     ):
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
@@ -211,10 +201,8 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_double_extends_on_main_template_and_component_two_different_components_different_parent(
         self,
-        components_settings,
     ):
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
@@ -279,8 +267,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_extends_on_component_one_component(self, components_settings):
+    def test_extends_on_component_one_component(self):
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
         @register("extended_component")
@@ -322,8 +309,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_extends_on_component_two_component(self, components_settings):
+    def test_extends_on_component_two_component(self):
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
         @register("extended_component")
@@ -376,8 +362,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_double_extends_on_main_template_and_nested_component(self, components_settings):
+    def test_double_extends_on_main_template_and_nested_component(self):
         registry.register("slotted_component", gen_slotted_component())
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
@@ -433,8 +418,7 @@ class TestExtendsCompat:
 
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_double_extends_on_main_template_and_nested_component_and_include(self, components_settings):
+    def test_double_extends_on_main_template_and_nested_component_and_include(self):
         registry.register("slotted_component", gen_slotted_component())
         registry.register("blocked_and_slotted_component", gen_blocked_and_slotted_component())
 
@@ -485,8 +469,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered_2, expected_2)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slots_inside_extends(self, components_settings):
+    def test_slots_inside_extends(self):
         registry.register("slotted_component", gen_slotted_component())
 
         @register("slot_inside_extends")
@@ -518,8 +501,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slots_inside_include(self, components_settings):
+    def test_slots_inside_include(self):
         registry.register("slotted_component", gen_slotted_component())
 
         @register("slot_inside_include")
@@ -555,8 +537,7 @@ class TestExtendsCompat:
     # We need to ensure that the component inside the `{% include %}` is rendered as if with deps_strategy="ignore",
     # so the parent template decides how to render the JS/CSS.
     # See https://github.com/django-components/django-components/issues/1296
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_with_media_inside_include(self, components_settings):
+    def test_component_with_media_inside_include(self):
         registry.register("test_component", gen_component_inside_include())
 
         template: str = """
@@ -589,8 +570,7 @@ class TestExtendsCompat:
     # then the component inside the `{% include %}` knows it's inside another component.
     # So it's always rendered as if with deps_strategy="ignore".
     # See https://github.com/django-components/django-components/issues/1296
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_with_media_inside_include_inside_component(self, components_settings):
+    def test_component_with_media_inside_include_inside_component(self):
         registry.register("test_component", gen_component_inside_include())
 
         @register("component_inside_include")
@@ -628,8 +608,7 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context())
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_inside_block(self, components_settings):
+    def test_component_inside_block(self):
         registry.register("slotted_component", gen_slotted_component())
         template: str = """
             {% extends "block.html" %}
@@ -663,8 +642,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_block_inside_component(self, components_settings):
+    def test_block_inside_component(self):
         registry.register("slotted_component", gen_slotted_component())
 
         template: str = """
@@ -692,8 +670,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_block_inside_component_parent(self, components_settings):
+    def test_block_inside_component_parent(self):
         registry.register("slotted_component", gen_slotted_component())
 
         @register("block_in_component_parent")
@@ -721,8 +698,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_block_does_not_affect_inside_component(self, components_settings):
+    def test_block_does_not_affect_inside_component(self):
         """
         Assert that when we call a component with `{% component %}`, that
         the `{% block %}` will NOT affect the inner component.
@@ -760,8 +736,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_inside_block__slot_default_block_default(self, components_settings):
+    def test_slot_inside_block__slot_default_block_default(self):
         registry.register("slotted_component", gen_slotted_component())
 
         @register("slot_inside_block")
@@ -792,8 +767,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_inside_block__slot_default_block_override(self, components_settings):
+    def test_slot_inside_block__slot_default_block_override(self):
         registry.clear()
         registry.register("slotted_component", gen_slotted_component())
 
@@ -828,8 +802,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_inside_block__slot_overriden_block_default(self, components_settings):
+    def test_slot_inside_block__slot_overriden_block_default(self):
         registry.register("slotted_component", gen_slotted_component())
 
         @register("slot_inside_block")
@@ -864,8 +837,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_inside_block__slot_overriden_block_overriden(self, components_settings):
+    def test_slot_inside_block__slot_overriden_block_overriden(self):
         registry.register("slotted_component", gen_slotted_component())
 
         @register("slot_inside_block")
@@ -910,8 +882,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_component_using_template_file_extends_relative_file(self, components_settings):
+    def test_component_using_template_file_extends_relative_file(self):
         @register("relative_file_component_using_template_file")
         class RelativeFileComponentUsingTemplateFile(Component):
             template_file = "relative_extends.html"
@@ -937,8 +908,7 @@ class TestExtendsCompat:
 
     # Fix for compatibility with Django's `{% include %}` and `{% extends %}` tags.
     # See https://github.com/django-components/django-components/issues/1325
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_component_with_include_and_extends_in_slot(self, components_settings):
+    def test_nested_component_with_include_and_extends_in_slot(self):
         @register("a_outer")
         class AOuterComponent(Component):
             template: str = """
@@ -975,10 +945,8 @@ class TestExtendsCompat:
         """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
     def test_double_include_template_with_extend(
         self,
-        components_settings,
     ):
         @register("simple_component")
         class SimpleComponent(Component):

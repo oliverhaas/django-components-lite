@@ -2,14 +2,8 @@ import pytest
 
 from django_components_lite import AlreadyRegistered, registry
 from django_components_lite.autodiscovery import autodiscover
-from django_components_lite.testing import djc_test
-
-from .testutils import setup_test_config
-
-setup_test_config()
 
 
-@djc_test
 class TestAutodiscover:
     def test_autodiscover(self):
         all_components = registry.all().copy()

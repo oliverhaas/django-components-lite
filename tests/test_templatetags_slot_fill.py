@@ -5,11 +5,6 @@ from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, Slot, register, registry
-from django_components_lite.testing import djc_test
-
-from .testutils import PARAMETRIZE_CONTEXT_BEHAVIOR, setup_test_config
-
-setup_test_config()
 
 
 def _gen_slotted_component():
@@ -31,10 +26,8 @@ def _gen_slotted_component():
 #######################
 
 
-@djc_test
 class TestComponentSlot:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slotted_template_basic(self, components_settings):
+    def test_slotted_template_basic(self):
         registry.register(name="test1", component=_gen_slotted_component())
 
         @register("test2")
@@ -74,8 +67,7 @@ class TestComponentSlot:
         """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slotted_template_basic_self_closing(self, components_settings):
+    def test_slotted_template_basic_self_closing(self):
         @register("test1")
         class SlottedComponent(Component):
             template: str = """
@@ -169,8 +161,7 @@ class TestComponentSlot:
         """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slotted_template_no_slots_filled(self, components_settings):
+    def test_slotted_template_no_slots_filled(self):
         registry.register(name="test", component=_gen_slotted_component())
 
         template_str: str = """
@@ -191,8 +182,7 @@ class TestComponentSlot:
         """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slotted_template_without_slots(self, components_settings):
+    def test_slotted_template_without_slots(self):
         @register("test")
         class SlottedComponentNoSlots(Component):
             template: str = """
@@ -208,8 +198,7 @@ class TestComponentSlot:
 
         assertHTMLEqual(rendered, "<custom-template></custom-template>")
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slotted_template_without_slots_and_single_quotes(self, components_settings):
+    def test_slotted_template_without_slots_and_single_quotes(self):
         @register("test")
         class SlottedComponentNoSlots(Component):
             template: str = """
@@ -225,8 +214,7 @@ class TestComponentSlot:
 
         assertHTMLEqual(rendered, "<custom-template></custom-template>")
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_variable_fill_name(self, components_settings):
+    def test_variable_fill_name(self):
         registry.register(name="test", component=_gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -247,8 +235,7 @@ class TestComponentSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_missing_required_slot_raises_error(self, components_settings):
+    def test_missing_required_slot_raises_error(self):
         class Comp(Component):
             template: str = """
                 {% load component_tags %}
@@ -271,7 +258,6 @@ class TestComponentSlot:
             template.render(Context())
 
     # NOTE: This is relevant only for the "isolated" mode
-    @djc_test(components_settings={})
     def test_slots_of_top_level_comps_can_access_full_outer_ctx(self):
         class SlottedComponent(Component):
             template: str = """
@@ -315,8 +301,7 @@ class TestComponentSlot:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_target_default_slot_as_named(self, components_settings):
+    def test_target_default_slot_as_named(self):
         @register("test")
         class Comp(Component):
             template: str = """
@@ -346,8 +331,7 @@ class TestComponentSlot:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_raises_on_doubly_filled_slot__same_name(self, components_settings):
+    def test_raises_on_doubly_filled_slot__same_name(self):
         @register("test")
         class Comp(Component):
             template: str = """
@@ -376,8 +360,7 @@ class TestComponentSlot:
         ):
             template.render(Context())
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_raises_on_doubly_filled_slot__named_and_default(self, components_settings):
+    def test_raises_on_doubly_filled_slot__named_and_default(self):
         @register("test")
         class Comp(Component):
             template: str = """
@@ -405,8 +388,7 @@ class TestComponentSlot:
         ):
             template.render(Context())
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_raises_on_doubly_filled_slot__named_and_default_2(self, components_settings):
+    def test_raises_on_doubly_filled_slot__named_and_default_2(self):
         @register("test")
         class Comp(Component):
             template: str = """
@@ -435,8 +417,7 @@ class TestComponentSlot:
         ):
             template.render(Context())
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_multiple_slots_with_same_name_different_flags(self, components_settings):
+    def test_multiple_slots_with_same_name_different_flags(self):
         class TestComp(Component):
             def get_template_data(self, args, kwargs, slots, context):
                 return {"required": kwargs["required"]}
@@ -492,8 +473,7 @@ class TestComponentSlot:
                 },
             )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_in_include(self, components_settings):
+    def test_slot_in_include(self):
         @register("slotted")
         class SlottedWithIncludeComponent(Component):
             template: str = """
@@ -521,8 +501,7 @@ class TestComponentSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_in_include_raises_if_isolated(self, components_settings):
+    def test_slot_in_include_raises_if_isolated(self):
         @register("broken_component")
         class BrokenComponent(Component):
             template: str = """
@@ -546,10 +525,8 @@ class TestComponentSlot:
             Template(template_str).render(Context({}))
 
 
-@djc_test
 class TestComponentSlotDefault:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_default_slot_is_fillable_by_implicit_fill_content(self, components_settings):
+    def test_default_slot_is_fillable_by_implicit_fill_content(self):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
             template: str = """
@@ -577,8 +554,7 @@ class TestComponentSlotDefault:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_default_slot_is_fillable_by_explicit_fill_content(self, components_settings):
+    def test_default_slot_is_fillable_by_explicit_fill_content(self):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
             template: str = """
@@ -605,8 +581,7 @@ class TestComponentSlotDefault:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_multiple_default_slots_with_same_name(self, components_settings):
+    def test_multiple_default_slots_with_same_name(self):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
             template: str = """
@@ -633,8 +608,7 @@ class TestComponentSlotDefault:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_multiple_default_slots_with_different_names(self, components_settings):
+    def test_multiple_default_slots_with_different_names(self):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
             template: str = """
@@ -661,8 +635,7 @@ class TestComponentSlotDefault:
         ):
             template.render(Context({}))
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_error_raised_when_default_and_required_slot_not_filled(self, components_settings):
+    def test_error_raised_when_default_and_required_slot_not_filled(self):
         @register("test_comp")
         class ComponentWithDefaultAndRequiredSlot(Component):
             template: str = """
@@ -686,8 +659,7 @@ class TestComponentSlotDefault:
         ):
             template.render(Context())
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_fill_tag_can_occur_within_component_nested_in_implicit_fill(self, components_settings):
+    def test_fill_tag_can_occur_within_component_nested_in_implicit_fill(self):
         registry.register("slotted", _gen_slotted_component())
 
         @register("test_comp")
@@ -724,8 +696,7 @@ class TestComponentSlotDefault:
         rendered = template.render(Context({}))
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_error_from_mixed_implicit_and_explicit_fill_content(self, components_settings):
+    def test_error_from_mixed_implicit_and_explicit_fill_content(self):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
             template: str = """
@@ -750,8 +721,7 @@ class TestComponentSlotDefault:
         ):
             Template(template_str).render(Context({}))
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_comments_permitted_inside_implicit_fill_content(self, components_settings):
+    def test_comments_permitted_inside_implicit_fill_content(self):
         @register("test_comp")
         class ComponentWithDefaultSlot(Component):
             template: str = """
@@ -781,8 +751,7 @@ class TestComponentSlotDefault:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_implicit_fill_when_no_slot_marked_default(self, components_settings):
+    def test_implicit_fill_when_no_slot_marked_default(self):
         registry.register("test_comp", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -803,8 +772,7 @@ class TestComponentSlotDefault:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_implicit_fill_when_slot_marked_default_not_rendered(self, components_settings):
+    def test_implicit_fill_when_slot_marked_default_not_rendered(self):
         @register("test_comp")
         class ConditionalSlotted(Component):
             def get_template_data(self, args, kwargs, slots, context):
@@ -853,10 +821,8 @@ class TestComponentSlotDefault:
         )
 
 
-@djc_test
 class TestPassthroughSlots:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_if_for(self, components_settings):
+    def test_if_for(self):
         @register("test")
         class SlottedComponent(Component):
             template: str = """
@@ -911,8 +877,7 @@ class TestPassthroughSlots:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_with(self, components_settings):
+    def test_with(self):
         @register("test")
         class SlottedComponent(Component):
             template: str = """
@@ -955,8 +920,7 @@ class TestPassthroughSlots:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_if_for_raises_on_content_outside_fill(self, components_settings):
+    def test_if_for_raises_on_content_outside_fill(self):
         @register("test")
         class SlottedComponent(Component):
             template: str = """
@@ -1000,8 +964,7 @@ class TestPassthroughSlots:
         ):
             template.render(Context({"slot_names": ["header", "main"]}))
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slots_inside_loops(self, components_settings):
+    def test_slots_inside_loops(self):
         @register("test_comp")
         class OuterComp(Component):
             def get_template_data(self, args, kwargs, slots, context):
@@ -1041,8 +1004,7 @@ class TestPassthroughSlots:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_passthrough_slots(self, components_settings):
+    def test_passthrough_slots(self):
         registry.register("slotted", _gen_slotted_component())
 
         @register("test_comp")
@@ -1092,8 +1054,7 @@ class TestPassthroughSlots:
 
     # NOTE: Ideally we'd (optionally) raise an error / warning here, but it's not possible
     # with current implementation. So this tests serves as a documentation of the current behavior.
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_passthrough_slots_unknown_fills_ignored(self, components_settings):
+    def test_passthrough_slots_unknown_fills_ignored(self):
         registry.register("slotted", _gen_slotted_component())
 
         @register("test_comp")
@@ -1143,7 +1104,6 @@ class TestPassthroughSlots:
 
 
 # See https://github.com/django-components/django-components/issues/698
-@djc_test
 class TestNestedSlots:
     def _gen_nested_slots_component(self):
         class NestedSlots(Component):
@@ -1173,8 +1133,7 @@ class TestNestedSlots:
 
         return NestedSlots
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_empty(self, components_settings):
+    def test_empty(self):
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
@@ -1199,8 +1158,7 @@ class TestNestedSlots:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_override_outer(self, components_settings):
+    def test_override_outer(self):
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
@@ -1221,8 +1179,7 @@ class TestNestedSlots:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_override_middle(self, components_settings):
+    def test_override_middle(self):
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
@@ -1249,8 +1206,7 @@ class TestNestedSlots:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_override_inner(self, components_settings):
+    def test_override_inner(self):
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
@@ -1280,8 +1236,7 @@ class TestNestedSlots:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_override_all(self, components_settings):
+    def test_override_all(self):
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
@@ -1313,10 +1268,8 @@ class TestNestedSlots:
         assertHTMLEqual(rendered, expected)
 
 
-@djc_test
 class TestSlottedTemplateRegression:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slotted_template_that_uses_missing_variable(self, components_settings):
+    def test_slotted_template_that_uses_missing_variable(self):
         @register("test")
         class SlottedComponentWithMissingVariable(Component):
             template: str = """
@@ -1348,10 +1301,8 @@ class TestSlottedTemplateRegression:
         )
 
 
-@djc_test
 class TestSlotFallback:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_basic(self, components_settings):
+    def test_basic(self):
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -1375,8 +1326,7 @@ class TestSlotFallback:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_multiple_calls(self, components_settings):
+    def test_multiple_calls(self):
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -1401,8 +1351,7 @@ class TestSlotFallback:
         """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_under_if_and_forloop(self, components_settings):
+    def test_under_if_and_forloop(self):
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -1432,8 +1381,7 @@ class TestSlotFallback:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_fills(self, components_settings):
+    def test_nested_fills(self):
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
@@ -1481,10 +1429,8 @@ class TestSlotFallback:
         )
 
 
-@djc_test
 class TestScopedSlot:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data(self, components_settings):
+    def test_slot_data(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1518,8 +1464,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_with_flags(self, components_settings):
+    def test_slot_data_with_flags(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1553,8 +1498,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_with_slot_fallback(self, components_settings):
+    def test_slot_data_with_slot_fallback(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1590,8 +1534,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_with_variable(self, components_settings):
+    def test_slot_data_with_variable(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1626,8 +1569,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_with_spread(self, components_settings):
+    def test_slot_data_with_spread(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1664,8 +1606,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_and_fallback_on_default_slot(self, components_settings):
+    def test_slot_data_and_fallback_on_default_slot(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1701,8 +1642,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_raises_on_slot_data_and_slot_fallback_same_var(self, components_settings):
+    def test_slot_data_raises_on_slot_data_and_slot_fallback_same_var(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1734,8 +1674,7 @@ class TestScopedSlot:
         ):
             Template(template).render(Context())
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_fill_without_data(self, components_settings):
+    def test_slot_data_fill_without_data(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1763,8 +1702,7 @@ class TestScopedSlot:
         expected = "<div> overriden </div>"
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_fill_without_slot_data(self, components_settings):
+    def test_slot_data_fill_without_slot_data(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1786,8 +1724,7 @@ class TestScopedSlot:
         expected = "<div> {} </div>"
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_no_fill(self, components_settings):
+    def test_slot_data_no_fill(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1812,8 +1749,7 @@ class TestScopedSlot:
         expected = "<div> Default text </div>"
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_fill_with_variables(self, components_settings):
+    def test_slot_data_fill_with_variables(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1855,8 +1791,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slot_data_fill_with_spread(self, components_settings):
+    def test_slot_data_fill_with_spread(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1900,8 +1835,7 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_nested_fills(self, components_settings):
+    def test_nested_fills(self):
         @register("test")
         class TestComponent(Component):
             template: str = """
@@ -1948,7 +1882,6 @@ class TestScopedSlot:
         )
 
 
-@djc_test
 class TestDuplicateSlot:
     def _gen_duplicate_slot_component(self):
         class DuplicateSlotComponent(Component):
@@ -2042,8 +1975,7 @@ class TestDuplicateSlot:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_duplicate_slots_fallback(self, components_settings):
+    def test_duplicate_slots_fallback(self):
         registry.register(name="duplicate_slot", component=self._gen_duplicate_slot_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
@@ -2065,8 +1997,7 @@ class TestDuplicateSlot:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_duplicate_slots_nested(self, components_settings):
+    def test_duplicate_slots_nested(self):
         registry.register(name="duplicate_slot_nested", component=self._gen_duplicate_slot_nested_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
@@ -2108,8 +2039,7 @@ class TestDuplicateSlot:
             """,
         )
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_duplicate_slots_nested_fallback(self, components_settings):
+    def test_duplicate_slots_nested_fallback(self):
         registry.register(name="duplicate_slot_nested", component=self._gen_duplicate_slot_nested_component())
         registry.register(name="calendar", component=self._gen_calendar_component())
 
@@ -2149,10 +2079,8 @@ class TestDuplicateSlot:
         )
 
 
-@djc_test
 class TestSlotFillTemplateSyntaxError:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_fill_with_no_parent_is_error(self, components_settings):
+    def test_fill_with_no_parent_is_error(self):
         template_str: str = """
             {% load component_tags %}
             {% fill "header" %}contents{% endfill %}
@@ -2165,8 +2093,7 @@ class TestSlotFillTemplateSyntaxError:
         ):
             Template(template_str).render(Context({}))
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_non_unique_fill_names_is_error(self, components_settings):
+    def test_non_unique_fill_names_is_error(self):
         registry.register("test", _gen_slotted_component())
 
         template_str: str = """
@@ -2185,8 +2112,7 @@ class TestSlotFillTemplateSyntaxError:
         ):
             Template(template_str).render(Context({}))
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_non_unique_fill_names_is_error_via_vars(self, components_settings):
+    def test_non_unique_fill_names_is_error_via_vars(self):
         registry.register("test", _gen_slotted_component())
 
         template_str: str = """
@@ -2208,10 +2134,9 @@ class TestSlotFillTemplateSyntaxError:
             Template(template_str).render(Context({}))
 
 
-@djc_test
 class TestSlotBehavior:
     # NOTE: This is standalone function instead of setUp, so we can configure
-    # Django settings per test with `@override_settings` / `@djc_test`
+    # Django settings per test with `@override_settings`
     def make_template(self) -> Template:
         class SlottedComponent(Component):
             template: str = """
@@ -2253,7 +2178,6 @@ class TestSlotBehavior:
         """
         return Template(template_str)
 
-    @djc_test(components_settings={})
     def test_slot_context__isolated(self):
         template = self.make_template()
         # {{ name }} should be "Jannete" everywhere
@@ -2295,10 +2219,8 @@ class TestSlotBehavior:
         )
 
 
-@djc_test
 class TestSlotInput:
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slots_accessible_when_python_render(self, components_settings):
+    def test_slots_accessible_when_python_render(self):
         seen_slots: dict = {}
 
         @register("test")
@@ -2333,8 +2255,7 @@ class TestSlotInput:
         assert callable(seen_slots["main"])
         assert "footer" not in seen_slots
 
-    @djc_test(parametrize=PARAMETRIZE_CONTEXT_BEHAVIOR)
-    def test_slots_normalized_as_slot_instances(self, components_settings):
+    def test_slots_normalized_as_slot_instances(self):
         seen_slots: dict[str, Slot] = {}
 
         @register("test")

@@ -5,21 +5,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
+from django.test import override_settings
 
-from django_components_lite.testing import djc_test
 from django_components_lite.util.loader import _filepath_to_python_module, get_component_dirs, get_component_files
 
-from .testutils import setup_test_config
 
-setup_test_config()
-
-
-@djc_test
 class TestComponentDirs:
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
     )
     def test_get_dirs__base_dir(self):
         dirs = sorted(get_component_dirs())
@@ -39,10 +32,8 @@ class TestComponentDirs:
         assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-3:] == ("tests", "test_app", "components")
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve() / "test_structures" / "test_structure_1",
-        },
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve() / "test_structures" / "test_structure_1",
     )
     def test_get_dirs__base_dir__complex(self):
         dirs = sorted(get_component_dirs())
@@ -62,11 +53,9 @@ class TestComponentDirs:
         ]
         assert own_dirs == expected
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "dirs": [
                 Path(__file__).parent.resolve() / "components",
                 ("with_alias", Path(__file__).parent.resolve() / "components"),
@@ -98,11 +87,9 @@ class TestComponentDirs:
         warn_inputs = [warn.args[0] for warn in mock_warning.call_args_list]
         assert "Got <class 'int'> : 3" in warn_inputs[0]
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "dirs": [],
         },
     )
@@ -118,11 +105,9 @@ class TestComponentDirs:
         assert apps_dirs[0].parts[-2:] == ("django_components_lite", "components")
         assert apps_dirs[1].parts[-3:] == ("tests", "test_app", "components")
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "dirs": ["components"],
         },
     )
@@ -130,11 +115,9 @@ class TestComponentDirs:
         with pytest.raises(ValueError, match=re.escape("COMPONENTS.dirs must contain absolute paths")):
             get_component_dirs()
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "dirs": [("with_alias", "components")],
         },
     )
@@ -142,11 +125,9 @@ class TestComponentDirs:
         with pytest.raises(ValueError, match=re.escape("COMPONENTS.dirs must contain absolute paths")):
             get_component_dirs()
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "app_dirs": ["custom_comps_dir"],
         },
     )
@@ -167,11 +148,9 @@ class TestComponentDirs:
             Path(__file__).parent.resolve() / "components",
         ]
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "app_dirs": [],
         },
     )
@@ -185,11 +164,9 @@ class TestComponentDirs:
             Path(__file__).parent.resolve() / "components",
         ]
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
-        components_settings={
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        COMPONENTS={
             "app_dirs": ["this_dir_does_not_exist"],
         },
     )
@@ -203,11 +180,9 @@ class TestComponentDirs:
             Path(__file__).parent.resolve() / "components",
         ]
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-            "INSTALLED_APPS": ("django_components_lite", "tests.test_app_nested.app"),
-        },
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
+        INSTALLED_APPS=("django_components_lite", "tests.test_app_nested.app"),
     )
     def test_get_dirs__nested_apps(self):
         dirs = sorted(get_component_dirs())
@@ -228,12 +203,9 @@ class TestComponentDirs:
         ]
 
 
-@djc_test
 class TestComponentFiles:
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
     )
     def test_get_files__py(self):
         files = sorted(get_component_files(".py"))
@@ -266,10 +238,8 @@ class TestComponentFiles:
         assert file_paths[8].parts[-3:] == ("django_components_lite", "components", "__init__.py")
         assert file_paths[9].parts[-5:] == ("tests", "test_app", "components", "app_lvl_comp", "app_lvl_comp.py")
 
-    @djc_test(
-        django_settings={
-            "BASE_DIR": Path(__file__).parent.resolve(),
-        },
+    @override_settings(
+        BASE_DIR=Path(__file__).parent.resolve(),
     )
     def test_get_files__js(self):
         files = sorted(get_component_files(".js"))
@@ -295,7 +265,6 @@ class TestComponentFiles:
         assert file_paths[5].parts[-5:] == ("tests", "test_app", "components", "app_lvl_comp", "app_lvl_comp.js")
 
 
-@djc_test
 class TestFilepathToPythonModule:
     def test_prepares_path__str(self):
         base_path = str(settings.BASE_DIR)
