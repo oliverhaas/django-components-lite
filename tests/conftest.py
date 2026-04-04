@@ -1,7 +1,6 @@
 """Pytest configuration and fixtures for django-components-lite tests."""
 
 import gc
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -67,7 +66,6 @@ def _djc_isolation():
     4. Restores all state after each test
     """
     from django_components_lite.app_settings import app_settings
-    from django_components_lite.autodiscovery import LOADED_MODULES
     from django_components_lite.component import ALL_COMPONENTS, component_node_subclasses_by_name
     from django_components_lite.component_registry import ALL_REGISTRIES
     from django_components_lite.template import _reset_component_template_file_cache, loading_components
@@ -143,11 +141,6 @@ def _djc_isolation():
         current_keys = set(registry._registry.keys())
         for key in current_keys - initial_keys:
             registry.unregister(key)
-
-    # Clean up autodiscovered modules
-    for mod in LOADED_MODULES:
-        sys.modules.pop(mod, None)
-    LOADED_MODULES.clear()
 
     # Clear component template cache and other state
     _reset_component_template_file_cache()

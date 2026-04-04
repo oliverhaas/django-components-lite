@@ -4,9 +4,6 @@ from collections.abc import Callable
 from django_components_lite.util.loader import get_component_files
 from django_components_lite.util.logger import logger
 
-# Tracks imported modules so they can be cleaned up between tests.
-LOADED_MODULES: list[str] = []
-
 
 def autodiscover(
     map_module: Callable[[str], str] | None = None,
@@ -44,7 +41,5 @@ def _import_modules(
         logger.debug(f'Importing module "{module_name}"')
         importlib.import_module(module_name)
         imported_modules.append(module_name)
-
-        LOADED_MODULES.append(module_name)
 
     return imported_modules
