@@ -28,7 +28,6 @@ Issues = "https://github.com/oliverhaas/django-components-lite/issues"
 
 [dependency-groups]
 dev = [
-  "django-template-partials==25.3",
   "mypy==1.20.0",
   "playwright==1.55.0",
   "pre-commit==4.5.1",

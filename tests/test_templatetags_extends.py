@@ -1,6 +1,7 @@
 """Catch-all for tests that use template tags and don't fit other files"""
 
-from django.template import Context, Template
+import pytest
+from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, register, registry
@@ -32,6 +33,23 @@ def gen_component_inside_include():
 #######################
 # TESTS
 #######################
+
+
+class TestBlockInsideFillDisallowed:
+    def test_block_inside_fill_raises_error(self):
+        @register("test_comp")
+        class _TestComp(Component):
+            template: str = "<div>{% slot 'main' %}{% endslot %}</div>"
+
+        with pytest.raises(TemplateSyntaxError, match="not allowed inside"):
+            Template(
+                "{% load component_tags %}"
+                '{% component "test_comp" %}'
+                '{% fill "main" %}'
+                "{% block body %}{% endblock %}"
+                "{% endfill %}"
+                "{% endcomponent %}",
+            )
 
 
 class TestExtendsCompat:
@@ -469,70 +487,6 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered_2, expected_2)
 
-    def test_slots_inside_extends(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("slot_inside_extends")
-        class SlotInsideExtendsComponent(Component):
-            template: str = """
-                {% extends "block_in_slot_in_component.html" %}
-            """
-
-        template: str = """
-            {% load component_tags %}
-            {% component "slot_inside_extends" %}
-                {% fill "body" %}
-                    BODY_FROM_FILL
-                {% endfill %}
-            {% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>BODY_FROM_FILL</main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_slots_inside_include(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("slot_inside_include")
-        class SlotInsideIncludeComponent(Component):
-            template: str = """
-                {% include "block_in_slot_in_component.html" %}
-            """
-
-        template: str = """
-            {% load component_tags %}
-            {% component "slot_inside_include" %}
-                {% fill "body" %}
-                    BODY_FROM_FILL
-                {% endfill %}
-            {% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>BODY_FROM_FILL</main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
     # In this case, `{% include %}` is NOT nested inside a `{% component %}` tag.
     # We need to ensure that the component inside the `{% include %}` is rendered as if with deps_strategy="ignore",
     # so the parent template decides how to render the JS/CSS.
@@ -637,246 +591,6 @@ class TestExtendsCompat:
                         </custom-template>
                     </div>
                 </main>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_block_inside_component(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        template: str = """
-            {% extends "block_in_component.html" %}
-            {% block body %}
-            <div>
-                58 giraffes and 2 pantaloons
-            </div>
-            {% endblock %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>
-                        <div> 58 giraffes and 2 pantaloons </div>
-                    </main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_block_inside_component_parent(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("block_in_component_parent")
-        class BlockInCompParent(Component):
-            template_file = "block_in_component_parent.html"
-
-        template: str = """
-            {% load component_tags %}
-            {% component "block_in_component_parent" %}{% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>
-                        <div> 58 giraffes and 2 pantaloons </div>
-                    </main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_block_does_not_affect_inside_component(self):
-        """
-        Assert that when we call a component with `{% component %}`, that
-        the `{% block %}` will NOT affect the inner component.
-        """
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("block_inside_slot_v1")
-        class BlockInSlotInComponent(Component):
-            template_file = "block_in_slot_in_component.html"
-
-        template: str = """
-            {% load component_tags %}
-            {% component "block_inside_slot_v1" %}
-                {% fill "body" %}
-                    BODY_FROM_FILL
-                {% endfill %}
-            {% endcomponent %}
-            {% block inner %}
-                wow
-            {% endblock %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>BODY_FROM_FILL</main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-            wow
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_slot_inside_block__slot_default_block_default(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("slot_inside_block")
-        class _SlotInsideBlockComponent(Component):
-            template: str = """
-                {% extends "slot_inside_block.html" %}
-            """
-
-        template: str = """
-            {% load component_tags %}
-            {% component "slot_inside_block" %}{% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>
-                        Helloodiddoo
-                        Default inner
-                    </main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_slot_inside_block__slot_default_block_override(self):
-        registry.clear()
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("slot_inside_block")
-        class _SlotInsideBlockComponent(Component):
-            template: str = """
-                {% extends "slot_inside_block.html" %}
-                {% block inner %}
-                    INNER BLOCK OVERRIDEN
-                {% endblock %}
-            """
-
-        template: str = """
-            {% load component_tags %}
-            {% component "slot_inside_block" %}{% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>
-                        Helloodiddoo
-                        INNER BLOCK OVERRIDEN
-                    </main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_slot_inside_block__slot_overriden_block_default(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("slot_inside_block")
-        class _SlotInsideBlockComponent(Component):
-            template: str = """
-                {% extends "slot_inside_block.html" %}
-            """
-
-        template: str = """
-            {% load component_tags %}
-            {% component "slot_inside_block" %}
-                {% fill "body" %}
-                    SLOT OVERRIDEN
-                {% endfill %}
-            {% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>
-                        Helloodiddoo
-                        SLOT OVERRIDEN
-                    </main>
-                    <footer>Default footer</footer>
-                </custom-template>
-            </body>
-            </html>
-        """
-        assertHTMLEqual(rendered, expected)
-
-    def test_slot_inside_block__slot_overriden_block_overriden(self):
-        registry.register("slotted_component", gen_slotted_component())
-
-        @register("slot_inside_block")
-        class _SlotInsideBlockComponent(Component):
-            template: str = """
-                {% extends "slot_inside_block.html" %}
-                {% block inner %}
-                    {% load component_tags %}
-                    {% slot "new_slot" %}{% endslot %}
-                {% endblock %}
-                whut
-            """
-
-        # NOTE: The "body" fill will NOT show up, because we override the `inner` block
-        # with a different slot. But the "new_slot" WILL show up.
-        template: str = """
-            {% load component_tags %}
-            {% component "slot_inside_block" %}
-                {% fill "body" %}
-                    SLOT_BODY__OVERRIDEN
-                {% endfill %}
-                {% fill "new_slot" %}
-                    SLOT_NEW__OVERRIDEN
-                {% endfill %}
-            {% endcomponent %}
-        """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
-        expected = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <body>
-                <custom-template>
-                    <header></header>
-                    <main>
-                        Helloodiddoo
-                        SLOT_NEW__OVERRIDEN
-                    </main>
-                    <footer>Default footer</footer>
-                </custom-template>
             </body>
             </html>
         """

@@ -4,9 +4,7 @@ from django import VERSION as DJANGO_VERSION
 from django.template import Context, NodeList, Template
 from django.template.base import Node, Origin, Parser
 from django.template.library import InclusionNode
-from django.template.loader_tags import IncludeNode
 
-from django_components_lite.context import COMPONENT_IS_NESTED_KEY
 from django_components_lite.util.template_parser import parse_template
 
 
@@ -17,7 +15,6 @@ def monkeypatch_template_cls(template_cls: type[Template]) -> None:
 
     monkeypatch_template_init(template_cls)
     monkeypatch_template_compile_nodelist(template_cls)
-    monkeypatch_template_render(template_cls)
     template_cls._djc_patched = True
 
 
@@ -96,9 +93,6 @@ def monkeypatch_template_compile_nodelist(template_cls: type[Template]) -> None:
             nodelist = parser.parse()
             if DJANGO_VERSION >= (5, 1):
                 #  ---------------- ADDED IN Django v5.1 - See https://github.com/django/django/commit/35bbb2c9c01882b1d77b0b8c737ac646144833d4
-                # NOTE: This must be enabled ONLY for 5.1 and later. Previously it was also for older
-                #       Django versions, and this led to compatibility issue with django-template-partials.
-                #       See https://github.com/carltongibson/django-template-partials/pull/85#issuecomment-3187354790
                 self.extra_data = getattr(parser, "extra_data", {})
                 #  ---------------- END OF ADDED IN Django v5.1 ----------------
             return nodelist
@@ -108,88 +102,6 @@ def monkeypatch_template_compile_nodelist(template_cls: type[Template]) -> None:
             raise
 
     template_cls.compile_nodelist = _compile_nodelist
-
-
-def monkeypatch_template_render(template_cls: type[Template]) -> None:
-    # Modify `Template.render` to set `isolated_context` kwarg of `push_state`
-    # based on our custom `_DJC_COMPONENT_IS_NESTED`.
-    #
-    # Part of fix for https://github.com/django-components/django-components/issues/508
-    #
-    # NOTE 1: While we could've subclassed Template, then we would need to either
-    # 1) ask the user to change the backend, so all templates are of our subclass, or
-    # 2) copy the data from user's Template class instance to our subclass instance,
-    # which could lead to doubly parsing the source, and could be problematic if users
-    # used more exotic subclasses of Template.
-    #
-    # Instead, modifying only the `render` method of an already-existing instance
-    # should work well with any user-provided custom subclasses of Template, and it
-    # doesn't require the source to be parsed multiple times. User can pass extra args/kwargs,
-    # and can modify the rendering behavior by overriding the `_render` method.
-    #
-    # NOTE 2: Instead of setting `_DJC_COMPONENT_IS_NESTED` context key, alternatively we could
-    # have passed the value to `monkeypatch_template_render` directly. However, we intentionally
-    # did NOT do that, so the monkey-patched method is more robust, and can be e.g. copied
-    # to other.
-    if is_cls_patched(template_cls):
-        # Do not patch if done so already. This helps us avoid RecursionError
-        return
-
-    # NOTE: This implementation is based on Django v5.1.3)
-    def _template_render(self: Template, context: Context, *args: Any, **kwargs: Any) -> str:
-        """Display stage -- can be called many times"""
-        # We parametrized `isolated_context`, which was `True` in the original method.
-        # MUST be `True` for templates that are NOT imported with `{% extends %}` tag
-        isolated_context = True if COMPONENT_IS_NESTED_KEY not in context else not context[COMPONENT_IS_NESTED_KEY]
-
-        with context.render_context.push_state(self, isolated_context=isolated_context):
-            if context.template is None:
-                with context.bind_template(self):
-                    context.template_name = self.name
-                    return self._render(context, *args, **kwargs)
-            else:
-                return self._render(context, *args, **kwargs)
-
-    template_cls.render = _template_render
-
-
-def monkeypatch_include_node(include_node_cls: type[Node]) -> None:
-    if is_cls_patched(include_node_cls):
-        return
-
-    monkeypatch_include_render(include_node_cls)
-    include_node_cls._djc_patched = True
-
-
-def monkeypatch_include_render(include_node_cls: type[Node]) -> None:
-    # Modify `IncludeNode.render()` (what renders `{% include %}` tag) so that the included
-    # template does NOT render the JS/CSS by itself.
-    #
-    # Instead, we want the parent template
-    # (which contains the `{% component %}` tag) to decide whether to render the JS/CSS.
-    #
-    # We achieve this by setting `DJC_DEPS_STRATEGY` to `ignore` in the context.
-    #
-    # Fix for https://github.com/django-components/django-components/issues/1296
-    if is_cls_patched(include_node_cls):
-        # Do not patch if done so already. This helps us avoid RecursionError
-        return
-
-    orig_include_render = include_node_cls.render
-
-    # NOTE: This implementation is based on Django v5.1.3)
-    def _include_render(self: IncludeNode, context: Context, *args: Any, **kwargs: Any) -> str:
-        # NOTE: `_STRATEGY_CONTEXT_KEY` is used so that we defer the rendering of components' JS/CSS
-        #       to until the parent template that used the `{% include %}` tag is rendered.
-        # NOTE: `{ COMPONENT_IS_NESTED_KEY: False }` is used so that a new RenderContext layer is created,
-        #       so that inside each `{% include %}` the template can use the `{% extends %}` tag.
-        #       Otherwise, the state leaks, and if both `{% include %}` templates use the `{% extends %}` tag,
-        #       the second one raises, because it would be like using two `{% extends %}` tags in the same template.
-        #       See https://github.com/django-components/django-components/issues/1389
-        with context.update({COMPONENT_IS_NESTED_KEY: False}):
-            return orig_include_render(self, context, *args, **kwargs)
-
-    include_node_cls.render = _include_render
 
 
 def monkeypatch_inclusion_node(inclusion_node_cls: type[Node]) -> None:
@@ -254,45 +166,6 @@ def monkeypatch_inclusion_render(inclusion_node_cls: type[Node]) -> None:
             return orig_inclusion_render(self, context, *args, **kwargs)
 
     inclusion_node_cls.render = _inclusion_render
-
-
-# NOTE: Remove once Django v5.2 reaches end of life
-#       See https://github.com/django-components/django-components/issues/1323#issuecomment-3163478287
-def monkeypatch_template_proxy_cls() -> None:
-    # Patch TemplateProxy if template_partials is installed
-    # See https://github.com/django-components/django-components/issues/1323#issuecomment-3164224042
-    try:
-        from template_partials.templatetags.partials import TemplateProxy
-    except ImportError:
-        # template_partials is in INSTALLED_APPS but not actually installed
-        # This is fine, just skip the patching
-        return
-
-    if is_cls_patched(TemplateProxy):
-        return
-
-    monkeypatch_template_proxy_render(TemplateProxy)
-    TemplateProxy._djc_patched = True
-
-
-def monkeypatch_template_proxy_render(template_proxy_cls: type[Any]) -> None:
-    # NOTE: TemplateProxy.render() is same logic as Template.render(), just duplicated.
-    # So we can instead reuse Template.render()
-    def _template_proxy_render(self: Any, context: Context, *_args: Any, **_kwargs: Any) -> str:
-        return Template.render(self, context)
-
-    template_proxy_cls.render = _template_proxy_render
-
-    # TemplateProxy from django-template-partials replicates Template.render().
-    # However, the older versions (e.g. 24.1) didn't define `_render()` method.
-    # So we define it to support the older versions of django-template-partials.
-    # With this, we support django-template-partials as old as v23.3.
-    if not hasattr(template_proxy_cls, "_render"):
-
-        def _render(self: Any, context: Context, *args: Any, **kwargs: Any) -> str:
-            return self.nodelist.render(context, *args, **kwargs)
-
-        template_proxy_cls._render = _render
 
 
 def is_cls_patched(cls: type[Any]) -> bool:

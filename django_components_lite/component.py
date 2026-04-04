@@ -15,7 +15,6 @@ from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 from django.http import HttpRequest, HttpResponse
 from django.template.base import FilterExpression, NodeList, Parser, Template, Token
 from django.template.context import Context, RequestContext
-from django.template.loader_tags import BLOCK_CONTEXT_KEY, BlockContext
 from django.test.signals import template_rendered
 from django.utils.safestring import mark_safe
 
@@ -23,7 +22,7 @@ from django_components_lite.component_media import resolve_component_files
 from django_components_lite.component_registry import ComponentRegistry
 from django_components_lite.component_registry import registry as registry_
 from django_components_lite.constants import COMP_ID_PREFIX
-from django_components_lite.context import _COMPONENT_CONTEXT_KEY, COMPONENT_IS_NESTED_KEY, make_isolated_context_copy
+from django_components_lite.context import _COMPONENT_CONTEXT_KEY, make_isolated_context_copy
 from django_components_lite.dependencies import build_dependency_tags
 from django_components_lite.node import BaseNode
 
@@ -1727,12 +1726,6 @@ class Component(metaclass=ComponentMeta):
         # 2. Prepare component state
         ######################################
 
-        # Required for compatibility with Django's {% extends %} tag
-        # See https://github.com/django-components/django-components/pull/859
-        context.render_context.push(  # type: ignore[union-attr]
-            {BLOCK_CONTEXT_KEY: context.render_context.get(BLOCK_CONTEXT_KEY, BlockContext())},  # type: ignore[union-attr]
-        )
-
         # We pass down the components the info about the component's parent.
         # This is used for correctly resolving slot fills, correct rendering order,
         # or CSS scoping.
@@ -1795,16 +1788,6 @@ class Component(metaclass=ComponentMeta):
         #############################################################################
 
         with prepare_component_template(component, template_data) as template:
-            # Set `_DJC_COMPONENT_IS_NESTED` based on whether we're currently INSIDE
-            # the `{% extends %}` tag.
-            # Part of fix for https://github.com/django-components/django-components/issues/508
-            # See django_monkeypatch.py
-            comp_is_nested = (
-                bool(context.render_context.get(BLOCK_CONTEXT_KEY))  # type: ignore[union-attr]
-                if template is not None
-                else False
-            )
-
             # Capture the template name so we can print better error messages (currently used in slots)
             component_ctx.template_name = template.name if template else None
 
@@ -1814,7 +1797,6 @@ class Component(metaclass=ComponentMeta):
                     **component.context_processors_data,
                     # Private context fields
                     _COMPONENT_CONTEXT_KEY: render_id,
-                    COMPONENT_IS_NESTED_KEY: comp_is_nested,
                     # NOTE: Public API for variables accessible from within a component's template
                     # See https://github.com/django-components/django-components/issues/280#issuecomment-2081180940
                     "component_vars": ComponentVars(
@@ -1834,9 +1816,6 @@ class Component(metaclass=ComponentMeta):
                 #
                 # This makes it possible to render nested components with a queue, avoiding recursion limits.
                 context_snapshot = snapshot_context(context)
-
-        # Cleanup
-        context.render_context.pop()  # type: ignore[union-attr]
 
         trace_component_msg(
             "COMP_PREP_END",

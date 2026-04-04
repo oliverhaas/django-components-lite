@@ -23,7 +23,7 @@ from django.utils.html import conditional_escape
 from django.utils.safestring import SafeString, mark_safe
 
 from django_components_lite.component import component_context_cache
-from django_components_lite.context import _COMPONENT_CONTEXT_KEY, _INJECT_CONTEXT_KEY_PREFIX, COMPONENT_IS_NESTED_KEY
+from django_components_lite.context import _COMPONENT_CONTEXT_KEY, _INJECT_CONTEXT_KEY_PREFIX
 from django_components_lite.node import BaseNode
 from django_components_lite.util.exception import add_slot_to_error_message
 from django_components_lite.util.logger import trace_component_msg
@@ -985,6 +985,18 @@ class FillNode(BaseNode):
     end_tag = "endfill"
     allowed_flags = ()
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        # Disallow {% block %} tags inside {% fill %} — these two systems don't compose.
+        # Use {% slot %}/{% fill %} for component composition instead.
+        from django.template.loader_tags import BlockNode
+
+        for node in self.nodelist.get_nodes_by_type(BlockNode):
+            raise TemplateSyntaxError(
+                f"Template block '{node.name}' is not allowed inside {{% fill %}}. "
+                "Use {% slot %}/{% fill %} for component composition instead of {% block %}.",
+            )
+
     def render(
         self,
         context: Context,
@@ -1463,9 +1475,7 @@ def _nodelist_to_slot(
 
         trace_component_msg("RENDER_NODELIST", component_name, component_id=None, slot_name=slot_name)
 
-        # NOTE: We also set `_DJC_COMPONENT_IS_NESTED` to `True` so that the template can access
-        #     current RenderContext layer.
-        with context.push({"DJC_DEPS_STRATEGY": "ignore", COMPONENT_IS_NESTED_KEY: True}):
+        with context.push({"DJC_DEPS_STRATEGY": "ignore"}):
             rendered = template.render(context)
 
         # After the rendering is done, remove the `extra_context` from the context stack
