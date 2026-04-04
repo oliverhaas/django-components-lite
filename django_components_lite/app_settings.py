@@ -138,36 +138,6 @@ class ComponentsSettings(NamedTuple):
     ```
     """
 
-    reload_on_file_change: bool | None = None
-    """
-    This is relevant if you are using the project structure where
-    HTML, JS, CSS and Python are in separate files and nested in a directory.
-
-    In this case you may notice that when you are running a development server,
-    the server sometimes does not reload when you change component files.
-
-    Django's native [live reload](https://stackoverflow.com/a/66023029/9788634) logic
-    handles only Python files and HTML template files. It does NOT reload when other
-    file types change or when template files are nested more than one level deep.
-
-    The setting `reload_on_file_change` fixes this, reloading the dev server even when your component's
-    HTML, JS, or CSS changes.
-
-    If `True`, django_components_lite configures Django to reload when files inside
-    [`COMPONENTS.dirs`](./settings.md#django_components_lite.app_settings.ComponentsSettings.dirs)
-    or
-    [`COMPONENTS.app_dirs`](./settings.md#django_components_lite.app_settings.ComponentsSettings.app_dirs)
-    change.
-
-    See [Reload dev server on component file changes](../guides/setup/development_server.md#reload-dev-server-on-component-file-changes).
-
-    Defaults to `False`.
-
-    !!! warning
-
-        This setting should be enabled only for the dev environment!
-    """
-
     static_files_allowed: list[str | re.Pattern] | None = None
     """
     A list of file extensions (including the leading dot) that define which files within
@@ -275,7 +245,6 @@ defaults = ComponentsSettings(
     # App-level "components" dirs, e.g. `[app]/components/`
     app_dirs=["components"],
     multiline_tags=True,
-    reload_on_file_change=False,
     static_files_allowed=[
         ".css",
         ".js", ".jsx", ".ts", ".tsx",
@@ -326,7 +295,6 @@ class InternalSettings:
             dirs=default(components_settings.dirs, dirs_default),
             app_dirs=default(components_settings.app_dirs, defaults.app_dirs),
             multiline_tags=default(components_settings.multiline_tags, defaults.multiline_tags),
-            reload_on_file_change=self._prepare_reload_on_file_change(components_settings),
             static_files_allowed=default(components_settings.static_files_allowed, defaults.static_files_allowed),
             static_files_forbidden=self._prepare_static_files_forbidden(components_settings),
         )
@@ -336,8 +304,6 @@ class InternalSettings:
             self._load_settings()
         return cast("ComponentsSettings", self._settings)
 
-    def _prepare_reload_on_file_change(self, new_settings: ComponentsSettings) -> bool:
-        return default(new_settings.reload_on_file_change, cast("bool", defaults.reload_on_file_change))
 
     def _prepare_static_files_forbidden(self, new_settings: ComponentsSettings) -> list[str | re.Pattern]:
         return default(new_settings.static_files_forbidden, cast("list[str | re.Pattern]", defaults.static_files_forbidden))
@@ -361,10 +327,6 @@ class InternalSettings:
     @property
     def MULTILINE_TAGS(self) -> bool:
         return self._get_settings().multiline_tags  # type: ignore[return-value]
-
-    @property
-    def RELOAD_ON_FILE_CHANGE(self) -> bool:
-        return self._get_settings().reload_on_file_change  # type: ignore[return-value]
 
     @property
     def STATIC_FILES_ALLOWED(self) -> Sequence[str | re.Pattern]:

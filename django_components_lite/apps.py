@@ -1,12 +1,9 @@
 import re
-from pathlib import Path
-from typing import Any
 
 from django.apps import AppConfig
 from django.template import Template
 from django.template.library import InclusionNode
 from django.template.loader_tags import IncludeNode
-from django.utils.autoreload import file_changed, trigger_reload
 
 
 class ComponentsConfig(AppConfig):
@@ -39,11 +36,6 @@ class ComponentsConfig(AppConfig):
         if app_settings.AUTODISCOVER:
             autodiscover()
 
-        # Auto-reload Django dev server when any component files changes
-        # See https://github.com/django-components/django-components/discussions/567#discussioncomment-10273632
-        if app_settings.RELOAD_ON_FILE_CHANGE:
-            _watch_component_files_for_autoreload()
-
         # Allow tags to span multiple lines. This makes it easier to work with
         # components inside Django templates, allowing us syntax like:
         # ```html
@@ -60,19 +52,3 @@ class ComponentsConfig(AppConfig):
             from django.template import base
 
             base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
-
-
-# See https://github.com/django-components/django-components/issues/586#issue-2472678136
-def _watch_component_files_for_autoreload() -> None:
-    from django_components_lite.util.loader import get_component_dirs
-
-    component_dirs = set(get_component_dirs())
-
-    def template_changed(sender: Any, file_path: Path, **kwargs: Any) -> None:
-        # Reload dev server if any of the files within `COMPONENTS.dirs` or `COMPONENTS.app_dirs` changed
-        for dir_path in file_path.parents:
-            if dir_path in component_dirs:
-                trigger_reload(file_path)
-                return
-
-    file_changed.connect(template_changed)
