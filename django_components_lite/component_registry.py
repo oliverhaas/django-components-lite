@@ -36,15 +36,8 @@ class NotRegisteredError(Exception):
     """
 
 
-# Why do we store the tags with the components?
-#
-# With the addition of TagFormatter, each component class may have a unique
-# set of template tags.
-#
-# For user's convenience, we automatically add/remove the tags from Django's tag Library,
-# when a component is (un)registered.
-#
-# Thus we need to remember which component used which template tags.
+# We store the tags with the components so we can automatically add/remove
+# them from Django's tag Library when a component is (un)registered.
 class ComponentRegistryEntry(NamedTuple):
     cls: type["Component"]
     tag: str

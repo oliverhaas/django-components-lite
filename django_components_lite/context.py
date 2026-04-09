@@ -12,7 +12,6 @@ from django_components_lite.util.misc import get_last_index
 
 _COMPONENT_CONTEXT_KEY = "_DJC_COMPONENT_CTX"
 _STRATEGY_CONTEXT_KEY = "DJC_DEPS_STRATEGY"
-_INJECT_CONTEXT_KEY_PREFIX = "_DJC_INJECT__"
 
 
 def make_isolated_context_copy(context: Context) -> Context:
@@ -26,12 +25,6 @@ def make_isolated_context_copy(context: Context) -> Context:
     # Pass through our internal keys
     if _COMPONENT_CONTEXT_KEY in context:
         context_copy[_COMPONENT_CONTEXT_KEY] = context[_COMPONENT_CONTEXT_KEY]
-
-    # Make inject/provide to work in isolated mode
-    context_keys = context.flatten().keys()
-    for key in context_keys:
-        if key.startswith(_INJECT_CONTEXT_KEY_PREFIX):
-            context_copy[key] = context[key]
 
     return context_copy
 

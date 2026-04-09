@@ -54,5 +54,4 @@ Components are automatically discovered from:
 
 - `components/` directories inside each installed app
 - Directories listed in `COMPONENTS.dirs`
-- Modules listed in `COMPONENTS.libraries`
 

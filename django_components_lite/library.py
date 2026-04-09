@@ -8,29 +8,8 @@ from django.template.library import Library
 
 class TagProtectedError(Exception):
     """
-    The way the [`TagFormatter`](./../concepts/advanced/tag_formatters.md) works is that,
-    based on which start and end tags are used for rendering components,
-    the [`ComponentRegistry`](./api.md#django_components_lite.ComponentRegistry) behind the scenes
-    [un-/registers the template tags](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#registering-the-tag)
-    with the associated instance of Django's
-    [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#code-layout).
-
-    In other words, if I have registered a component `"table"`, and I use the shorthand
-    syntax:
-
-    ```django
-    {% table ... %}
-    {% endtable %}
-    ```
-
-    Then [`ComponentRegistry`](./api.md#django_components_lite.ComponentRegistry)
-    registers the tag `table` onto the Django's Library instance.
-
-    However, that means that if we registered a component `"slot"`, then we would overwrite
-    the [`{% slot %}`](./template_tags.md#slot) tag from django_components_lite.
-
-    Thus, this exception is raised when a component is attempted to be registered under
-    a forbidden name, such that it would overwrite one of django_component's own template tags.
+    Raised when a component is registered under a name that would overwrite
+    one of django_components_lite's own template tags (e.g. `slot`, `fill`).
     """
 
 
@@ -39,7 +18,6 @@ PROTECTED_TAGS = [
     "component_js_dependencies",
     "fill",
     "html_attrs",
-    "provide",
     "slot",
 ]
 """

@@ -23,7 +23,7 @@ from django.utils.html import conditional_escape
 from django.utils.safestring import SafeString, mark_safe
 
 from django_components_lite.component import component_context_cache
-from django_components_lite.context import _COMPONENT_CONTEXT_KEY, _INJECT_CONTEXT_KEY_PREFIX
+from django_components_lite.context import _COMPONENT_CONTEXT_KEY
 from django_components_lite.node import BaseNode
 from django_components_lite.util.exception import add_slot_to_error_message
 from django_components_lite.util.logger import trace_component_msg
@@ -771,16 +771,6 @@ class SlotNode(BaseNode):
         # {% endcomponent %}
         # ```
         #
-        # Irrespective of which context we use ("root" context or the one passed to this
-        # render function), pass down the keys used by inject/provide feature. This makes it
-        # possible to pass the provided values down through slots, e.g.:
-        # {% provide "abc" val=123 %}
-        #   {% slot "content" %}{% endslot %}
-        # {% endprovide %}
-        for key, value in context.flatten().items():
-            if key.startswith(_INJECT_CONTEXT_KEY_PREFIX):
-                extra_context[key] = value  # noqa: PERF403
-
         fallback = SlotFallback(self, context)
 
         # For the user-provided slot fill, we want to use the context of where the slot
@@ -1321,7 +1311,7 @@ def _extract_fill_content(
         raise TemplateSyntaxError(
             f"Illegal content passed to component '{component_name}'. "
             "Explicit 'fill' tags cannot occur alongside other text. "
-            "The component body rendered content: {content}",
+            f"The component body rendered content: {content}",
         )
 
     # Check for any duplicates

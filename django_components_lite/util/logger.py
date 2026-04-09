@@ -21,9 +21,7 @@ def setup_logging() -> None:
 
 
 def _get_log_levels() -> dict[str, int]:
-    # Use official API if possible
     return logging.getLevelNamesMapping()
-    return logging._nameToLevel.copy()
 
 
 def trace(message: str, *args: Any, **kwargs: Any) -> None:

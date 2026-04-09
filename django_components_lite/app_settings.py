@@ -101,25 +101,6 @@ class ComponentsSettings(NamedTuple):
     ```
     """
 
-    cache: str | None = None
-    """
-    Name of the [Django cache](https://docs.djangoproject.com/en/5.2/topics/cache/)
-    to be used for storing component's JS and CSS files.
-
-    If `None`, a [`LocMemCache`](https://docs.djangoproject.com/en/5.2/topics/cache/#local-memory-caching)
-    is used with default settings.
-
-    Defaults to `None`.
-
-    Read more about [caching](../guides/setup/caching.md).
-
-    ```python
-    COMPONENTS = ComponentsSettings(
-        cache="my_cache",
-    )
-    ```
-    """
-
     multiline_tags: bool | None = None
     """
     Enable / disable
@@ -238,7 +219,6 @@ class Dynamic[T]:
 # --snippet:defaults--
 defaults = ComponentsSettings(
     autodiscover=True,
-    cache=None,
     # Root-level "components" dirs, e.g. `/path/to/proj/components/`
     dirs=Dynamic(lambda: [Path(settings.BASE_DIR) / "components"]),  # type: ignore[arg-type]
     # App-level "components" dirs, e.g. `[app]/components/`
@@ -290,7 +270,6 @@ class InternalSettings:
 
         self._settings = ComponentsSettings(
             autodiscover=default(components_settings.autodiscover, defaults.autodiscover),
-            cache=default(components_settings.cache, defaults.cache),
             dirs=default(components_settings.dirs, dirs_default),
             app_dirs=default(components_settings.app_dirs, defaults.app_dirs),
             multiline_tags=default(components_settings.multiline_tags, defaults.multiline_tags),
@@ -312,10 +291,6 @@ class InternalSettings:
     @property
     def AUTODISCOVER(self) -> bool:
         return self._get_settings().autodiscover  # type: ignore[return-value]
-
-    @property
-    def CACHE(self) -> str | None:
-        return self._get_settings().cache
 
     @property
     def DIRS(self) -> Sequence[str | PathLike | tuple[str, str] | tuple[str, PathLike]]:

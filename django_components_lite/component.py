@@ -1210,13 +1210,8 @@ class Component(metaclass=ComponentMeta):
     [`RequestContext`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.RequestContext)
     then this will be an instance of `RequestContext`.
 
-    Whether the context variables defined in `context` are available to the template depends on the
-    [context behavior mode](../settings#django_components_lite.app_settings.ComponentsSettings.context_behavior):
-
-    - In `"django"` context behavior mode, the template will have access to the keys of this context.
-
-    - In `"isolated"` context behavior mode, the template will NOT have access to this context,
-        and data MUST be passed via component's args and kwargs.
+    Components use isolated context, so the template will NOT have access to this context directly.
+    Data MUST be passed via component's args and kwargs.
     """
 
     outer_context: Context | None
@@ -1232,12 +1227,8 @@ class Component(metaclass=ComponentMeta):
     {% endwith %}
     ```
 
-    This is relevant when your components are isolated, for example when using
-    the ["isolated"](../settings#django_components_lite.app_settings.ComponentsSettings.context_behavior)
-    context behavior mode or when using the `only` flag.
-
-    When components are isolated, each component has its own instance of Context,
-    so `outer_context` is different from the `context` argument.
+    Components use isolated context, so each component has its own instance of Context
+    and `outer_context` is different from the `context` argument.
     """
 
     registry: ComponentRegistry
@@ -1550,13 +1541,8 @@ class Component(metaclass=ComponentMeta):
             )
             ```
 
-            Whether the variables defined in `context` are available to the template depends on the
-            [context behavior mode](../settings#django_components_lite.app_settings.ComponentsSettings.context_behavior):
-
-            - In `"django"` context behavior mode, the template will have access to the keys of this context.
-
-            - In `"isolated"` context behavior mode, the template will NOT have access to this context,
-                and data MUST be passed via component's args and kwargs.
+            Components use isolated context, so the template will NOT have access to this context directly.
+            Data MUST be passed via component's args and kwargs.
 
         - `request` - Optional. HTTPRequest object. Pass a request object directly to the component to apply
             [context processors](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context.update).
@@ -1942,47 +1928,11 @@ class ComponentNode(BaseNode):
     {% endcomponent %}
     ```
 
-    ### Isolating components
+    ### Isolated context
 
-    By default, components behave similarly to Django's
-    [`{% include %}`](https://docs.djangoproject.com/en/5.2/ref/templates/builtins/#include),
-    and the template inside the component has access to the variables defined in the outer template.
-
-    You can selectively isolate a component, using the `only` flag, so that the inner template
-    can access only the data that was explicitly passed to it:
-
-    ```django
-    {% component "name" positional_arg keyword_arg=value ... only %}
-    ```
-
-    Alternatively, you can set all components to be isolated by default, by setting
-    [`context_behavior`](../settings#django_components_lite.app_settings.ComponentsSettings.context_behavior)
-    to `"isolated"` in your settings:
-
-    ```python
-    # settings.py
-    COMPONENTS = {
-        "context_behavior": "isolated",
-    }
-    ```
-
-    ### Omitting the component keyword
-
-    If you would like to omit the `component` keyword, and simply refer to your
-    components by their registered names:
-
-    ```django
-    {% button name="John" job="Developer" / %}
-    ```
-
-    You can do so by setting the "shorthand" tag formatter in the settings:
-
-    ```python
-    # settings.py
-    COMPONENTS = {
-        "tag_formatter": "django_components_lite.component_shorthand_formatter",
-    }
-    ```
+    Components always use isolated context - the template inside the component does NOT have
+    access to variables defined in the outer template. Data must be passed explicitly via
+    args and kwargs.
     """
 
     tag = "component"

@@ -7,11 +7,9 @@ import re
 from typing import Any
 
 import pytest
-from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.template import Context, RequestContext, Template, TemplateSyntaxError
-from django.test import Client, override_settings
-from django.urls import path
+from django.test import override_settings
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import (
@@ -21,22 +19,6 @@ from django_components_lite import (
     get_component_by_class_id,
     register,
 )
-from tests.urls import urlpatterns as dc_urlpatterns
-
-
-# Client for testing endpoints via requests
-class CustomClient(Client):
-    def __init__(self, urlpatterns=None, *args, **kwargs):
-        import types
-
-        if urlpatterns:
-            urls_module = types.ModuleType("urls")
-            urls_module.urlpatterns = urlpatterns + dc_urlpatterns  # type: ignore[attr-defined]
-            settings.ROOT_URLCONF = urls_module
-        else:
-            settings.ROOT_URLCONF = __name__
-        settings.SECRET_KEY = "secret"  # noqa: S105
-        super().__init__(*args, **kwargs)
 
 
 class TestComponent:
@@ -213,7 +195,7 @@ class TestComponent:
         with pytest.raises(KeyError):
             get_component_by_class_id("nonexistent")
 
-    def test_get_context_data_returns_none(self):
+    def test_get_template_data_returns_none(self):
         class SimpleComponent(Component):
             template_file = "test_component/get-context-data-returns-none.html"
 
@@ -773,31 +755,6 @@ class TestComponentRender:
             </custom-template>
             """,
         )
-
-    def request_context_ignores_context_when_already_a_context(self):
-        @register("thing")
-        class Thing(Component):
-            template: str = """
-                <p>CSRF token: {{ csrf_token|default:"<em>No CSRF token</em>" }}</p>
-                <p>Existing context: {{ existing_context|default:"<em>No existing context</em>" }}</p>
-            """
-
-            class View:
-                def get(self, request):
-                    return Thing.render_to_response(
-                        request=request,
-                        context=Context({"existing_context": "foo"}),
-                    )
-
-        client = CustomClient(urlpatterns=[path("test_thing/", Thing.as_view())])
-        response = client.get("/test_thing/")
-
-        assert response.status_code == 200
-
-        token_re = re.compile(rb"CSRF token:\s+(?P<token>[0-9a-zA-Z]{64})")
-
-        assert not token_re.findall(response.content)
-        assert "Existing context: foo" in response.content.decode()
 
     def test_render_with_extends(self):
         class SimpleComponent(Component):
