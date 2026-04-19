@@ -7,7 +7,6 @@ from django.template import Context, Origin, Template
 from django.template.loader import get_template as django_get_template
 
 from django_components_lite.util.django_monkeypatch import is_cls_patched
-from django_components_lite.util.logger import trace_component_msg
 from django_components_lite.util.misc import get_module_info
 
 if TYPE_CHECKING:
@@ -149,8 +148,6 @@ def ensure_unique_template(component_cls: type["Component"], template: Template)
 
 
 def _get_component_template(component: "Component") -> Template | None:
-    trace_component_msg("COMP_LOAD", component_name=component.name, component_id=component.id, slot_name=None)
-
     template: Template | None = None
     template_string: str | None = None
 

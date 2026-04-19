@@ -8,7 +8,6 @@ from django.template import Context, Library
 from django.template.base import FilterExpression, Node, NodeList, Parser, Token
 from django.template.exceptions import TemplateSyntaxError
 
-from django_components_lite.util.logger import trace_node_msg
 from django_components_lite.util.misc import gen_id
 from django_components_lite.util.template_tag import (
     TagParam,
@@ -90,8 +89,6 @@ class NodeMeta(type):
 
         @functools.wraps(orig_render)
         def wrapper_render(self: "BaseNode", context: Context) -> str:
-            trace_node_msg("RENDER", self.tag, self.node_id)
-
             # Resolve FilterExpressions to actual values
             raw_args, raw_kwargs = self.params
             resolved_args = [arg.resolve(context) for arg in raw_args]
@@ -131,10 +128,7 @@ class NodeMeta(type):
                 invalid_kwargs,
             )
 
-            output = orig_render(self, context, *args, **kwargs)
-
-            trace_node_msg("RENDER", self.tag, self.node_id, msg="...Done!")
-            return output
+            return orig_render(self, context, *args, **kwargs)
 
         # Wrap cls.render() so we resolve the args and kwargs and pass them to the
         # actual render method.
@@ -513,8 +507,6 @@ class BaseNode(Node, metaclass=NodeMeta):
         bits = token.split_contents()
         tag_name = bits[0]
 
-        trace_node_msg("PARSE", cls.tag, tag_id)
-
         # Sanity check
         if tag_name != cls.tag:
             raise TemplateSyntaxError(f"Start tag parser received tag '{tag_name}', expected '{cls.tag}'")
@@ -553,7 +545,7 @@ class BaseNode(Node, metaclass=NodeMeta):
             nodelist = NodeList()
             contents = None
 
-        node = cls(
+        return cls(
             params=(args, tag_kwargs),
             flags=all_flags,
             nodelist=nodelist,
@@ -563,9 +555,6 @@ class BaseNode(Node, metaclass=NodeMeta):
             template_component=get_component_from_origin(parser.origin) if parser.origin else None,
             **kwargs,
         )
-
-        trace_node_msg("PARSE", cls.tag, tag_id, "...Done!")
-        return node
 
     @classmethod
     def register(cls, library: Library) -> None:

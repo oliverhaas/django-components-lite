@@ -38,7 +38,6 @@ from django_components_lite.slots import (
 from django_components_lite.template import cache_component_template_file, prepare_component_template
 from django_components_lite.util.context import gen_context_processors_data, snapshot_context
 from django_components_lite.util.exception import component_error_message
-from django_components_lite.util.logger import trace_component_msg
 from django_components_lite.util.misc import (
     default,
     gen_id,
@@ -1720,18 +1719,6 @@ class Component(metaclass=ComponentMeta):
         else:
             component_path = [component_name]
 
-        trace_component_msg(
-            "COMP_PREP_START",
-            component_name=component_name,
-            component_id=render_id,
-            slot_name=None,
-            component_path=component_path,
-            extra=(
-                f"Received {len(args_list)} args, {len(kwargs_dict)} kwargs, {len(slots_dict)} slots,"
-                f" Available slots: {slots_dict}"
-            ),
-        )
-
         # This is data that will be accessible (internally) from within the component's template.
         # NOTE: Be careful with the context - Do not store a strong reference to the component,
         #       because that would prevent the component from being garbage collected.
@@ -1801,14 +1788,6 @@ class Component(metaclass=ComponentMeta):
                 #
                 # This makes it possible to render nested components with a queue, avoiding recursion limits.
                 context_snapshot = snapshot_context(context)
-
-        trace_component_msg(
-            "COMP_PREP_END",
-            component_name=component_name,
-            component_id=render_id,
-            slot_name=None,
-            component_path=component_path,
-        )
 
         ######################################
         # 5. Render component

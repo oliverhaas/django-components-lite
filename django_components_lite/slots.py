@@ -26,7 +26,6 @@ from django_components_lite.component import component_context_cache
 from django_components_lite.context import _COMPONENT_CONTEXT_KEY
 from django_components_lite.node import BaseNode
 from django_components_lite.util.exception import add_slot_to_error_message
-from django_components_lite.util.logger import trace_component_msg
 from django_components_lite.util.misc import default, get_last_index, is_identifier
 
 if TYPE_CHECKING:
@@ -635,7 +634,6 @@ class SlotNode(BaseNode):
                 f"Component with id '{component_id}' was garbage collected before its slots could be rendered.",
             )
         component_name = component.name
-        component_path = component_ctx.component_path
         is_dynamic_component = getattr(component, "_is_dynamic_component", False)
         # NOTE: Use `ComponentContext.outer_context`, and NOT `Component.outer_context`.
         #       The first is a SNAPSHOT of the outer context.
@@ -646,16 +644,6 @@ class SlotNode(BaseNode):
         slot_name = name
         is_default = self.flags[SLOT_DEFAULT_FLAG]
         is_required = self.flags[SLOT_REQUIRED_FLAG]
-
-        trace_component_msg(
-            "RENDER_SLOT_START",
-            component_name=component_name,
-            component_id=component_id,
-            slot_name=slot_name,
-            component_path=component_path,
-            slot_fills=slot_fills,
-            extra=f"Available fills: {slot_fills}",
-        )
 
         # Check for errors
         if is_default and not is_dynamic_component:
@@ -792,15 +780,6 @@ class SlotNode(BaseNode):
                 # NOTE: While `{% fill %}` tag has to opt in for the `fallback` and `data` variables,
                 #       the render function ALWAYS receives them.
                 output = slot(data=kwargs, fallback=fallback, context=used_ctx)
-
-        trace_component_msg(
-            "RENDER_SLOT_END",
-            component_name=component_name,
-            component_id=component_id,
-            slot_name=slot_name,
-            component_path=component_path,
-            slot_fills=slot_fills,
-        )
 
         return output
 
@@ -1462,8 +1441,6 @@ def _nodelist_to_slot(
         # Insert the `extra_context` layer BEFORE the layer that defines the variables from get_template_data.
         # Thus, get_template_data will overshadow these on conflict.
         context.dicts.insert(index_of_last_component_layer, extra_context or {})
-
-        trace_component_msg("RENDER_NODELIST", component_name, component_id=None, slot_name=slot_name)
 
         with context.push({"DJC_DEPS_STRATEGY": "ignore"}):
             rendered = template.render(context)
