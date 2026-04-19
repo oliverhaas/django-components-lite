@@ -25,7 +25,7 @@ def gen_slotted_component_with_context():
             </custom-template>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             return {"variable": kwargs["variable"]}
 
     return SlottedComponentWithContext
@@ -42,7 +42,7 @@ class TestComponentTemplateTag:
             Variable: <strong>{{ variable }}</strong>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             return {
                 "variable": kwargs["variable"],
                 "variable2": kwargs.get("variable2", "default"),
@@ -106,7 +106,7 @@ class TestComponentTemplateTag:
                 {% endif %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "variable": kwargs["variable"],
                     "variable2": kwargs.get("variable2", "default"),
@@ -163,7 +163,7 @@ class TestComponentTemplateTag:
                 Default: <p>{{ default_param }}</p>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "variable": kwargs["variable"],
                     "default_param": kwargs.get("default_param", "default text"),

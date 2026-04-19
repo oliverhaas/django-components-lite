@@ -138,7 +138,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "attrs": kwargs["attrs"],
                     "defaults": {"class": "override-me"},
@@ -167,7 +167,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "attrs": kwargs["attrs"],
                     "defaults": {"class": "override-me"},
@@ -195,7 +195,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "attrs": kwargs["attrs"],
                     "defaults": {"class": "override-me"},
@@ -224,7 +224,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "attrs": kwargs["attrs"],
                     "defaults": {"class": "override-me"},
@@ -253,7 +253,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {"defaults": {"class": "override-me"}}
 
         my_attrs = {"class": "padding-top-8"}
@@ -278,7 +278,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {"attrs": kwargs["attrs"]}
 
         my_attrs = {"@click.stop": "dispatch('click_event')", "x-data": "{hello: 'world'}", "class": "padding-top-8"}
@@ -303,7 +303,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {}
 
         my_attrs = {"class": "padding-top-8"}
@@ -328,7 +328,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {}
 
         my_attrs = {"class": "padding-top-8"}
@@ -353,7 +353,7 @@ class TestHtmlAttrs:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "attrs": None,
                     "defaults": None,

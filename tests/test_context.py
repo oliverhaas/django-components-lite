@@ -26,8 +26,8 @@ def gen_simple_component():
             Variable: <strong>{{ variable }}</strong>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
-            return {"variable": kwargs.get("variable", None)} if "variable" in kwargs else {}
+        def get_context_data(self, **kwargs):
+            return {"variable": kwargs.get("variable")} if "variable" in kwargs else {}
 
     return SimpleComponent
 
@@ -40,7 +40,7 @@ def gen_variable_display_component():
             <h1>Uniquely named variable = {{ unique_variable }}</h1>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             context = {}
             if kwargs["shadowing_variable"] is not None:
                 context["shadowing_variable"] = kwargs["shadowing_variable"]
@@ -63,7 +63,7 @@ def gen_incrementer_component():
             super().__init__(*args, **kwargs)
             self.call_count = 0
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             value = int(kwargs.get("value", 0))
             if hasattr(self, "call_count"):
                 self.call_count += 1
@@ -92,7 +92,7 @@ def gen_parent_component():
             </div>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             return {"shadowing_variable": "NOT SHADOWED"}
 
     return ParentComponent
@@ -116,7 +116,7 @@ def gen_parent_component_with_args():
             </div>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             return {"inner_parent_value": kwargs["parent_value"]}
 
     return ParentComponentWithArgs
@@ -532,7 +532,7 @@ class TestContextProcessors:
         class TestComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal inner_request
                 context_processors_data = self.context_processors_data
@@ -566,7 +566,7 @@ class TestContextProcessors:
                 {% componentsc "test_child" %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal parent_request
                 context_processors_data = self.context_processors_data
@@ -576,7 +576,7 @@ class TestContextProcessors:
         class TestChildComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data_child
                 nonlocal child_request
                 context_processors_data_child = self.context_processors_data
@@ -611,7 +611,7 @@ class TestContextProcessors:
                 {% slot "content" default %}{% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal parent_request
                 context_processors_data = self.context_processors_data
@@ -621,7 +621,7 @@ class TestContextProcessors:
         class TestChildComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data_child
                 nonlocal child_request
                 context_processors_data_child = self.context_processors_data
@@ -653,7 +653,7 @@ class TestContextProcessors:
         class TestComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal inner_request
                 context_processors_data = self.context_processors_data
@@ -680,7 +680,7 @@ class TestContextProcessors:
                 {% componentsc "test_child" %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal parent_request
                 context_processors_data = self.context_processors_data
@@ -690,7 +690,7 @@ class TestContextProcessors:
         class TestChildComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data_child
                 nonlocal child_request
                 context_processors_data_child = self.context_processors_data
@@ -714,7 +714,7 @@ class TestContextProcessors:
         class TestComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal inner_request
                 context_processors_data = self.context_processors_data
@@ -740,7 +740,7 @@ class TestContextProcessors:
                 {% componentsc "test_child" %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal parent_request
                 context_processors_data = self.context_processors_data
@@ -750,7 +750,7 @@ class TestContextProcessors:
         class TestChildComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data_child
                 nonlocal child_request
                 context_processors_data_child = self.context_processors_data
@@ -774,7 +774,7 @@ class TestContextProcessors:
         class TestComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal inner_request
                 context_processors_data = self.context_processors_data
@@ -795,7 +795,7 @@ class TestContextProcessors:
         class TestComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal inner_request
                 context_processors_data = self.context_processors_data
@@ -816,7 +816,7 @@ class TestContextProcessors:
         class TestComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 nonlocal inner_request
                 context_processors_data = self.context_processors_data
@@ -856,7 +856,7 @@ class TestContextProcessors:
                 {% componentsc "test_child" %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data
                 context_processors_data = self.context_processors_data
 
@@ -864,7 +864,7 @@ class TestContextProcessors:
         class TestChildComponent(Component):
             template: str = """{% csrf_token %}"""
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal context_processors_data_child
                 context_processors_data_child = self.context_processors_data
 
@@ -911,7 +911,7 @@ class TestOuterContextProperty:
                 Variable: <strong>{{ variable }}</strong>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return self.outer_context.flatten()  # type: ignore[union-attr]
 
         template_str: str = """

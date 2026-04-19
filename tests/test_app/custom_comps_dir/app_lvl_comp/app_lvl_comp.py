@@ -10,5 +10,5 @@ class AppLvlCompComponent(Component):
         js = "app_lvl_comp.js"
         css = "app_lvl_comp.css"
 
-    def get_template_data(self, args, kwargs, slots, context):
+    def get_context_data(self, **kwargs):
         return {"variable": kwargs["variable"]}

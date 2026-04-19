@@ -34,9 +34,9 @@ class TestComponent:
                 Variable: <strong>{{ variable }}</strong>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "variable": kwargs.get("variable", None),
+                    "variable": kwargs.get("variable"),
                 }
 
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
@@ -51,9 +51,9 @@ class TestComponent:
         class SimpleComponent(Component):
             template_file = "simple_template.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "variable": kwargs.get("variable", None),
+                    "variable": kwargs.get("variable"),
                 }
 
         rendered = SimpleComponent.render(kwargs={"variable": "test"})
@@ -99,17 +99,17 @@ class TestComponent:
         class SimpleComponent1(Component):
             template_file = "simple_template.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "variable": kwargs.get("variable", None),
+                    "variable": kwargs.get("variable"),
                 }
 
         class SimpleComponent2(Component):
             template_file = "simple_template.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "variable": kwargs.get("variable", None),
+                    "variable": kwargs.get("variable"),
                 }
 
         # Render to trigger template caching
@@ -141,9 +141,9 @@ class TestComponent:
         class SimpleComponent(Component):
             template_name = "simple_template.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "variable": kwargs.get("variable", None),
+                    "variable": kwargs.get("variable"),
                 }
 
         # Access fields on Component class
@@ -199,7 +199,7 @@ class TestComponent:
         class SimpleComponent(Component):
             template_file = "test_component/get-context-data-returns-none.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return None
 
         assert SimpleComponent.render() == "Hello"
@@ -210,7 +210,7 @@ class TestComponentRenderAPI:
         class SimpleComponent(Component):
             template_file = "test_component/component-render-id.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {"render_id": self.id}
 
         rendered = SimpleComponent.render()
@@ -224,7 +224,7 @@ class TestComponentRenderAPI:
                 {% slot 'my_slot' %}{% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 assert self.raw_args == [123, "str"]
                 assert self.raw_kwargs == {"variable": "test", "another": 1}
                 assert isinstance(self.context, Context)
@@ -255,7 +255,7 @@ class TestComponentRenderAPI:
         class TestComponent(Component):
             template_file = "test_component/args-kwargs-slots--simple.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal called
                 called = True
 
@@ -279,7 +279,7 @@ class TestComponentRenderAPI:
         class TestComponent(Component):
             template_file = "test_component/args-kwargs-slots--available-outside-render.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal comp
                 comp = self
 
@@ -299,7 +299,7 @@ class TestComponentRenderAPI:
         class TestComponent(Component):
             template_file = "test_component/metadata--template.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal comp
                 comp = self
 
@@ -333,7 +333,7 @@ class TestComponentRenderAPI:
         class TestComponent(Component):
             template_file = "test_component/metadata--component.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal comp
                 comp = self
 
@@ -364,7 +364,7 @@ class TestComponentRenderAPI:
         class TestComponent(Component):
             template_file = "test_component/metadata--python.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal comp
                 comp = self
 
@@ -540,11 +540,11 @@ class TestComponentRender:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "the_arg2": args[0] if args else None,
+                    "the_arg2": self.args[0] if self.args else None,
                     "the_kwarg": kwargs.pop("the_kwarg", None),
-                    "args": args[1:],
+                    "args": self.args[1:],
                     "kwargs": kwargs,
                 }
 
@@ -583,12 +583,12 @@ class TestComponentRender:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "the_arg": args[0],
-                    "the_arg2": args[1],
+                    "the_arg": self.args[0],
+                    "the_arg2": self.args[1],
                     "the_kwarg": kwargs.pop("the_kwarg", None),
-                    "args": args[2:],
+                    "args": self.args[2:],
                     "kwargs": kwargs,
                 }
 
@@ -635,12 +635,12 @@ class TestComponentRender:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "the_arg": args[0],
-                    "the_arg2": args[1],
+                    "the_arg": self.args[0],
+                    "the_arg2": self.args[1],
                     "the_kwarg": kwargs.pop("the_kwarg"),
-                    "args": args[2:],
+                    "args": self.args[2:],
                     "kwargs": kwargs,
                 }
 
@@ -778,7 +778,7 @@ class TestComponentRender:
         class TestComponent(Component):
             template_file = "test_component/render-can-access-instance.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "id": self.id,
                 }
@@ -793,7 +793,7 @@ class TestComponentRender:
         class TestComponent(Component):
             template_file = "test_component/render-to-response-can-access-instance.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "id": self.id,
                 }

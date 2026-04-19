@@ -27,9 +27,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "the_arg": args[0],
+                    "the_arg": self.args[0],
                     "the_kwarg": kwargs.pop("the_kwarg", None),
                     "kwargs": kwargs,
                 }
@@ -200,9 +200,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         SimpleComponent.render(
             slots={"first": "FIRST_SLOT"},
@@ -237,9 +237,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         slot_func = lambda _ctx: "FROM_INSIDE_SLOT"  # noqa: E731
 
@@ -276,9 +276,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         slot_func = lambda _ctx: "FROM_INSIDE_SLOT"  # noqa: E731
 
@@ -316,9 +316,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         template_str: str = """
             {% load component_tags %}
@@ -358,9 +358,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         template_str: str = """
             {% load component_tags %}
@@ -399,9 +399,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         SimpleComponent.render(
             slots={"first": "FIRST_SLOT"},
@@ -431,9 +431,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         slot_func = lambda _ctx: "FROM_INSIDE_SLOT"  # noqa: E731
 
@@ -461,9 +461,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         slot_func = lambda _ctx: "FROM_INSIDE_SLOT"  # noqa: E731
 
@@ -492,9 +492,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         template_str: str = """
             {% load component_tags %}
@@ -531,9 +531,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         template_str: str = """
             {% load component_tags %}
@@ -572,9 +572,9 @@ class TestSlot:
                 {% endslot %}
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal captured_slots
-                captured_slots = slots
+                captured_slots = self.slots
 
         template_str: str = """
             {% load component_tags %}

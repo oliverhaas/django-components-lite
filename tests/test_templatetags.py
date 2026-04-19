@@ -18,7 +18,7 @@ class TestMultilineTags:
                 Variable: <strong>{{ variable }}</strong>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "variable": kwargs["variable"],
                     "variable2": kwargs.get("variable2", "default"),
@@ -46,7 +46,7 @@ class TestNestedTags:
             Variable: <strong>{{ var }}</strong>
         """
 
-        def get_template_data(self, args, kwargs, slots, context):
+        def get_context_data(self, **kwargs):
             return {
                 "var": kwargs["var"],
             }

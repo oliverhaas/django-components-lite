@@ -34,7 +34,7 @@ class TestComponentSlot:
         class SimpleComponent(Component):
             template_file = "test_templatetags_slot_fill/slotted-template-basic.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "variable": kwargs["variable"],
                     "variable2": kwargs.get("variable2", "default"),
@@ -85,7 +85,7 @@ class TestComponentSlot:
         class SimpleComponent(Component):
             template_file = "test_templatetags_slot_fill/slotted-template-basic-self-closing.html"
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "variable": kwargs["variable"],
                     "variable2": kwargs.get("variable2", "default"),
@@ -131,7 +131,7 @@ class TestComponentSlot:
                 </custom-template>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {"variable": kwargs["variable"]}
 
         template_str: str = """
@@ -267,9 +267,9 @@ class TestComponentSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "name": kwargs.get("name", None),
+                    "name": kwargs.get("name"),
                 }
 
         registry.register("test", SlottedComponent)
@@ -419,7 +419,7 @@ class TestComponentSlot:
 
     def test_multiple_slots_with_same_name_different_flags(self):
         class TestComp(Component):
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {"required": kwargs["required"]}
 
             template: str = """
@@ -775,7 +775,7 @@ class TestComponentSlotDefault:
     def test_implicit_fill_when_slot_marked_default_not_rendered(self):
         @register("test_comp")
         class ConditionalSlotted(Component):
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {"var": kwargs["var"]}
 
             template: str = """
@@ -834,9 +834,9 @@ class TestPassthroughSlots:
                 </custom-template>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "name": kwargs.get("name", None),
+                    "name": kwargs.get("name"),
                 }
 
         template_str: str = """
@@ -889,9 +889,9 @@ class TestPassthroughSlots:
                 </custom-template>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "name": kwargs.get("name", None),
+                    "name": kwargs.get("name"),
                 }
 
         template_str: str = """
@@ -932,9 +932,9 @@ class TestPassthroughSlots:
                 </custom-template>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "name": kwargs.get("name", None),
+                    "name": kwargs.get("name"),
                 }
 
         template_str: str = """
@@ -967,7 +967,7 @@ class TestPassthroughSlots:
     def test_slots_inside_loops(self):
         @register("test_comp")
         class OuterComp(Component):
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "slots": ["header", "main", "footer"],
                 }
@@ -1009,7 +1009,7 @@ class TestPassthroughSlots:
 
         @register("test_comp")
         class OuterComp(Component):
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "slots": self.slots,
                 }
@@ -1059,7 +1059,7 @@ class TestPassthroughSlots:
 
         @register("test_comp")
         class OuterComp(Component):
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "slots": self.slots,
                 }
@@ -1440,7 +1440,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1474,7 +1474,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1508,7 +1508,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1544,7 +1544,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "slot_name": "my_slot",
                     "abc": "def",
@@ -1579,7 +1579,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "var123": 456,
                 }
@@ -1613,7 +1613,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "xyz",
                     "var123": 456,
@@ -1648,7 +1648,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1680,7 +1680,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1730,7 +1730,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1755,7 +1755,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1797,7 +1797,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "var123": 456,
@@ -1832,7 +1832,7 @@ class TestScopedSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "abc": "def",
                     "input": kwargs["input"],
@@ -1880,9 +1880,9 @@ class TestDuplicateSlot:
                 <footer>{% slot "footer" %}Default footer{% endslot %}</footer>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "name": kwargs.get("name", None),
+                    "name": kwargs.get("name"),
                 }
 
         return DuplicateSlotComponent
@@ -1908,7 +1908,7 @@ class TestDuplicateSlot:
                 </div>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
                     "items": kwargs["items"],
                 }
@@ -2135,9 +2135,9 @@ class TestSlotBehavior:
                 </custom-template>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 return {
-                    "name": kwargs.get("name", None),
+                    "name": kwargs.get("name"),
                 }
 
         registry.register("test", SlottedComponent)
@@ -2219,9 +2219,9 @@ class TestSlotInput:
                 <footer>{% slot "footer" %}Default footer{% endslot %}</footer>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal seen_slots
-                seen_slots = slots
+                seen_slots = self.slots
 
         assert seen_slots == {}
 
@@ -2254,9 +2254,9 @@ class TestSlotInput:
                 <footer>{% slot "footer" %}Default footer{% endslot %}</footer>
             """
 
-            def get_template_data(self, args, kwargs, slots, context):
+            def get_context_data(self, **kwargs):
                 nonlocal seen_slots
-                seen_slots = slots
+                seen_slots = self.slots
 
         assert seen_slots == {}
 

@@ -445,132 +445,6 @@ class Component(metaclass=ComponentMeta):
     ```
     """
 
-    def get_template_data(self, args: Any, kwargs: Any, slots: Any, context: Context) -> Mapping | None:
-        """
-        Use this method to define variables that will be available in the template.
-
-        This method has access to the [Render API](../../concepts/fundamentals/render_api).
-
-        Read more about [Template variables](../../concepts/fundamentals/html_js_css_variables).
-
-        **Example:**
-
-        ```py
-        class MyComponent(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "name": kwargs["name"],
-                    "id": self.id,
-                }
-
-            template = "Hello, {{ name }}!"
-
-        MyComponent.render(name="World")
-        ```
-
-        **Args:**
-
-        - `args`: Positional arguments passed to the component.
-        - `kwargs`: Keyword arguments passed to the component.
-        - `slots`: Slots passed to the component.
-        - `context`: [`Context`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context)
-           used for rendering the component template.
-
-        **Pass-through kwargs:**
-
-        It's best practice to explicitly define what args and kwargs a component accepts.
-
-        However, if you want a looser setup, you can easily write components that accept any number
-        of kwargs, and pass them all to the template
-        (similar to [django-cotton](https://github.com/wrabit/django-cotton)).
-
-        To do that, simply return the `kwargs` dictionary itself from `get_template_data()`:
-
-        ```py
-        class MyComponent(Component):
-            def get_template_data(self, args, kwargs, slots, context):
-                return kwargs
-        ```
-
-        **Type hints:**
-
-        To get type hints for the `args`, `kwargs`, and `slots` parameters,
-        you can define the [`Args`](../api#django_components_lite.Component.Args),
-        [`Kwargs`](../api#django_components_lite.Component.Kwargs), and
-        [`Slots`](../api#django_components_lite.Component.Slots) classes on the component class,
-        and then directly reference them in the function signature of `get_template_data()`.
-
-        When you set these classes, the `args`, `kwargs`, and `slots` parameters will be
-        given as instances of these (`args` instance of `Args`, etc).
-
-        When you omit these classes, or set them to `None`, then the `args`, `kwargs`, and `slots`
-        parameters will be given as plain lists / dictionaries, unmodified.
-
-        Read more on [Typing and validation](../../concepts/fundamentals/typing_and_validation).
-
-        **Example:**
-
-        ```py
-        from django.template import Context
-        from django_components_lite import Component, SlotInput
-
-        class MyComponent(Component):
-            class Args:
-                color: str
-
-            class Kwargs:
-                size: int
-
-            class Slots:
-                footer: SlotInput
-
-            def get_template_data(self, args: Args, kwargs: Kwargs, slots: Slots, context: Context):
-                assert isinstance(args, MyComponent.Args)
-                assert isinstance(kwargs, MyComponent.Kwargs)
-                assert isinstance(slots, MyComponent.Slots)
-
-                return {
-                    "color": args.color,
-                    "size": kwargs.size,
-                    "id": self.id,
-                }
-        ```
-
-        You can also add typing to the data returned from
-        [`get_template_data()`](../api#django_components_lite.Component.get_template_data)
-        by defining the [`TemplateData`](../api#django_components_lite.Component.TemplateData)
-        class on the component class.
-
-        When you set this class, you can return either the data as a plain dictionary,
-        or an instance of [`TemplateData`](../api#django_components_lite.Component.TemplateData).
-
-        If you return plain dictionary, the data will be validated against the
-        [`TemplateData`](../api#django_components_lite.Component.TemplateData) class
-        by instantiating it with the dictionary.
-
-        **Example:**
-
-        ```py
-        class MyComponent(Component):
-            class TemplateData:
-                color: str
-                size: int
-
-            def get_template_data(self, args, kwargs, slots, context):
-                return {
-                    "color": kwargs["color"],
-                    "size": kwargs["size"],
-                }
-                # or
-                return MyComponent.TemplateData(
-                    color=kwargs["color"],
-                    size=kwargs["size"],
-                )
-        ```
-
-        """
-        return None
-
     js: str | None = None
     """
     Main JS associated with this component inlined as string.
@@ -1599,7 +1473,7 @@ class Component(metaclass=ComponentMeta):
         # 3. Call data methods
         ######################################
 
-        template_data = component._call_data_methods()
+        template_data = component.get_context_data(**kwargs_dict) or {}
 
         #############################################################################
         # 4. Make Context copy
@@ -1657,21 +1531,13 @@ class Component(metaclass=ComponentMeta):
         """
         Override this to provide template context variables.
 
-        This is the simple, Django-style API. For access to args, slots, and
-        the rendering context, override `get_template_data()` instead.
+        Receives the kwargs that were passed to the component. For access to
+        positional args, slots, or the outer context, use ``self.args``,
+        ``self.slots``, ``self.context``.
 
         By default, returns an empty dict.
         """
         return {}
-
-    def _call_data_methods(self) -> dict:
-        # If the subclass overrides get_template_data, use that (advanced API).
-        # Otherwise fall back to get_context_data (simple Django-style API).
-        if type(self).get_template_data is not Component.get_template_data:
-            maybe_template_data = self.get_template_data(self.args, self.kwargs, self.slots, self.context)
-        else:
-            maybe_template_data = self.get_context_data(**self.kwargs)
-        return to_dict(default(maybe_template_data, {}))
 
 
 # Perf

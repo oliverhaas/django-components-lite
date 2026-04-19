@@ -1,4 +1,3 @@
-from typing import Any
 
 from django.http import HttpResponse
 
@@ -23,5 +22,5 @@ class MultFileComponent(Component):
                 kwargs={"variable": "GET"},
             )
 
-    def get_template_data(self, args, kwargs, slots, context) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         return {"variable": kwargs["variable"]}

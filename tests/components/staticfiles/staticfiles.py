@@ -1,4 +1,3 @@
-from typing import Any
 
 from django_components_lite import Component, register
 
@@ -12,5 +11,5 @@ class RelativeFileWithPathObjComponent(Component):
         js = "staticfiles.js"
         css = "staticfiles.css"
 
-    def get_template_data(self, args, kwargs, slots, context) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         return {"variable": kwargs["variable"]}
