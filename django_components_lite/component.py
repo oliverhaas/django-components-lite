@@ -26,7 +26,6 @@ from django_components_lite.dependencies import build_dependency_tags
 from django_components_lite.node import BaseNode
 from django_components_lite.slots import (
     Slot,
-    SlotResult,
     _is_extracting_fill,
     normalize_slot_fills,
     resolve_fills,
@@ -673,57 +672,8 @@ class Component(metaclass=ComponentMeta):
     """
 
     # #####################################
-    # PUBLIC API - HOOKS (Configurable by users)
+    # PUBLIC API - RENDER
     # #####################################
-
-    def on_render_before(self, context: Context, template: Template | None) -> None:
-        """
-        Runs just before the component's template is rendered.
-
-        It is called for every component, including nested ones, as part of
-        the component render lifecycle.
-
-        Args:
-            context (Context): The Django
-                [Context](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Context)
-                that will be used to render the component's template.
-            template (Optional[Template]): The Django
-                [Template](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Template)
-                instance that will be rendered, or `None` if no template.
-
-        Returns:
-            None. This hook is for side effects only.
-
-        **Example:**
-
-        You can use this hook to access the context or the template:
-
-        ```py
-        from django.template import Context, Template
-        from django_components_lite import Component
-
-        class MyTable(Component):
-            def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-                # Insert value into the Context
-                context["from_on_before"] = ":)"
-
-                assert isinstance(template, Template)
-        ```
-
-        !!! warning
-
-            If you want to pass data to the template, prefer using
-            [`get_template_data()`](../api#django_components_lite.Component.get_template_data)
-            instead of this hook.
-
-        !!! warning
-
-            Do NOT modify the template in this hook. The template is reused across renders.
-
-            Since this hook is called for every component, this means that the template would be modified
-            every time a component is rendered.
-
-        """
 
     def on_render(self, context: Context, template: Template | None) -> str | None:
         """
@@ -732,81 +682,6 @@ class Component(metaclass=ComponentMeta):
         if template is None:
             return None
         return template.render(context)
-
-    def on_render_after(
-        self,
-        context: Context,
-        template: Template | None,
-        result: str | None,
-        error: Exception | None,
-    ) -> SlotResult | None:
-        """
-        Hook that runs when the component was fully rendered,
-        including all its children.
-
-        It receives the same arguments as [`on_render_before()`](../api#django_components_lite.Component.on_render_before),
-        plus the outcome of the rendering:
-
-        - `result`: The rendered output of the component. `None` if the rendering failed.
-        - `error`: The error that occurred during the rendering, or `None` if the rendering succeeded.
-
-        [`on_render_after()`](../api#django_components_lite.Component.on_render_after) behaves the same way
-        as the second part of [`on_render()`](../api#django_components_lite.Component.on_render) (after the `yield`).
-
-        ```py
-        class MyTable(Component):
-            def on_render_after(self, context, template, result, error):
-                if error is None:
-                    # The rendering succeeded
-                    return result
-                else:
-                    # The rendering failed
-                    print(f"Error: {error}")
-        ```
-
-        Same as [`on_render()`](../api#django_components_lite.Component.on_render),
-        you can return a new HTML, raise a new exception, or return nothing:
-
-        1. Return a new HTML
-
-            The new HTML will be used as the final output.
-
-            If the original template raised an error, it will be ignored.
-
-            ```py
-            class MyTable(Component):
-                def on_render_after(self, context, template, result, error):
-                    return "NEW HTML"
-            ```
-
-        2. Raise a new exception
-
-            The new exception is what will bubble up from the component.
-
-            The original HTML and original error will be ignored.
-
-            ```py
-            class MyTable(Component):
-                def on_render_after(self, context, template, result, error):
-                    raise Exception("Error message")
-            ```
-
-        3. Return nothing (or `None`) to handle the result as usual
-
-            If you don't raise an exception, and neither return a new HTML,
-            then original HTML / error will be used:
-
-            - If rendering succeeded, the original HTML will be used as the final output.
-            - If rendering failed, the original error will be propagated.
-
-            ```py
-            class MyTable(Component):
-                def on_render_after(self, context, template, result, error):
-                    if error is not None:
-                        # The rendering failed
-                        print(f"Error: {error}")
-            ```
-        """
 
     # #####################################
     # MISC
@@ -1768,28 +1643,7 @@ class Component(metaclass=ComponentMeta):
         # 5. Render component
         ######################################
 
-        component.on_render_before(context_snapshot, template)
-
-        # Render the component synchronously
-        html: str | None = None
-        error: Exception | None = None
-        try:
-            html = component.on_render(context_snapshot, template)
-        except Exception as e:  # noqa: BLE001
-            error = e
-
-        # Post-render hook
-        try:
-            maybe_output = component.on_render_after(context_snapshot, template, html, error)
-            if maybe_output is not None:
-                html = maybe_output
-                error = None
-        except Exception as new_error:  # noqa: BLE001
-            error = new_error
-            html = None
-
-        if error is not None:
-            raise error
+        html = component.on_render(context_snapshot, template)
 
         # Prepend <link>/<script> tags for this component's JS/CSS files
         if html is not None:

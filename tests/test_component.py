@@ -236,14 +236,6 @@ class TestComponentRenderAPI:
                     "variable": kwargs["variable"],
                 }
 
-            def on_render_before(self, context, template):
-                assert self.raw_args == [123, "str"]
-                assert self.raw_kwargs == {"variable": "test", "another": 1}
-                assert isinstance(self.context, Context)
-                assert list(self.raw_slots.keys()) == ["my_slot"]
-                my_slot = self.raw_slots["my_slot"]
-                assert my_slot() == "MY_SLOT"
-
         rendered = TestComponent.render(
             kwargs={"variable": "test", "another": 1},
             args=(123, "str"),
