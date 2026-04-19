@@ -22,7 +22,6 @@ from django.template.exceptions import TemplateSyntaxError
 from django.utils.html import conditional_escape
 from django.utils.safestring import SafeString, mark_safe
 
-from django_components_lite.component import component_context_cache
 from django_components_lite.context import _COMPONENT_CONTEXT_KEY
 from django_components_lite.node import BaseNode
 from django_components_lite.util.exception import add_slot_to_error_message
@@ -626,12 +625,11 @@ class SlotNode(BaseNode):
             )
 
         # Component info
-        component_id: str = context[_COMPONENT_CONTEXT_KEY]
-        component_ctx = component_context_cache[component_id]
+        component_ctx = context[_COMPONENT_CONTEXT_KEY]
         component = component_ctx.component()
         if component is None:
             raise RuntimeError(
-                f"Component with id '{component_id}' was garbage collected before its slots could be rendered.",
+                "Component was garbage collected before its slots could be rendered.",
             )
         component_name = component.name
         is_dynamic_component = getattr(component, "_is_dynamic_component", False)

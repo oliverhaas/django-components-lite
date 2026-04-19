@@ -24,10 +24,6 @@ from django_components_lite.constants import COMP_ID_PREFIX
 from django_components_lite.context import _COMPONENT_CONTEXT_KEY, make_isolated_context_copy
 from django_components_lite.dependencies import build_dependency_tags
 from django_components_lite.node import BaseNode
-
-# Maps render_id -> ComponentContext. Used by slots to find their parent component during rendering.
-component_context_cache: dict[str, "ComponentContext"] = {}
-
 from django_components_lite.slots import (
     Slot,
     SlotResult,
@@ -335,11 +331,6 @@ class ComponentContext:
     template_name: str | None
     default_slot: str | None
     outer_context: Context | None
-
-
-def on_component_garbage_collected(component_id: str) -> None:
-    """Finalizer function to be called when a Component object is garbage collected."""
-    component_context_cache.pop(component_id, None)
 
 
 class Component(metaclass=ComponentMeta):
@@ -873,9 +864,6 @@ class Component(metaclass=ComponentMeta):
         self.outer_context: Context | None = outer_context
         self.registry = default(registry, registry_)
         self.node = node
-
-        # Run finalizer when component is garbage collected
-        finalize(self, on_component_garbage_collected, self.id)
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         cls.class_id = hash_comp_cls(cls)
@@ -1615,13 +1603,11 @@ class Component(metaclass=ComponentMeta):
         node: Optional["ComponentNode"] = None,
     ) -> str:
         component_name = _get_component_name(cls, registered_name)
-        render_id = _gen_component_id()
 
         # Modify the error to display full component path (incl. slots)
         with component_error_message([component_name]):
             try:
                 return cls._render_impl(
-                    render_id=render_id,
                     context=context,
                     args=args,
                     kwargs=kwargs,
@@ -1638,7 +1624,6 @@ class Component(metaclass=ComponentMeta):
     @classmethod
     def _render_impl(
         comp_cls,
-        render_id: str,
         context: dict[str, Any] | Context | None = None,
         args: Any | None = None,
         kwargs: Any | None = None,
@@ -1661,7 +1646,7 @@ class Component(metaclass=ComponentMeta):
             request = getattr(context, "request", None)
             # Check if this is a nested component and whether parent has request
             if request is None:
-                _, parent_comp_ctx = _get_parent_component_context(context)
+                parent_comp_ctx = _get_parent_component_context(context)
                 if parent_comp_ctx:
                     parent_comp = parent_comp_ctx.component()
                     request = parent_comp and parent_comp.request
@@ -1688,7 +1673,6 @@ class Component(metaclass=ComponentMeta):
             context = RequestContext(request, context) if request else Context(context)
 
         component = comp_cls(
-            id=render_id,
             args=args_list,
             kwargs=kwargs_dict,
             slots=slots_dict,
@@ -1713,7 +1697,7 @@ class Component(metaclass=ComponentMeta):
         # We pass down the components the info about the component's parent.
         # This is used for correctly resolving slot fills, correct rendering order,
         # or CSS scoping.
-        _parent_id, parent_comp_ctx = _get_parent_component_context(context)
+        parent_comp_ctx = _get_parent_component_context(context)
         if parent_comp_ctx is not None:
             component_path = [*parent_comp_ctx.component_path, component_name]
         else:
@@ -1735,15 +1719,6 @@ class Component(metaclass=ComponentMeta):
             # NOTE: This is only a SNAPSHOT of the outer context.
             outer_context=snapshot_context(outer_context) if outer_context is not None else None,
         )
-
-        # Instead of passing the ComponentContext directly through the Context, the entry on the Context
-        # contains only a key to retrieve the ComponentContext from `component_context_cache`.
-        #
-        # This way, the flow is easier to debug. Because otherwise, if you tried to print out
-        # or inspect the Context object, your screen would be filled with the deeply nested ComponentContext objects.
-        # But now, the printed Context may simply look like this:
-        # `[{ "True": True, "False": False, "None": None }, {"_DJC_COMPONENT_CTX": "c1A2b3c"}]`
-        component_context_cache[render_id] = component_ctx
 
         ######################################
         # 3. Call data methods
@@ -1768,7 +1743,7 @@ class Component(metaclass=ComponentMeta):
                     # Make data from context processors available inside templates
                     **component.context_processors_data,
                     # Private context fields
-                    _COMPONENT_CONTEXT_KEY: render_id,
+                    _COMPONENT_CONTEXT_KEY: component_ctx,
                     # NOTE: Public API for variables accessible from within a component's template
                     # See https://github.com/django-components/django-components/issues/280#issuecomment-2081180940
                     "component_vars": ComponentVars(
@@ -2009,17 +1984,5 @@ class ComponentNode(BaseNode):
         )
 
 
-def _get_parent_component_context(
-    context: Context | Mapping,
-) -> tuple[None, None] | tuple[str, ComponentContext]:
-    parent_id = context.get(_COMPONENT_CONTEXT_KEY, None)
-    if parent_id is None:
-        return None, None
-
-    # NOTE: This may happen when slots are rendered outside of the component's render context.
-    # See https://github.com/django-components/django-components/issues/1189
-    if parent_id not in component_context_cache:
-        return None, None
-
-    parent_comp_ctx = component_context_cache[parent_id]
-    return parent_id, parent_comp_ctx
+def _get_parent_component_context(context: Context | Mapping) -> ComponentContext | None:
+    return context.get(_COMPONENT_CONTEXT_KEY, None)
