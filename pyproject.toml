@@ -42,6 +42,7 @@ dev = [
   "ty==0.0.29",
 ]
 docs = ["mkdocs", "mkdocs-material", "mike", "pygments", "pygments-djc"]
+benchmark = ["django-components"]
 
 [build-system]
 requires = ["hatchling"]
@@ -103,7 +104,7 @@ suppress-none-returning = true
 "examples/**" = [
   "INP001", # Component dirs are implicit namespace packages by design
 ]
-"benchmarks/**" = ["ANN", "ARG", "N806", "PLC0415", "RUF012", "S101", "TRY002"]
+"benchmarks/**" = ["ANN", "ARG", "N806", "PLC0415", "RUF012", "S101", "S106", "T201", "TRY002"]
 "sampleproject/**" = [
   "ARG002", # Unused method argument
   "ANN",    # Annotations not needed
