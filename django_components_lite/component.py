@@ -15,7 +15,6 @@ from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 from django.http import HttpRequest, HttpResponse
 from django.template.base import FilterExpression, NodeList, Parser, Template, Token
 from django.template.context import Context, RequestContext
-from django.test.signals import template_rendered
 from django.utils.safestring import mark_safe
 
 from django_components_lite.component_media import resolve_component_files
@@ -1816,10 +1815,6 @@ class Component(metaclass=ComponentMeta):
         ######################################
 
         component.on_render_before(context_snapshot, template)
-
-        # Emit signal that the template is about to be rendered
-        if template is not None:
-            template_rendered.send(sender=template, template=template, context=context_snapshot)
 
         # Render the component synchronously
         html: str | None = None
