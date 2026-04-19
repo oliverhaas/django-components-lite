@@ -206,16 +206,6 @@ class TestComponent:
 
 
 class TestComponentRenderAPI:
-    def test_component_render_id(self):
-        class SimpleComponent(Component):
-            template_file = "test_component/component-render-id.html"
-
-            def get_context_data(self, **kwargs):
-                return {"render_id": self.id}
-
-        rendered = SimpleComponent.render()
-        assert rendered == "render_id: ca1bc3e"
-
     def test_raw_input(self):
         class TestComponent(Component):
             template: str = """
@@ -225,11 +215,11 @@ class TestComponentRenderAPI:
             """
 
             def get_context_data(self, **kwargs):
-                assert self.raw_args == [123, "str"]
-                assert self.raw_kwargs == {"variable": "test", "another": 1}
+                assert self.args == [123, "str"]
+                assert self.kwargs == {"variable": "test", "another": 1}
                 assert isinstance(self.context, Context)
-                assert list(self.raw_slots.keys()) == ["my_slot"]
-                my_slot = self.raw_slots["my_slot"]
+                assert list(self.slots.keys()) == ["my_slot"]
+                my_slot = self.slots["my_slot"]
                 assert my_slot() == "MY_SLOT"
 
                 return {
@@ -780,13 +770,13 @@ class TestComponentRender:
 
             def get_context_data(self, **kwargs):
                 return {
-                    "id": self.id,
+                    "id": self.name,
                 }
 
         rendered = TestComponent.render()
         assertHTMLEqual(
             rendered,
-            "Variable: <strong>ca1bc3e</strong>",
+            "Variable: <strong>TestComponent</strong>",
         )
 
     def test_render_to_response_can_access_instance(self):
@@ -795,13 +785,13 @@ class TestComponentRender:
 
             def get_context_data(self, **kwargs):
                 return {
-                    "id": self.id,
+                    "id": self.name,
                 }
 
         rendered_resp = TestComponent.render_to_response()
         assertHTMLEqual(
             rendered_resp.content.decode("utf-8"),
-            "Variable: <strong>ca1bc3e</strong>",
+            "Variable: <strong>TestComponent</strong>",
         )
 
     def test_prepends_exceptions_on_template_compile_error(self):

@@ -94,6 +94,11 @@ class NodeMeta(type):
             resolved_args = [arg.resolve(context) for arg in raw_args]
             resolved_kwargs = {k: v.resolve(context) for k, v in raw_kwargs.items()}
 
+            # {% component %} accepts arbitrary args and kwargs (incl. non-identifier keys
+            # like `data-id` or `@click`), so we skip the signature validation walk for it.
+            if cls._skip_param_validation:
+                return orig_render(self, context, *resolved_args, **resolved_kwargs)
+
             # Build TagParam list for validation
             # Template tags may accept kwargs that are not valid Python identifiers, e.g.
             # `{% component data-id="John" class="pt-4" :href="myVar" %}`
@@ -273,6 +278,14 @@ class BaseNode(Node, metaclass=NodeMeta):
         tag = "mytag"
         end_tag = None
     ```
+    """
+
+    _skip_param_validation: ClassVar[bool] = False
+    """
+    If set on a subclass, the wrapped ``render()`` will skip the ``inspect``-based
+    parameter validation and forward resolved args/kwargs directly. Intended for
+    tags that accept arbitrary args and non-identifier kwargs (currently only
+    ``ComponentNode``).
     """
 
     allowed_flags: ClassVar[Iterable[str] | None] = None

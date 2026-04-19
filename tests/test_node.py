@@ -632,7 +632,7 @@ class TestSignatureBasedValidation:
         assert isinstance(args4[0], FilterExpression)  # type: ignore[has-type]
         assert len(nodelist4) == 0  # type: ignore[has-type]
         assert contents4 is None  # type: ignore[has-type]
-        assert node_id4 == "a1bc42"  # type: ignore[has-type]
+        assert node_id4 == "a1bc41"  # type: ignore[has-type]
 
         if os.name == "nt":
             assert cast("str", template_name4).endswith("\\tests\\test_node.py::TestComponent")  # type: ignore[has-type]

@@ -879,8 +879,8 @@ class TestContextProcessors:
         assert list(parent_data.keys()) == ["csrf_token", "dummy"]
         assert list(child_data.keys()) == ["csrf_token", "dummy"]
 
-        assert parent_data["dummy"] == "a1bc3f"
-        assert child_data["dummy"] == "a1bc3f"
+        assert parent_data["dummy"] == "a1bc3e"
+        assert child_data["dummy"] == "a1bc3e"
         assert parent_data["csrf_token"] == child_data["csrf_token"]
 
     def test_context_processors_data_outside_of_rendering(self):

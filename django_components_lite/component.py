@@ -20,12 +20,10 @@ from django.utils.safestring import mark_safe
 from django_components_lite.component_media import resolve_component_files
 from django_components_lite.component_registry import ComponentRegistry
 from django_components_lite.component_registry import registry as registry_
-from django_components_lite.constants import COMP_ID_PREFIX
 from django_components_lite.context import _COMPONENT_CONTEXT_KEY, make_isolated_context_copy
 from django_components_lite.dependencies import build_dependency_tags
 from django_components_lite.node import BaseNode
 from django_components_lite.slots import (
-    Slot,
     _is_extracting_fill,
     normalize_slot_fills,
     resolve_fills,
@@ -35,9 +33,7 @@ from django_components_lite.util.context import gen_context_processors_data, sna
 from django_components_lite.util.exception import component_error_message
 from django_components_lite.util.misc import (
     default,
-    gen_id,
     hash_comp_cls,
-    to_dict,
 )
 from django_components_lite.util.weakref import cached_ref
 
@@ -268,10 +264,6 @@ class ComponentVars(NamedTuple):
         '''
     ```
     """
-
-
-def _gen_component_id() -> str:
-    return COMP_ID_PREFIX + gen_id()
 
 
 def _get_component_name(cls: type["Component"], registered_name: str | None = None) -> str:
@@ -597,21 +589,16 @@ class Component(metaclass=ComponentMeta):
         slots: Any | None = None,
         request: HttpRequest | None = None,
         node: Optional["ComponentNode"] = None,
-        id: str | None = None,  # noqa: A002
     ) -> None:
-        self.id = default(id, _gen_component_id, factory=True)  # type: ignore[arg-type]
         self.name = _get_component_name(self.__class__, registered_name)
         self.registered_name: str | None = registered_name
-        self.args = default(args, [])
-        self.kwargs = default(kwargs, {})
-        self.slots = default(slots, {})
-        self.raw_args: list[Any] = self.args if isinstance(self.args, list) else list(self.args)
-        self.raw_kwargs: dict[str, Any] = self.kwargs if isinstance(self.kwargs, dict) else to_dict(self.kwargs)
-        self.raw_slots: dict[str, Slot] = self.slots if isinstance(self.slots, dict) else to_dict(self.slots)
-        self.context = default(context, Context())
+        self.args = [] if args is None else args
+        self.kwargs = {} if kwargs is None else kwargs
+        self.slots = {} if slots is None else slots
+        self.context = Context() if context is None else context
         self.request = request
         self.outer_context: Context | None = outer_context
-        self.registry = default(registry, registry_)
+        self.registry = registry_ if registry is None else registry
         self.node = node
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -686,37 +673,6 @@ class Component(metaclass=ComponentMeta):
     ```
     """
 
-    id: str
-    """
-    This ID is unique for every time a [`Component.render()`](../api#django_components_lite.Component.render)
-    (or equivalent) is called (AKA "render ID").
-
-    This is useful for logging or debugging.
-
-    The ID is a 7-letter alphanumeric string in the format `cXXXXXX`,
-    where `XXXXXX` is a random string of 6 alphanumeric characters (case-sensitive).
-
-    E.g. `c1A2b3c`.
-
-    A single render ID has a chance of collision 1 in 57 billion. However, due to birthday paradox,
-    the chance of collision increases to 1% when approaching ~33K render IDs.
-
-    Thus, there is currently a soft-cap of ~30K components rendered on a single page.
-
-    If you need to expand this limit, please open an issue on GitHub.
-
-    **Example:**
-
-    ```py
-    class MyComponent(Component):
-        def get_template_data(self, args, kwargs, slots, context):
-            print(f"Rendering '{self.id}'")
-
-    MyComponent.render()
-    # Rendering 'ab3c4d'
-    ```
-    """
-
     args: Any
     """
     Positional arguments passed to the component.
@@ -760,28 +716,6 @@ class Component(metaclass=ComponentMeta):
         def on_render_before(self, context: Context, template: Optional[Template]) -> None:
             assert self.args[0] == 123
             assert self.args[1] == 10
-    ```
-    """
-
-    raw_args: list[Any]
-    """
-    Positional arguments passed to the component.
-
-    This is part of the [Render API](../../concepts/fundamentals/render_api).
-
-    Unlike [`Component.args`](../api/#django_components_lite.Component.args), this attribute
-    is not typed and will remain as plain list even if you define the
-    [`Component.Args`](../api/#django_components_lite.Component.Args) class.
-
-    **Example:**
-
-    ```python
-    from django_components_lite import Component
-
-    class Table(Component):
-        def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-            assert self.raw_args[0] == 123
-            assert self.raw_args[1] == 10
     ```
     """
 
@@ -837,31 +771,6 @@ class Component(metaclass=ComponentMeta):
     ```
     """
 
-    raw_kwargs: dict[str, Any]
-    """
-    Keyword arguments passed to the component.
-
-    This is part of the [Render API](../../concepts/fundamentals/render_api).
-
-    Unlike [`Component.kwargs`](../api/#django_components_lite.Component.kwargs), this attribute
-    is not typed and will remain as plain dict even if you define the
-    [`Component.Kwargs`](../api/#django_components_lite.Component.Kwargs) class.
-
-    `raw_kwargs` have the defaults applied to them.
-    Read more about [Component defaults](../../concepts/fundamentals/component_defaults).
-
-    **Example:**
-
-    ```python
-    from django_components_lite import Component
-
-    class Table(Component):
-        def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-            assert self.raw_kwargs["page"] == 123
-            assert self.raw_kwargs["per_page"] == 10
-    ```
-    """
-
     slots: Any
     """
     Slots passed to the component.
@@ -908,28 +817,6 @@ class Component(metaclass=ComponentMeta):
         def on_render_before(self, context: Context, template: Optional[Template]) -> None:
             assert isinstance(self.slots["header"], Slot)
             assert isinstance(self.slots["footer"], Slot)
-    ```
-    """
-
-    raw_slots: dict[str, Slot]
-    """
-    Slots passed to the component.
-
-    This is part of the [Render API](../../concepts/fundamentals/render_api).
-
-    Unlike [`Component.slots`](../api/#django_components_lite.Component.slots), this attribute
-    is not typed and will remain as plain dict even if you define the
-    [`Component.Slots`](../api/#django_components_lite.Component.Slots) class.
-
-    **Example:**
-
-    ```python
-    from django_components_lite import Component
-
-    class Table(Component):
-        def on_render_before(self, context: Context, template: Optional[Template]) -> None:
-            assert self.raw_slots["header"] == "MY_HEADER"
-            assert self.raw_slots["footer"] == "FOOTER: " + ctx.data["user_id"]
     ```
     """
 
@@ -1402,13 +1289,11 @@ class Component(metaclass=ComponentMeta):
 
         component_name = _get_component_name(comp_cls, registered_name)
 
-        # Allow to provide no args/kwargs/slots/context
-        # NOTE: We make copies of args / kwargs / slots, so that plugins can modify them
-        # without affecting the original values.
-        args_list: list[Any] = list(default(args, []))
-        kwargs_dict = to_dict(default(kwargs, {}))
+        # Allow to provide no args/kwargs/slots/context.
+        args_list: list[Any] = [] if args is None else list(args)
+        kwargs_dict: dict[str, Any] = {} if kwargs is None else kwargs
         slots_dict = normalize_slot_fills(
-            to_dict(default(slots, {})),
+            {} if slots is None else slots,
             component_name=component_name,
         )
         # Use RequestContext if request is provided, so that child non-component template tags
@@ -1432,12 +1317,6 @@ class Component(metaclass=ComponentMeta):
             registered_name=registered_name,
             node=node,
         )
-
-        # If user doesn't specify `Args`, `Kwargs`, `Slots` types, then we pass them in as plain
-        # dicts / lists.
-        component.args = args_list
-        component.kwargs = kwargs_dict
-        component.slots = slots_dict
 
         ######################################
         # 2. Prepare component state
@@ -1607,6 +1486,7 @@ class ComponentNode(BaseNode):
     tag = "component"
     end_tag = "endcomponent"
     allowed_flags = ()
+    _skip_param_validation = True
 
     def __init__(
         self,

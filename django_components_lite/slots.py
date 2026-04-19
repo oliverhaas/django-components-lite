@@ -638,7 +638,7 @@ class SlotNode(BaseNode):
         outer_context = component_ctx.outer_context
 
         # Slot info
-        slot_fills = component.raw_slots
+        slot_fills = component.slots
         slot_name = name
         is_default = self.flags[SLOT_DEFAULT_FLAG]
         is_required = self.flags[SLOT_REQUIRED_FLAG]
@@ -679,7 +679,7 @@ class SlotNode(BaseNode):
         # 1. Using the "django" context behavior
         # 2. AND the slot fill is defined in the root template
         #
-        # Then `ctx_with_fills.component.raw_slots` does NOT contain any fills (`{% fill %}`). So in this case,
+        # Then `ctx_with_fills.component.slots` does NOT contain any fills (`{% fill %}`). So in this case,
         # we need to use a different strategy to find the fills Context layer that contains the fills.
         #
         # ------------------------------------------------------------------------------------------
