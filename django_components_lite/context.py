@@ -15,35 +15,28 @@ _STRATEGY_CONTEXT_KEY = "DJC_DEPS_STRATEGY"
 
 
 def make_isolated_context_copy(context: Context) -> Context:
-    context_copy = context.new()
-    _copy_forloop_context(context, context_copy)
+    """Fresh Context preserving only flags, render_context, forloop, and internal key."""
+    # Preserve the concrete class (e.g. RequestContext) and its __dict__
+    # (e.g. `_processors`) without paying for copy.copy's render_context
+    # and dicts copies that context.new() would do.
+    ctx = object.__new__(context.__class__)
+    ctx.__dict__ = context.__dict__.copy()
 
-    # Required for compatibility with Django's {% extends %} tag
-    # See https://github.com/django-components/django-components/pull/859
-    context_copy.render_context = context.render_context
+    base: dict[str, object] = {}
+    for layer in context.dicts:
+        if "forloop" in layer:
+            base.update(layer)
+        if _COMPONENT_CONTEXT_KEY in layer:
+            base[_COMPONENT_CONTEXT_KEY] = layer[_COMPONENT_CONTEXT_KEY]
 
-    # Pass through our internal keys
-    if _COMPONENT_CONTEXT_KEY in context:
-        context_copy[_COMPONENT_CONTEXT_KEY] = context[_COMPONENT_CONTEXT_KEY]
-
-    return context_copy
+    builtins = {"True": True, "False": False, "None": None}
+    ctx.dicts = [builtins, base] if base else [builtins]
+    ctx.render_context = context.render_context
+    return ctx
 
 
 def make_flat_render_context(outer_context: Context, data: dict) -> Context:
-    """
-    Build the isolated Context used to render a component's template.
-
-    Unlike ``make_isolated_context_copy`` + ``context.update(...)``, this creates
-    a Context with everything already merged into the base layer - no stack
-    pushes, no layer walking during variable resolution.
-
-    ``outer_context`` is flattened and used as the base; the caller's ``data``
-    (template data, context processors, internal keys) is layered on top so it
-    wins on key conflicts. When called from ``{% component %}`` the outer
-    context is already isolated (an empty shell), so the flatten is cheap.
-    When called directly via ``Component.render(context=...)`` the caller's
-    Context data flows through as expected.
-    """
+    """Flat render Context with `data` layered on top of `outer_context.flatten()`."""
     merged = {**outer_context.flatten(), **data}
     ctx = Context(
         merged,
