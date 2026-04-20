@@ -1035,7 +1035,7 @@ class Component(metaclass=ComponentMeta):
         )
         ```
         """
-        return cls._render_with_error_trace(
+        return cls._render(
             context=context,
             args=args,
             kwargs=kwargs,
@@ -1047,40 +1047,10 @@ class Component(metaclass=ComponentMeta):
             node=node,
         )
 
-    # This is the internal entrypoint for the render function
+    # Internal entrypoint for rendering - used by the public render() above
+    # and by ComponentNode.render() for the {% component %} tag path.
     @classmethod
-    def _render_with_error_trace(
-        cls,
-        context: dict[str, Any] | Context | None = None,
-        args: Any | None = None,
-        kwargs: Any | None = None,
-        slots: Any | None = None,
-        request: HttpRequest | None = None,
-        outer_context: Context | None = None,
-        registry: ComponentRegistry | None = None,
-        registered_name: str | None = None,
-        node: Optional["ComponentNode"] = None,
-    ) -> str:
-        try:
-            return cls._render_impl(
-                context=context,
-                args=args,
-                kwargs=kwargs,
-                slots=slots,
-                request=request,
-                outer_context=outer_context,
-                registry=registry,
-                registered_name=registered_name,
-                node=node,
-            )
-        except Exception as err:
-            # Prepend the component path to the error message so nested
-            # render failures surface where they happened.
-            set_component_error_message(err, [_get_component_name(cls, registered_name)])
-            raise err from None
-
-    @classmethod
-    def _render_impl(
+    def _render(
         comp_cls,
         context: dict[str, Any] | Context | None = None,
         args: Any | None = None,
@@ -1172,34 +1142,37 @@ class Component(metaclass=ComponentMeta):
         )
 
         ######################################
-        # 3. Call data methods
+        # 3. Call data methods & render
         ######################################
 
-        template_data = component.get_context_data(**kwargs_dict) or {}
+        # Wrap the user-code + template render in a try/except so nested
+        # component failures surface with the full component path prepended
+        # to the exception message.
+        try:
+            template_data = component.get_context_data(**kwargs_dict) or {}
 
-        ######################################
-        # 4. Render component
-        ######################################
+            template = get_component_template(component)
+            component_ctx.template_name = template.name if template else None
 
-        template = get_component_template(component)
-        component_ctx.template_name = template.name if template else None
-
-        if template is None:
-            html = None
-        else:
-            # Build a flat isolated context: template_data + context_processors +
-            # internal component key, merged into the base layer so the template
-            # engine doesn't walk a push/pop stack for every variable lookup.
-            render_ctx = make_flat_render_context(
-                context,  # type: ignore[arg-type]
-                {
-                    **component.context_processors_data,
-                    **template_data,
-                    _COMPONENT_CONTEXT_KEY: component_ctx,
-                },
-            )
-            render_ctx.template = template
-            html = template.render(render_ctx)
+            if template is None:
+                html = None
+            else:
+                # Flat isolated context: template_data + context_processors +
+                # internal component key, merged into the base layer so the
+                # template engine doesn't walk a push/pop stack per lookup.
+                render_ctx = make_flat_render_context(
+                    context,  # type: ignore[arg-type]
+                    {
+                        **component.context_processors_data,
+                        **template_data,
+                        _COMPONENT_CONTEXT_KEY: component_ctx,
+                    },
+                )
+                render_ctx.template = template
+                html = template.render(render_ctx)
+        except Exception as err:
+            set_component_error_message(err, [component_name])
+            raise err from None
 
         # Prepend <link>/<script> tags for this component's JS/CSS files
         if html is not None:
@@ -1375,7 +1348,7 @@ class ComponentNode(BaseNode):
         # like Django's inclusion_tag behavior.
         inner_context = make_isolated_context_copy(context)
 
-        return component_cls._render_with_error_trace(
+        return component_cls._render(
             context=inner_context,
             args=args,
             kwargs=kwargs,
