@@ -40,29 +40,10 @@ def set_component_error_message(err: Exception, component_path: list[str]) -> No
 
 
 @contextmanager
-def component_error_message(component_path: list[str]) -> Generator[None, None, None]:
-    """
-    If an error occurs within the context, format the error message to include
-    the component path. E.g.
-    ```
-    KeyError: "An error occured while rendering components MyPage > MyComponent > MyComponent(slot:content)
-    ```
-    """
-    try:
-        yield
-    except Exception as err:
-        set_component_error_message(err, component_path)
-
-        # `from None` should still raise the original error, but without showing this
-        # line in the traceback.
-        raise err from None
-
-
-@contextmanager
 def add_slot_to_error_message(component_name: str, slot_name: str) -> Generator[None, None, None]:
     """
-    This compliments `component_error_message` and is used inside SlotNode to add
-    the slots to the component path in the error message, e.g.:
+    Used inside SlotNode to add the slot name to the component path in the
+    error message, e.g.:
 
     ```
     KeyError: "An error occured while rendering components MyPage > MyComponent > MyComponent(slot:content)

@@ -33,7 +33,7 @@ from django_components_lite.slots import (
 )
 from django_components_lite.template import cache_component_template_file, get_component_template
 from django_components_lite.util.context import gen_context_processors_data, snapshot_context
-from django_components_lite.util.exception import component_error_message
+from django_components_lite.util.exception import set_component_error_message
 from django_components_lite.util.misc import (
     default,
     hash_comp_cls,
@@ -1061,24 +1061,23 @@ class Component(metaclass=ComponentMeta):
         registered_name: str | None = None,
         node: Optional["ComponentNode"] = None,
     ) -> str:
-        component_name = _get_component_name(cls, registered_name)
-
-        # Modify the error to display full component path (incl. slots)
-        with component_error_message([component_name]):
-            try:
-                return cls._render_impl(
-                    context=context,
-                    args=args,
-                    kwargs=kwargs,
-                    slots=slots,
-                    request=request,
-                    outer_context=outer_context,
-                    registry=registry,
-                    registered_name=registered_name,
-                    node=node,
-                )
-            except Exception as e:
-                raise e from None
+        try:
+            return cls._render_impl(
+                context=context,
+                args=args,
+                kwargs=kwargs,
+                slots=slots,
+                request=request,
+                outer_context=outer_context,
+                registry=registry,
+                registered_name=registered_name,
+                node=node,
+            )
+        except Exception as err:
+            # Prepend the component path to the error message so nested
+            # render failures surface where they happened.
+            set_component_error_message(err, [_get_component_name(cls, registered_name)])
+            raise err from None
 
     @classmethod
     def _render_impl(
