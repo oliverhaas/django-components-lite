@@ -1172,13 +1172,9 @@ class Component(metaclass=ComponentMeta):
 
         template_data = component.get_context_data(**kwargs_dict) or {}
 
-        #############################################################################
-        # 4. Make Context copy
-        #
-        # NOTE: To support infinite recursion, we make a copy of the context.
-        #       This way we don't have to call the whole component tree in one go recursively,
-        #       but instead can render one component at a time.
-        #############################################################################
+        ######################################
+        # 4. Render component
+        ######################################
 
         with prepare_component_template(component, template_data) as template:
             # Capture the template name so we can print better error messages (currently used in slots)
@@ -1192,22 +1188,7 @@ class Component(metaclass=ComponentMeta):
                     _COMPONENT_CONTEXT_KEY: component_ctx,
                 },
             ):
-                # Make a "snapshot" of the context as it was at the time of the render call.
-                #
-                # Previously, we recursively called `Template.render()` as this point, but due to recursion
-                # this was limiting the number of nested components to only about 60 levels deep.
-                #
-                # Now, we make a flat copy, so that the context copy is static and doesn't change even if
-                # we leave the `with context.update` blocks.
-                #
-                # This makes it possible to render nested components with a queue, avoiding recursion limits.
-                context_snapshot = snapshot_context(context)
-
-        ######################################
-        # 5. Render component
-        ######################################
-
-        html = template.render(context_snapshot) if template is not None else None
+                html = template.render(context) if template is not None else None
 
         # Prepend <link>/<script> tags for this component's JS/CSS files
         if html is not None:
