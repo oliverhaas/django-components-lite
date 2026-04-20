@@ -1,9 +1,7 @@
-from collections.abc import Generator
-from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from weakref import ReferenceType, ref
 
-from django.template import Context, Origin, Template
+from django.template import Origin, Template
 from django.template.loader import get_template as django_get_template
 
 from django_components_lite.util.django_monkeypatch import is_cls_patched
@@ -11,81 +9,6 @@ from django_components_lite.util.misc import get_module_info
 
 if TYPE_CHECKING:
     from django_components_lite.component import Component
-
-
-########################################################
-# PREPARING COMPONENT TEMPLATES FOR RENDERING
-########################################################
-
-
-@contextmanager
-def prepare_component_template(
-    component: "Component",
-    template_data: Any,
-) -> Generator[Template | None, Any, None]:
-    context = component.context
-    with context.update(template_data):
-        template = _get_component_template(component)
-
-        if template is None:
-            # If template is None, then the component is "template-less",
-            # and we skip template processing.
-            yield template
-            return
-
-        if not is_cls_patched(template):
-            raise RuntimeError(
-                "Django-components received a Template instance which was not patched."
-                "If you are using Django's Template class, check if you added django-components"
-                "to INSTALLED_APPS. If you are using a custom template class, then you need to"
-                "manually patch the class.",
-            )
-
-        with _maybe_bind_template(context, template):
-            yield template
-
-
-# `_maybe_bind_template()` handles two problems:
-#
-# 1. Initially, the binding the template was needed for the context processor data
-#    to work when using `RequestContext` (See `RequestContext.bind_template()` in e.g. Django v4.2 or v5.1).
-#    But as of djc v0.140 (possibly earlier) we generate and apply the context processor data
-#    ourselves in `Component._render_impl()`.
-#
-#    Now, we still want to "bind the template" by setting the `Context.template` attribute.
-#    This is for compatibility with Django, because we don't know if there isn't some code that relies
-#    on the `Context.template` attribute being set.
-#
-#    But we don't call `context.bind_template()` explicitly. If we did, then we would
-#    be generating and applying the context processor data twice if the context was `RequestContext`.
-#    Instead, we only run the same logic as `Context.bind_template()` but inlined.
-#
-#    The downstream effect of this is that if the user or some third-party library
-#    uses custom subclass of `Context` with custom logic for `Context.bind_template()`,
-#    then this custom logic will NOT be applied. In such case they should open an issue.
-#
-#    See https://github.com/django-components/django-components/issues/580
-#    and https://github.com/django-components/django-components/issues/634
-#
-# 2. Not sure if I (Juro) remember right, but I think that with the binding of templates
-#    there was also an issue that in *some* cases the template was already bound to the context
-#    by the time we got to rendering the component. This is why we need to check if `context.template`
-#    is already set.
-#
-#    The cause of this may have been compatibility with Django's `{% extends %}` tag, or
-#    maybe when using the "isolated" context behavior. But not sure.
-@contextmanager
-def _maybe_bind_template(context: Context, template: Template) -> Generator[None, Any, None]:
-    if context.template is not None:
-        yield
-        return
-
-    # This code is taken from `Context.bind_template()` from Django v5.1
-    context.template = template
-    try:
-        yield
-    finally:
-        context.template = None
 
 
 ########################################################
