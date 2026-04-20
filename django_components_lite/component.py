@@ -412,8 +412,10 @@ class Component(metaclass=ComponentMeta):
         slots: Any | None = None,
         request: HttpRequest | None = None,
         node: Optional["ComponentNode"] = None,
+        name: str | None = None,
     ) -> None:
-        self.name = _get_component_name(self.__class__, registered_name)
+        # `name` can be supplied by the render pipeline to avoid recomputing.
+        self.name = name if name is not None else _get_component_name(self.__class__, registered_name)
         self.registered_name: str | None = registered_name
         self.args = [] if args is None else args
         self.kwargs = {} if kwargs is None else kwargs
@@ -1106,6 +1108,7 @@ class Component(metaclass=ComponentMeta):
             registry=registry,
             registered_name=registered_name,
             node=node,
+            name=component_name,
         )
 
         ######################################
@@ -1160,14 +1163,17 @@ class Component(metaclass=ComponentMeta):
                 # Flat isolated context: template_data + context_processors +
                 # internal component key, merged into the base layer so the
                 # template engine doesn't walk a push/pop stack per lookup.
-                render_ctx = make_flat_render_context(
-                    context,  # type: ignore[arg-type]
-                    {
+                # Skip the context_processors_data property when there's no
+                # request - it always returns {} in that case.
+                if request is None:
+                    render_data = {**template_data, _COMPONENT_CONTEXT_KEY: component_ctx}
+                else:
+                    render_data = {
                         **component.context_processors_data,
                         **template_data,
                         _COMPONENT_CONTEXT_KEY: component_ctx,
-                    },
-                )
+                    }
+                render_ctx = make_flat_render_context(context, render_data)  # type: ignore[arg-type]
                 render_ctx.template = template
                 html = template.render(render_ctx)
         except Exception as err:
