@@ -147,6 +147,19 @@ def ensure_unique_template(component_cls: type["Component"], template: Template)
     return template
 
 
+def get_component_template(component: "Component") -> Template | None:
+    """Resolve the Template instance for a Component, or None if the component has no template."""
+    template = _get_component_template(component)
+    if template is not None and not is_cls_patched(template):
+        raise RuntimeError(
+            "Django-components received a Template instance which was not patched."
+            "If you are using Django's Template class, check if you added django-components"
+            "to INSTALLED_APPS. If you are using a custom template class, then you need to"
+            "manually patch the class.",
+        )
+    return template
+
+
 def _get_component_template(component: "Component") -> Template | None:
     template: Template | None = None
     template_string: str | None = None

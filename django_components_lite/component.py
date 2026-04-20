@@ -19,7 +19,11 @@ from django.utils.safestring import mark_safe
 from django_components_lite.component_media import resolve_component_files
 from django_components_lite.component_registry import ComponentRegistry
 from django_components_lite.component_registry import registry as registry_
-from django_components_lite.context import _COMPONENT_CONTEXT_KEY, make_isolated_context_copy
+from django_components_lite.context import (
+    _COMPONENT_CONTEXT_KEY,
+    make_flat_render_context,
+    make_isolated_context_copy,
+)
 from django_components_lite.dependencies import build_dependency_tags
 from django_components_lite.node import BaseNode
 from django_components_lite.slots import (
@@ -27,7 +31,7 @@ from django_components_lite.slots import (
     normalize_slot_fills,
     resolve_fills,
 )
-from django_components_lite.template import cache_component_template_file, prepare_component_template
+from django_components_lite.template import cache_component_template_file, get_component_template
 from django_components_lite.util.context import gen_context_processors_data, snapshot_context
 from django_components_lite.util.exception import component_error_message
 from django_components_lite.util.misc import (
@@ -1182,19 +1186,25 @@ class Component(metaclass=ComponentMeta):
         # 4. Render component
         ######################################
 
-        with prepare_component_template(component, template_data) as template:
-            # Capture the template name so we can print better error messages (currently used in slots)
-            component_ctx.template_name = template.name if template else None
+        template = get_component_template(component)
+        component_ctx.template_name = template.name if template else None
 
-            with context.update(  # type: ignore[union-attr]
+        if template is None:
+            html = None
+        else:
+            # Build a flat isolated context: template_data + context_processors +
+            # internal component key, merged into the base layer so the template
+            # engine doesn't walk a push/pop stack for every variable lookup.
+            render_ctx = make_flat_render_context(
+                context,  # type: ignore[arg-type]
                 {
-                    # Make data from context processors available inside templates
                     **component.context_processors_data,
-                    # Private context fields
+                    **template_data,
                     _COMPONENT_CONTEXT_KEY: component_ctx,
                 },
-            ):
-                html = template.render(context) if template is not None else None
+            )
+            render_ctx.template = template
+            html = template.render(render_ctx)
 
         # Prepend <link>/<script> tags for this component's JS/CSS files
         if html is not None:

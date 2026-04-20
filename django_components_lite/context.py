@@ -29,6 +29,33 @@ def make_isolated_context_copy(context: Context) -> Context:
     return context_copy
 
 
+def make_flat_render_context(outer_context: Context, data: dict) -> Context:
+    """
+    Build the isolated Context used to render a component's template.
+
+    Unlike ``make_isolated_context_copy`` + ``context.update(...)``, this creates
+    a Context with everything already merged into the base layer - no stack
+    pushes, no layer walking during variable resolution.
+
+    ``outer_context`` is flattened and used as the base; the caller's ``data``
+    (template data, context processors, internal keys) is layered on top so it
+    wins on key conflicts. When called from ``{% component %}`` the outer
+    context is already isolated (an empty shell), so the flatten is cheap.
+    When called directly via ``Component.render(context=...)`` the caller's
+    Context data flows through as expected.
+    """
+    merged = {**outer_context.flatten(), **data}
+    ctx = Context(
+        merged,
+        autoescape=outer_context.autoescape,
+        use_l10n=outer_context.use_l10n,
+        use_tz=outer_context.use_tz,
+    )
+    # Share render_context so Django's {% extends %} tag keeps working.
+    ctx.render_context = outer_context.render_context
+    return ctx
+
+
 def _copy_forloop_context(from_context: Context, to_context: Context) -> None:
     """Forward the info about the current loop"""
     # Note that the ForNode (which implements `{% for %}`) does not
