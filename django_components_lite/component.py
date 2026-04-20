@@ -1280,9 +1280,8 @@ class Component(metaclass=ComponentMeta):
         # Allow to provide no args/kwargs/slots/context.
         args_list: list[Any] = [] if args is None else list(args)
         kwargs_dict: dict[str, Any] = {} if kwargs is None else kwargs
-        slots_dict = normalize_slot_fills(
-            {} if slots is None else slots,
-            component_name=component_name,
+        slots_dict = (
+            normalize_slot_fills(slots, component_name=component_name) if slots else {}
         )
         # Use RequestContext if request is provided, so that child non-component template tags
         # can access the request object too.
