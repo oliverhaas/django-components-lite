@@ -1100,15 +1100,14 @@ class Component(metaclass=ComponentMeta):
         # Allow to pass down Request object via context.
         # `context` may be passed explicitly via `Component.render()` and `Component.render_to_response()`,
         # or implicitly via `{% component %}` tag.
+        parent_comp_ctx = _get_parent_component_context(context) if context else None
         if request is None and context:
             # If the context is `RequestContext`, it has `request` attribute
             request = getattr(context, "request", None)
             # Check if this is a nested component and whether parent has request
-            if request is None:
-                parent_comp_ctx = _get_parent_component_context(context)
-                if parent_comp_ctx:
-                    parent_comp = parent_comp_ctx.component()
-                    request = parent_comp and parent_comp.request
+            if request is None and parent_comp_ctx:
+                parent_comp = parent_comp_ctx.component()
+                request = parent_comp and parent_comp.request
 
         component_name = _get_component_name(comp_cls, registered_name)
 
@@ -1144,10 +1143,7 @@ class Component(metaclass=ComponentMeta):
         # 2. Prepare component state
         ######################################
 
-        # We pass down the components the info about the component's parent.
-        # This is used for correctly resolving slot fills, correct rendering order,
-        # or CSS scoping.
-        parent_comp_ctx = _get_parent_component_context(context)
+        # `parent_comp_ctx` was resolved above when checking for a parent's request.
         if parent_comp_ctx is not None:
             component_path = [*parent_comp_ctx.component_path, component_name]
         else:
