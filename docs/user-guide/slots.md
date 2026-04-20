@@ -59,13 +59,20 @@ Content inside `{% slot %}` is the fallback, rendered when no `{% fill %}` is pr
 
 ## Checking if a slot is filled
 
-In your component's template, you can check whether a slot was filled:
+Pass a flag from your Python code into the template via ``get_context_data``
+and branch on that:
 
-```html
-{% load component_tags %}
-{% if component_vars.slots.header %}
-  <div class="has-header">
-    {% slot "header" %}{% endslot %}
-  </div>
-{% endif %}
+```python
+class MyComponent(Component):
+    template = """
+        {% load component_tags %}
+        {% if has_header %}
+          <div class="has-header">
+            {% slot "header" %}{% endslot %}
+          </div>
+        {% endif %}
+    """
+
+    def get_context_data(self, **kwargs):
+        return {"has_header": "header" in self.slots}
 ```

@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import (
     Any,
     ClassVar,
-    NamedTuple,
     Optional,
     Union,
     cast,
@@ -96,174 +95,6 @@ def get_component_by_class_id(comp_cls_id: str) -> type["Component"]:
     NOTE: This is mainly intended for extensions.
     """
     return comp_cls_id_mapping[comp_cls_id]
-
-
-class ComponentVars(NamedTuple):
-    """
-    Type for the variables available inside the component templates.
-
-    All variables here are scoped under `component_vars.`, so e.g. attribute
-    `kwargs` on this class is accessible inside the template as:
-
-    ```django
-    {{ component_vars.kwargs }}
-    ```
-    """
-
-    args: Any
-    """
-    The `args` argument as passed to
-    [`Component.get_template_data()`](../api/#django_components_lite.Component.get_template_data).
-
-    This is the same [`Component.args`](../api/#django_components_lite.Component.args)
-    that's available on the component instance.
-
-    If you defined the [`Component.Args`](../api/#django_components_lite.Component.Args) class,
-    then the `args` property will return an instance of that class.
-
-    Otherwise, `args` will be a plain list.
-
-    **Example:**
-
-    With `Args` class:
-
-    ```djc_py
-    from django_components_lite import Component, register
-
-    @register("table")
-    class Table(Component):
-        class Args:
-            page: int
-            per_page: int
-
-        template = '''
-            <div>
-                <h1>Table</h1>
-                <p>Page: {{ component_vars.args.page }}</p>
-                <p>Per page: {{ component_vars.args.per_page }}</p>
-            </div>
-        '''
-    ```
-
-    Without `Args` class:
-
-    ```djc_py
-    from django_components_lite import Component, register
-
-    @register("table")
-    class Table(Component):
-        template = '''
-            <div>
-                <h1>Table</h1>
-                <p>Page: {{ component_vars.args.0 }}</p>
-                <p>Per page: {{ component_vars.args.1 }}</p>
-            </div>
-        '''
-    ```
-    """
-
-    kwargs: Any
-    """
-    The `kwargs` argument as passed to
-    [`Component.get_template_data()`](../api/#django_components_lite.Component.get_template_data).
-
-    This is the same [`Component.kwargs`](../api/#django_components_lite.Component.kwargs)
-    that's available on the component instance.
-
-    If you defined the [`Component.Kwargs`](../api/#django_components_lite.Component.Kwargs) class,
-    then the `kwargs` property will return an instance of that class.
-
-    Otherwise, `kwargs` will be a plain dict.
-
-    **Example:**
-
-    With `Kwargs` class:
-
-    ```djc_py
-    from django_components_lite import Component, register
-
-    @register("table")
-    class Table(Component):
-        class Kwargs:
-            page: int
-            per_page: int
-
-        template = '''
-            <div>
-                <h1>Table</h1>
-                <p>Page: {{ component_vars.kwargs.page }}</p>
-                <p>Per page: {{ component_vars.kwargs.per_page }}</p>
-            </div>
-        '''
-    ```
-
-    Without `Kwargs` class:
-
-    ```djc_py
-    from django_components_lite import Component, register
-
-    @register("table")
-    class Table(Component):
-        template = '''
-            <div>
-                <h1>Table</h1>
-                <p>Page: {{ component_vars.kwargs.page }}</p>
-                <p>Per page: {{ component_vars.kwargs.per_page }}</p>
-            </div>
-        '''
-    ```
-    """
-
-    slots: Any
-    """
-    The `slots` argument as passed to
-    [`Component.get_template_data()`](../api/#django_components_lite.Component.get_template_data).
-
-    This is the same [`Component.slots`](../api/#django_components_lite.Component.slots)
-    that's available on the component instance.
-
-    If you defined the [`Component.Slots`](../api/#django_components_lite.Component.Slots) class,
-    then the `slots` property will return an instance of that class.
-
-    Otherwise, `slots` will be a plain dict.
-
-    **Example:**
-
-    With `Slots` class:
-
-    ```djc_py
-    from django_components_lite import Component, SlotInput, register
-
-    @register("table")
-    class Table(Component):
-        class Slots:
-            footer: SlotInput
-
-        template = '''
-            <div>
-                {% component "pagination" %}
-                    {% fill "footer" body=component_vars.slots.footer / %}
-                {% endcomponent %}
-            </div>
-        '''
-    ```
-
-    Without `Slots` class:
-
-    ```djc_py
-    from django_components_lite import Component, SlotInput, register
-
-    @register("table")
-    class Table(Component):
-        template = '''
-            <div>
-                {% component "pagination" %}
-                    {% fill "footer" body=component_vars.slots.footer / %}
-                {% endcomponent %}
-            </div>
-        '''
-    ```
-    """
 
 
 def _get_component_name(cls: type["Component"], registered_name: str | None = None) -> str:
@@ -1359,13 +1190,6 @@ class Component(metaclass=ComponentMeta):
                     **component.context_processors_data,
                     # Private context fields
                     _COMPONENT_CONTEXT_KEY: component_ctx,
-                    # NOTE: Public API for variables accessible from within a component's template
-                    # See https://github.com/django-components/django-components/issues/280#issuecomment-2081180940
-                    "component_vars": ComponentVars(
-                        args=component.args,
-                        kwargs=component.kwargs,
-                        slots=component.slots,
-                    ),
                 },
             ):
                 # Make a "snapshot" of the context as it was at the time of the render call.

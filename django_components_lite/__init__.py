@@ -8,7 +8,6 @@ from django_components_lite.autodiscovery import autodiscover
 from django_components_lite.component import (
     Component,
     ComponentNode,
-    ComponentVars,
     all_components,
     get_component_by_class_id,
 )
@@ -45,7 +44,6 @@ __all__ = [
     "ComponentFileEntry",
     "ComponentNode",
     "ComponentRegistry",
-    "ComponentVars",
     "ComponentsSettings",
     "Empty",
     "FillNode",
