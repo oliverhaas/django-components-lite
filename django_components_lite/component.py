@@ -538,18 +538,6 @@ class Component(metaclass=ComponentMeta):
     """
 
     # #####################################
-    # PUBLIC API - RENDER
-    # #####################################
-
-    def on_render(self, context: Context, template: Template | None) -> str | None:
-        """
-        Render the component. Override to customize rendering.
-        """
-        if template is None:
-            return None
-        return template.render(context)
-
-    # #####################################
     # MISC
     # #####################################
 
@@ -1396,7 +1384,7 @@ class Component(metaclass=ComponentMeta):
         # 5. Render component
         ######################################
 
-        html = component.on_render(context_snapshot, template)
+        html = template.render(context_snapshot) if template is not None else None
 
         # Prepend <link>/<script> tags for this component's JS/CSS files
         if html is not None:

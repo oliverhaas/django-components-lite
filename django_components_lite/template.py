@@ -169,8 +169,7 @@ def _get_component_template(component: "Component") -> Template | None:
     if template_string is not None:
         return _create_template_from_string(component.__class__, template_string)
 
-    # Otherwise, Component has no template - this is valid, as it may be instead rendered
-    # via `Component.on_render()`
+    # Otherwise, Component has no template - render returns an empty string.
     return None
 
 
