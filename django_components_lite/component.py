@@ -1342,7 +1342,9 @@ class ComponentNode(BaseNode):
 
         component_cls: type[Component] = self.registry.get(self.name)
 
-        slot_fills = resolve_fills(context, self, self.name)
+        # Skip the fill-resolution walk when the tag has no body (common case
+        # for props-only components like `{% component "card" ... / %}`).
+        slot_fills = resolve_fills(context, self, self.name) if self.nodelist else {}
 
         # Components use isolated context  -  template only sees get_template_data() output,
         # like Django's inclusion_tag behavior.
