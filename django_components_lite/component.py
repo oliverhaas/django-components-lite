@@ -1152,6 +1152,13 @@ class Component(metaclass=ComponentMeta):
         # This is data that will be accessible (internally) from within the component's template.
         # NOTE: Be careful with the context - Do not store a strong reference to the component,
         #       because that would prevent the component from being garbage collected.
+        # Only snapshot outer_context when slots were passed: filled slots are
+        # the only code path that consults ComponentContext.outer_context.
+        ctx_outer = (
+            snapshot_context(outer_context)
+            if slots_dict and outer_context is not None
+            else None
+        )
         component_ctx = ComponentContext(
             component=ref(component),
             component_path=component_path,
@@ -1162,8 +1169,7 @@ class Component(metaclass=ComponentMeta):
             # - If multiple slots have the `default` attribute set, yet have different name, then
             #   we will raise an error.
             default_slot=None,
-            # NOTE: This is only a SNAPSHOT of the outer context.
-            outer_context=snapshot_context(outer_context) if outer_context is not None else None,
+            outer_context=ctx_outer,
         )
 
         ######################################
