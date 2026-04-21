@@ -1167,7 +1167,7 @@ class Component(metaclass=ComponentMeta):
                         **template_data,
                         _COMPONENT_CONTEXT_KEY: component_ctx,
                     }
-                render_ctx = make_flat_render_context(context, render_data)  # type: ignore[arg-type]
+                render_ctx = make_flat_render_context(context, render_data)
                 render_ctx.template = template
                 html = template.render(render_ctx)
         except Exception as err:
