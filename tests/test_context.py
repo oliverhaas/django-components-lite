@@ -80,14 +80,14 @@ def gen_parent_component():
             {% load component_tags %}
             <div>
                 <h1>Parent content</h1>
-                {% component "variable_display" shadowing_variable='override' new_variable='unique_val' %}
-                {% endcomponent %}
+                {% comp "variable_display" shadowing_variable='override' new_variable='unique_val' %}
+                {% endcomp %}
             </div>
             <div>
                 {% slot 'content' %}
                     <h2>Slot content</h2>
-                    {% component "variable_display" shadowing_variable='slot_default_override' new_variable='slot_default_unique' %}
-                    {% endcomponent %}
+                    {% comp "variable_display" shadowing_variable='slot_default_override' new_variable='slot_default_unique' %}
+                    {% endcomp %}
                 {% endslot %}
             </div>
         """
@@ -104,14 +104,14 @@ def gen_parent_component_with_args():
             {% load component_tags %}
             <div>
                 <h1>Parent content</h1>
-                {% component "variable_display" shadowing_variable=inner_parent_value new_variable='unique_val' %}
-                {% endcomponent %}
+                {% comp "variable_display" shadowing_variable=inner_parent_value new_variable='unique_val' %}
+                {% endcomp %}
             </div>
             <div>
                 {% slot 'content' %}
                     <h2>Slot content</h2>
-                    {% component "variable_display" shadowing_variable='slot_default_override' new_variable=inner_parent_value %}
-                    {% endcomponent %}
+                    {% comp "variable_display" shadowing_variable='slot_default_override' new_variable=inner_parent_value %}
+                    {% endcomp %}
                 {% endslot %}
             </div>
         """
@@ -136,7 +136,7 @@ class TestContext:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_component' %}{% endcomponent %}
+            {% comp 'parent_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -153,7 +153,7 @@ class TestContext:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_component' %}{% endcomponent %}
+            {% comp 'parent_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -170,12 +170,12 @@ class TestContext:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_component' %}
+            {% comp 'parent_component' %}
                 {% fill 'content' %}
-                    {% component 'variable_display' shadowing_variable='shadow_from_slot' new_variable='unique_from_slot' %}
-                    {% endcomponent %}
+                    {% comp 'variable_display' shadowing_variable='shadow_from_slot' new_variable='unique_from_slot' %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -190,12 +190,12 @@ class TestContext:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_component' %}
+            {% comp 'parent_component' %}
                 {% fill 'content' %}
-                    {% component 'variable_display' shadowing_variable='shadow_from_slot' new_variable='unique_from_slot' %}
-                    {% endcomponent %}
+                    {% comp 'variable_display' shadowing_variable='shadow_from_slot' new_variable='unique_from_slot' %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -211,7 +211,7 @@ class TestContext:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_component' %}{% endcomponent %}
+            {% comp 'parent_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"shadowing_variable": "NOT SHADOWED"}))
@@ -228,12 +228,12 @@ class TestContext:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_component' %}
+            {% comp 'parent_component' %}
                 {% fill 'content' %}
-                    {% component 'variable_display' shadowing_variable='shadow_from_slot' new_variable='unique_from_slot' %}
-                    {% endcomponent %}
+                    {% comp 'variable_display' shadowing_variable='shadow_from_slot' new_variable='unique_from_slot' %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"shadowing_variable": "NOT SHADOWED"}))
@@ -251,8 +251,8 @@ class TestParentArgs:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_with_args' parent_value=parent_value %}
-            {% endcomponent %}
+            {% comp 'parent_with_args' parent_value=parent_value %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"parent_value": "passed_in"}))
@@ -280,7 +280,7 @@ class TestParentArgs:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_with_args' parent_value='passed_in' %}{%endcomponent %}
+            {% comp 'parent_with_args' parent_value='passed_in' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -309,12 +309,12 @@ class TestParentArgs:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'parent_with_args' parent_value='passed_in' %}
+            {% comp 'parent_with_args' parent_value='passed_in' %}
                 {% fill 'content' %}
-                    {% component 'variable_display' shadowing_variable='value_from_slot' new_variable=inner_parent_value %}
-                    {% endcomponent %}
+                    {% comp 'variable_display' shadowing_variable='value_from_slot' new_variable=inner_parent_value %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
             """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -340,7 +340,7 @@ class TestContextCalledOnce:
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'incrementer' %}{% endcomponent %}
+            {% comp 'incrementer' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context()).strip().replace("\n", "")
@@ -353,7 +353,7 @@ class TestContextCalledOnce:
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'incrementer' value='2' %}{% endcomponent %}
+            {% comp 'incrementer' value='2' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context()).strip()
@@ -369,7 +369,7 @@ class TestContextCalledOnce:
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'incrementer' %}{% endcomponent %}
+            {% comp 'incrementer' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context()).strip()
@@ -380,7 +380,7 @@ class TestContextCalledOnce:
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'incrementer' value='3' %}{% endcomponent %}
+            {% comp 'incrementer' value='3' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context()).strip()
@@ -391,11 +391,11 @@ class TestContextCalledOnce:
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'incrementer' %}
+            {% comp 'incrementer' %}
                 {% fill 'content' %}
                     <p>slot</p>
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context()).strip()
@@ -413,11 +413,11 @@ class TestContextCalledOnce:
         registry.register(name="incrementer", component=gen_incrementer_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'incrementer' value='3' %}
+            {% comp 'incrementer' value='3' %}
                 {% fill 'content' %}
                     <p>slot</p>
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context()).strip()
@@ -437,7 +437,7 @@ class TestComponentsCanAccessOuterContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' %}{% endcomponent %}
+            {% comp 'simple_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"}))
@@ -454,7 +454,7 @@ class TestIsolatedContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' variable=variable %}{% endcomponent %}
+            {% comp 'simple_component' variable=variable %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -464,7 +464,7 @@ class TestIsolatedContext:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' %}{% endcomponent %}
+            {% comp 'simple_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()
@@ -478,7 +478,7 @@ class TestIsolatedContextSetting:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' variable=variable %}{% endcomponent %}
+            {% comp 'simple_component' variable=variable %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"}))
@@ -490,7 +490,7 @@ class TestIsolatedContextSetting:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' %}{% endcomponent %}
+            {% comp 'simple_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"}))
@@ -502,8 +502,8 @@ class TestIsolatedContextSetting:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' variable=variable %}
-            {% endcomponent %}
+            {% comp 'simple_component' variable=variable %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"}))
@@ -515,8 +515,8 @@ class TestIsolatedContextSetting:
         registry.register(name="simple_component", component=gen_simple_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'simple_component' %}
-            {% endcomponent %}
+            {% comp 'simple_component' %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"}))
@@ -540,8 +540,8 @@ class TestContextProcessors:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
-            {% endcomponent %}
+            {% comp "test" %}
+            {% endcomp %}
         """
         request = HttpRequest()
         request_context = RequestContext(request)
@@ -563,7 +563,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% componentsc "test_child" %}
+                {% compc "test_child" %}
             """
 
             def get_context_data(self, **kwargs):
@@ -584,7 +584,7 @@ class TestContextProcessors:
 
         template_str: str = """
             {% load component_tags %}
-            {% componentsc "test_parent" %}
+            {% compc "test_parent" %}
         """
         request = HttpRequest()
         request_context = RequestContext(request)
@@ -629,9 +629,9 @@ class TestContextProcessors:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test_parent" %}
-                {% componentsc "test_child" %}
-            {% endcomponent %}
+            {% comp "test_parent" %}
+                {% compc "test_child" %}
+            {% endcomp %}
         """
         request = HttpRequest()
         request_context = RequestContext(request)
@@ -677,7 +677,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% componentsc "test_child" %}
+                {% compc "test_child" %}
             """
 
             def get_context_data(self, **kwargs):
@@ -737,7 +737,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% componentsc "test_child" %}
+                {% compc "test_child" %}
             """
 
             def get_context_data(self, **kwargs):
@@ -853,7 +853,7 @@ class TestContextProcessors:
         class TestParentComponent(Component):
             template: str = """
                 {% load component_tags %}
-                {% componentsc "test_child" %}
+                {% compc "test_child" %}
             """
 
             def get_context_data(self, **kwargs):
@@ -916,7 +916,7 @@ class TestOuterContextProperty:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'outer_context_component' %}{% endcomponent %}
+            {% comp 'outer_context_component' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"variable": "outer_value"})).strip()

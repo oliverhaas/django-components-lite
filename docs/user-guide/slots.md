@@ -27,24 +27,24 @@ Use `{% fill %}` when using the component:
 
 ```html
 {% load component_tags %}
-{% component "panel" %}
+{% comp "panel" %}
   {% fill "header" %}
     <h2>Custom Header</h2>
   {% endfill %}
   {% fill "body" %}
     <p>Panel content goes here.</p>
   {% endfill %}
-{% endcomponent %}
+{% endcomp %}
 ```
 
 ## Default slot
 
-Content placed directly inside `{% component %}` without a `{% fill %}` goes into the default slot:
+Content placed directly inside `{% comp %}` without a `{% fill %}` goes into the default slot:
 
 ```html
-{% component "panel" %}
+{% comp "panel" %}
   This goes into the default slot.
-{% endcomponent %}
+{% endcomp %}
 ```
 
 ## Slot fallback

@@ -322,9 +322,9 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               FROM_INSIDE_DEFAULT_SLOT
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -364,11 +364,11 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               {% fill "first" %}
                 FROM_INSIDE_NAMED_SLOT
               {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -498,9 +498,9 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               FROM_INSIDE_DEFAULT_SLOT
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -537,11 +537,11 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               {% fill "first" %}
                 FROM_INSIDE_NAMED_SLOT
               {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -578,9 +578,9 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               {% fill "first" body=my_slot %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -611,9 +611,9 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               {% fill "first" body=my_slot %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -633,9 +633,9 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               {% fill "first" body=my_slot %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -654,11 +654,11 @@ class TestSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
               {% fill "first" body=my_slot %}
                 FROM_INSIDE_NAMED_SLOT
               {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 

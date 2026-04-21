@@ -78,32 +78,32 @@ class TestComponentRegistry:
         assert custom_registry._tags == {}
 
         # NOTE: We preserve the default component tags
-        assert "component" not in custom_registry.library.tags
+        assert "comp" not in custom_registry.library.tags
 
         # Register two components that use the same tag
         custom_registry.register(name="testcomponent", component=MockComponent)
         custom_registry.register(name="testcomponent2", component=MockComponent)
 
         assert custom_registry._tags == {
-            "component": {"testcomponent", "testcomponent2"},
+            "comp": {"testcomponent", "testcomponent2"},
         }
 
-        assert "component" in custom_registry.library.tags
+        assert "comp" in custom_registry.library.tags
 
         # Unregister only one of the components. The tags should remain
         custom_registry.unregister(name="testcomponent")
 
         assert custom_registry._tags == {
-            "component": {"testcomponent2"},
+            "comp": {"testcomponent2"},
         }
 
-        assert "component" in custom_registry.library.tags
+        assert "comp" in custom_registry.library.tags
 
         # Unregister the second components. The tags should be removed
         custom_registry.unregister(name="testcomponent2")
 
         assert custom_registry._tags == {}
-        assert "component" not in custom_registry.library.tags
+        assert "comp" not in custom_registry.library.tags
 
     def test_prevent_registering_different_components_with_the_same_name(self):
         custom_registry = ComponentRegistry()

@@ -30,11 +30,11 @@ Create the template at `components/greeting/greeting.html`:
 ```html
 {% load component_tags %}
 
-{% component "greeting" name="Django" %}
+{% comp "greeting" name="Django" %}
   {% fill "extra" %}
     <p>Welcome to components!</p>
   {% endfill %}
-{% endcomponent %}
+{% endcomp %}
 ```
 
 This renders:

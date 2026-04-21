@@ -105,7 +105,7 @@ class ComponentsSettings(NamedTuple):
     """
     Enable / disable
     [multiline support for template tags](../concepts/fundamentals/template_tag_syntax.md#multiline-tags).
-    If `True`, template tags like `{% component %}` or `{{ my_var }}` can span multiple lines.
+    If `True`, template tags like `{% comp %}` or `{{ my_var }}` can span multiple lines.
 
     Defaults to `True`.
 
@@ -115,6 +115,35 @@ class ComponentsSettings(NamedTuple):
     ```python
     COMPONENTS = ComponentsSettings(
         multiline_tags=False,
+    )
+    ```
+    """
+
+    tag_name: str | None = None
+    """
+    Name of the block-form component template tag.
+
+    Defaults to ``"comp"`` (so ``{% comp "card" %}...{% endcomp %}``). The end
+    tag is always ``f"end{tag_name}"`` and cannot be customized separately.
+
+    ```python
+    COMPONENTS = ComponentsSettings(
+        tag_name="component",  # use `{% component %}...{% endcomponent %}` instead
+    )
+    ```
+    """
+
+    tag_name_sc: str | None = None
+    """
+    Name of the self-closing component template tag.
+
+    Defaults to ``f"{tag_name}c"`` (so ``"compc"`` with the default
+    ``tag_name``). Set this to override the derived name.
+
+    ```python
+    COMPONENTS = ComponentsSettings(
+        tag_name="component",
+        tag_name_sc="comp_inline",  # use `{% comp_inline "card" / %}`
     )
     ```
     """
@@ -224,6 +253,9 @@ defaults = ComponentsSettings(
     # App-level "components" dirs, e.g. `[app]/components/`
     app_dirs=["components"],
     multiline_tags=True,
+    tag_name="comp",
+    # `tag_name_sc` defaults to `f"{tag_name}c"` when not set explicitly - see _load_settings.
+    tag_name_sc=None,
     static_files_allowed=[
         ".css",
         ".js", ".jsx", ".ts", ".tsx",
@@ -268,11 +300,16 @@ class InternalSettings:
         dirs_default_fn = cast("Dynamic[Sequence[str | tuple[str, str]]]", defaults.dirs)
         dirs_default = dirs_default_fn.getter()
 
+        tag_name = default(components_settings.tag_name, defaults.tag_name)
+        tag_name_sc = default(components_settings.tag_name_sc, f"{tag_name}c")
+
         self._settings = ComponentsSettings(
             autodiscover=default(components_settings.autodiscover, defaults.autodiscover),
             dirs=default(components_settings.dirs, dirs_default),
             app_dirs=default(components_settings.app_dirs, defaults.app_dirs),
             multiline_tags=default(components_settings.multiline_tags, defaults.multiline_tags),
+            tag_name=tag_name,
+            tag_name_sc=tag_name_sc,
             static_files_allowed=default(components_settings.static_files_allowed, defaults.static_files_allowed),
             static_files_forbidden=self._prepare_static_files_forbidden(components_settings),
         )
@@ -303,6 +340,18 @@ class InternalSettings:
     @property
     def MULTILINE_TAGS(self) -> bool:
         return self._get_settings().multiline_tags  # type: ignore[return-value]
+
+    @property
+    def TAG_NAME(self) -> str:
+        return self._get_settings().tag_name  # type: ignore[return-value]
+
+    @property
+    def TAG_NAME_SC(self) -> str:
+        return self._get_settings().tag_name_sc  # type: ignore[return-value]
+
+    @property
+    def END_TAG_NAME(self) -> str:
+        return f"end{self._get_settings().tag_name}"
 
     @property
     def STATIC_FILES_ALLOWED(self) -> Sequence[str | re.Pattern]:

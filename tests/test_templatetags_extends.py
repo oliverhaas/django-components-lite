@@ -44,11 +44,11 @@ class TestBlockInsideFillDisallowed:
         with pytest.raises(TemplateSyntaxError, match="not allowed inside"):
             Template(
                 "{% load component_tags %}"
-                '{% component "test_comp" %}'
+                '{% comp "test_comp" %}'
                 '{% fill "main" %}'
                 "{% block body %}{% endblock %}"
                 "{% endfill %}"
-                "{% endcomponent %}",
+                "{% endcomp %}",
             )
 
 
@@ -69,11 +69,11 @@ class TestExtendsCompat:
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
-                {% component "extended_component" %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -113,16 +113,16 @@ class TestExtendsCompat:
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
-                {% component "extended_component" %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN
                     {% endfill %}
-                {% endcomponent %}
-                {% component "extended_component" %}
+                {% endcomp %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN 2
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -179,16 +179,16 @@ class TestExtendsCompat:
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
-                {% component "extended_component" %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN
                     {% endfill %}
-                {% endcomponent %}
-                {% component "second_extended_component" %}
+                {% endcomp %}
+                {% comp "second_extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN 2
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endblock %}
         """
         template = Template(template_str)
@@ -246,16 +246,16 @@ class TestExtendsCompat:
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
-                {% component "extended_component" %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN
                     {% endfill %}
-                {% endcomponent %}
-                {% component "second_extended_component" %}
+                {% endcomp %}
+                {% comp "second_extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN 2
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -302,11 +302,11 @@ class TestExtendsCompat:
             <!DOCTYPE html>
             <html lang="en">
             <body>
-                {% component "extended_component" %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             </body>
             </html>
         """
@@ -344,16 +344,16 @@ class TestExtendsCompat:
             <!DOCTYPE html>
             <html lang="en">
             <body>
-                {% component "extended_component" %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN
                     {% endfill %}
-                {% endcomponent %}
-                {% component "extended_component" %}
+                {% endcomp %}
+                {% comp "extended_component" %}
                     {% fill "header" %}
                         SLOT OVERRIDEN 2
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             </body>
             </html>
         """
@@ -397,15 +397,15 @@ class TestExtendsCompat:
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
-                {% component "slotted_component" %}
+                {% comp "slotted_component" %}
                     {% fill "main" %}
-                        {% component "extended_component" %}
+                        {% comp "extended_component" %}
                             {% fill "header" %}
                                 SLOT OVERRIDEN
                             {% endfill %}
-                        {% endcomponent %}
+                        {% endcomp %}
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -449,7 +449,7 @@ class TestExtendsCompat:
             {% load component_tags %}
             {% block body %}
                 {% include 'included.html' %}
-                {% componentsc "extended_component" %}
+                {% compc "extended_component" %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -487,7 +487,7 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered_2, expected_2)
 
-    # In this case, `{% include %}` is NOT nested inside a `{% component %}` tag.
+    # In this case, `{% include %}` is NOT nested inside a `{% comp %}` tag.
     # We need to ensure that the component inside the `{% include %}` is rendered as if with deps_strategy="ignore",
     # so the parent template decides how to render the JS/CSS.
     # See https://github.com/django-components/django-components/issues/1296
@@ -520,7 +520,7 @@ class TestExtendsCompat:
         rendered = Template(template).render(Context())
         assertHTMLEqual(rendered, expected)
 
-    # In this case, because `{% include %}` is rendered inside a `{% component %}` tag,
+    # In this case, because `{% include %}` is rendered inside a `{% comp %}` tag,
     # then the component inside the `{% include %}` knows it's inside another component.
     # So it's always rendered as if with deps_strategy="ignore".
     # See https://github.com/django-components/django-components/issues/1296
@@ -540,7 +540,7 @@ class TestExtendsCompat:
         template: str = """
             {% load component_tags %}
             <html>
-                {% componentsc "component_inside_include" %}
+                {% compc "component_inside_include" %}
             </html>
         """
 
@@ -568,13 +568,13 @@ class TestExtendsCompat:
             {% extends "block.html" %}
             {% load component_tags %}
             {% block body %}
-            {% component "slotted_component" %}
+            {% comp "slotted_component" %}
                 {% fill "header" %}{% endfill %}
                 {% fill "main" %}
                 TEST
                 {% endfill %}
                 {% fill "footer" %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
             {% endblock %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
@@ -603,7 +603,7 @@ class TestExtendsCompat:
 
         template: str = """
             {% load component_tags %}
-            {% component "relative_file_component_using_template_file" %}{% endcomponent %}
+            {% comp "relative_file_component_using_template_file" %}{% endcomp %}
         """
         rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
         expected = """
@@ -641,11 +641,11 @@ class TestExtendsCompat:
 
         template: str = """
             {% load component_tags %}
-            {% component "a_outer" %}
-                {% component "b_inner" %}
+            {% comp "a_outer" %}
+                {% comp "b_inner" %}
                     {% include "extends_compat_c_include.html" %}
-                {% endcomponent %}
-            {% endcomponent %}
+                {% endcomp %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context({}))
 
@@ -699,12 +699,12 @@ class TestExtendsCompat:
             {% extends 'block.html' %}
             {% load component_tags %}
             {% block body %}
-                {% component "simple_component" %}
+                {% comp "simple_component" %}
                     {% fill "content" %}
                         {% include 'included.html' with variable="INCLUDED 1" %}
                         {% include 'included.html' with variable="INCLUDED 2" %}
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endblock %}
         """
         rendered2 = Template(template2).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))

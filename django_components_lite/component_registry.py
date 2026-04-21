@@ -5,6 +5,7 @@ from weakref import ReferenceType, finalize
 from django.template import Library, TemplateSyntaxError
 from django.template.base import Parser, Token
 
+from django_components_lite.app_settings import app_settings
 from django_components_lite.library import is_tag_protected, mark_protected_tags, register_tag
 from django_components_lite.util.misc import is_str_wrapped_in_quotes
 from django_components_lite.util.weakref import cached_ref
@@ -442,10 +443,13 @@ class ComponentRegistry:
 
             return tag_fn
 
-        register_tag(self.library, "component", _make_tag_fn("component", "endcomponent"))
-        self.library.tag("componentsc", _make_tag_fn("componentsc", None))
+        tag_name = app_settings.TAG_NAME
+        tag_name_sc = app_settings.TAG_NAME_SC
+        end_tag_name = app_settings.END_TAG_NAME
+        register_tag(self.library, tag_name, _make_tag_fn(tag_name, end_tag_name))
+        self.library.tag(tag_name_sc, _make_tag_fn(tag_name_sc, None))
 
-        return ComponentRegistryEntry(cls=component, tag="component")
+        return ComponentRegistryEntry(cls=component, tag=tag_name)
 
 
 # This variable represents the global component registry

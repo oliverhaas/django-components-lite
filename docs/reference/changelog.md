@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0
+
+### Breaking
+
+The default component tag names changed: `{% component %}` / `{% endcomponent %}` / `{% componentsc %}` are now `{% comp %}` / `{% endcomp %}` / `{% compc %}`. If you want the old names back, add to your Django settings:
+
+```python
+COMPONENTS = ComponentsSettings(
+    tag_name="component",
+    tag_name_sc="componentsc",
+)
+```
+
+### Added
+
+- `tag_name` and `tag_name_sc` settings to configure the component tag names. The end tag is always derived as `f"end{tag_name}"`. See [Settings](../user-guide/settings.md#customizing-tag-names).
+
 ## 0.2.1
 
 ### Fixed
@@ -17,7 +34,7 @@ Key changes:
 - Build the render `Context` flat: `template_data`, context processors, and internal keys merged into the base dict, no per-render stack pushes.
 - Skip the `context.new()` / `copy.copy()` path when creating the isolated context; construct the `Context` directly.
 - Skip the outer-context snapshot when no slots are passed (filled slots are the only consumer).
-- Skip `resolve_fills` when the `{% component %}` tag has no body.
+- Skip `resolve_fills` when the `{% comp %}` tag has no body.
 - Skip `normalize_slot_fills` when no slots are passed.
 - Skip `context_processors_data` property access when no request is set.
 - Inline the `component_error_message` context manager as a direct try/except.

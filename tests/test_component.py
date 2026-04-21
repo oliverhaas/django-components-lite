@@ -296,7 +296,7 @@ class TestComponentRenderAPI:
         template_str: str = """
             {% load component_tags %}
             <div class="test-component">
-                {% componentsc "test" %}
+                {% compc "test" %}
             </div>
         """
         template = Template(template_str)
@@ -697,7 +697,7 @@ class TestComponentRender:
             TemplateSyntaxError,
             match=re.escape(
                 "An error occured while rendering components Other:\n"
-                "Invalid block tag on line 4: 'endif', expected 'endcomponent'",
+                "Invalid block tag on line 4: 'endif', expected 'endcomp'",
             ),
         ):
             Other.render()
@@ -713,7 +713,7 @@ class TestComponentRender:
         with pytest.raises(
             TemplateSyntaxError,
             match=re.escape(
-                "An error occured while rendering components Other:\nUnclosed tag on line 3: 'component'",
+                "An error occured while rendering components Other:\nUnclosed tag on line 3: 'comp'",
             ),
         ):
             Other.render()

@@ -35,11 +35,11 @@ From a template:
 
 ```html
 {% load component_tags %}
-{% component "card" title="My Card" %}
+{% comp "card" title="My Card" %}
   {% fill "content" %}
     <p>Custom content here.</p>
   {% endfill %}
-{% endcomponent %}
+{% endcomp %}
 ```
 
 From Python:

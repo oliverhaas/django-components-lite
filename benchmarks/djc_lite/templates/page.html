@@ -1,6 +1,6 @@
 <!doctype html>
 <html><body>
-<section class="cards">{% for c in cards %}{% component "card" title=c.title body=c.body variant=c.variant footer=c.footer %}{% endcomponent %}{% endfor %}</section>
-<section class="buttons">{% for b in buttons %}{% component "button" label=b.label variant=b.variant size=b.size disabled=b.disabled %}{% endcomponent %}{% endfor %}</section>
-<section class="alerts">{% for a in alerts %}{% component "alert" level=a.level message=a.message dismissible=a.dismissible %}{% endcomponent %}{% endfor %}</section>
+<section class="cards">{% for c in cards %}{% comp "card" title=c.title body=c.body variant=c.variant footer=c.footer %}{% endcomp %}{% endfor %}</section>
+<section class="buttons">{% for b in buttons %}{% comp "button" label=b.label variant=b.variant size=b.size disabled=b.disabled %}{% endcomp %}{% endfor %}</section>
+<section class="alerts">{% for a in alerts %}{% comp "alert" level=a.level message=a.message dismissible=a.dismissible %}{% endcomp %}{% endfor %}</section>
 </body></html>

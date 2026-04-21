@@ -7,7 +7,7 @@ An exploratory fork of [django-components](https://github.com/django-components/
 ## Features
 
 - Component classes with Python logic and Django templates
-- `{% component %}` / `{% endcomponent %}` template tags
+- `{% comp %}` / `{% endcomp %}` template tags
 - Slots and fills (`{% slot %}`, `{% fill %}`)
 - Component autodiscovery
 - Component registry

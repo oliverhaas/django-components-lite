@@ -16,7 +16,7 @@ This project is built on the excellent work of the **[django-components](https:/
 What django-components-lite keeps from django-components:
 
 - Component classes with Python logic and Django templates
-- `{% component %}` / `{% endcomponent %}` template tags
+- `{% comp %}` / `{% endcomp %}` template tags
 - Slots and fills (`{% slot %}`, `{% fill %}`)
 - Component autodiscovery
 - Component registry
@@ -84,11 +84,11 @@ class Greeting(Component):
 ```html
 <!-- In any template -->
 {% load component_tags %}
-{% component "greeting" name="World" %}
+{% comp "greeting" name="World" %}
   {% fill "extra" %}
     <p>Welcome!</p>
   {% endfill %}
-{% endcomponent %}
+{% endcomp %}
 ```
 
 ## Links

@@ -78,6 +78,6 @@ Available after `{% load component_tags %}`:
 
 | Tag | Description |
 |-----|-------------|
-| `{% component "name" %}...{% endcomponent %}` | Render a component |
+| `{% comp "name" %}...{% endcomp %}` | Render a component |
 | `{% slot "name" %}...{% endslot %}` | Define a slot in a component template |
 | `{% fill "name" %}...{% endfill %}` | Fill a slot when using a component |

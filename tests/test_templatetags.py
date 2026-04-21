@@ -26,12 +26,12 @@ class TestMultilineTags:
 
         template: str = """
             {% load component_tags %}
-            {% component
+            {% comp
                 "test_component"
                 variable=123
                 variable2="abc"
             %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -56,7 +56,7 @@ class TestNestedTags:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" var=_("organisation's") %} {% endcomponent %}
+            {% comp "test" var=_("organisation's") %} {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -69,7 +69,7 @@ class TestNestedTags:
 
         template: str = """
             {% load component_tags %}
-            {% componentsc "test" var=_("organisation's") %}
+            {% compc "test" var=_("organisation's") %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -82,7 +82,7 @@ class TestNestedTags:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" var=_('organisation"s') %} {% endcomponent %}
+            {% comp "test" var=_('organisation"s') %} {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -95,7 +95,7 @@ class TestNestedTags:
 
         template: str = """
             {% load component_tags %}
-            {% componentsc "test" var=_('organisation"s') %}
+            {% compc "test" var=_('organisation"s') %}
         """
         rendered = Template(template).render(Context())
         expected = """

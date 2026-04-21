@@ -124,8 +124,8 @@ class TestHtmlAttrs:
     # Simple component that passes attrs dict directly
     template_str: str = """
         {% load component_tags %}
-        {% component "test" attrs=my_attrs %}
-        {% endcomponent %}
+        {% comp "test" attrs=my_attrs %}
+        {% endcomp %}
     """
 
     def test_tag_positional_args(self):

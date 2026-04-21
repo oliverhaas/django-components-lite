@@ -1264,8 +1264,10 @@ class ComponentNode(BaseNode):
     args and kwargs.
     """
 
-    tag = "component"
-    end_tag = "endcomponent"
+    # Defaults; may be overridden by `component_tags.py` at library-load time
+    # based on `COMPONENTS.tag_name` / `COMPONENTS.tag_name_sc` settings.
+    tag = "comp"
+    end_tag = "endcomp"
     allowed_flags = ()
     _skip_param_validation = True
 

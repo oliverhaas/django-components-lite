@@ -5,14 +5,14 @@
 <body>
   <h1>django-components-lite</h1>
 
-  {% component "greeting" name="Django" %}{% endcomponent %}
+  {% comp "greeting" name="Django" %}{% endcomp %}
 
-  {% component "greeting" name="World" %}
+  {% comp "greeting" name="World" %}
     {% fill "extra" %}
       <p>This slot was filled by the parent template.</p>
     {% endfill %}
-  {% endcomponent %}
+  {% endcomp %}
 
-  {% component "greeting" %}{% endcomponent %}
+  {% comp "greeting" %}{% endcomp %}
 </body>
 </html>

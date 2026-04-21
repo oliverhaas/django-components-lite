@@ -42,14 +42,14 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test1" %}
+            {% comp "test1" %}
                 {% fill "header" %}
                     Custom header
                 {% endfill %}
                 {% fill "main" %}
-                    {% component "test2" variable="variable" %}{% endcomponent %}
+                    {% comp "test2" variable="variable" %}{% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -93,13 +93,13 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test1" %}
+            {% comp "test1" %}
                 {% fill "header" %}
-                    {% componentsc "test2" variable="variable" %}
+                    {% compc "test2" variable="variable" %}
                 {% endfill %}
                 {% fill "main" %}{% endfill %}
                 {% fill "footer" %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -137,14 +137,14 @@ class TestComponentSlot:
         template_str: str = """
             {% load component_tags %}
             {% with my_first_variable="test123" %}
-                {% component "test1" variable="test456" %}
+                {% comp "test1" variable="test456" %}
                     {% fill "main" %}
                         {{ my_first_variable }} - {{ variable }}
                     {% endfill %}
                     {% fill "footer" %}
                         {{ my_second_variable }}
                     {% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endwith %}
         """
         template = Template(template_str)
@@ -166,7 +166,7 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}{% endcomponent %}
+            {% comp "test" %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -191,7 +191,7 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}{% endcomponent %}
+            {% comp "test" %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -207,7 +207,7 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}{% endcomponent %}
+            {% comp 'test' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -219,9 +219,9 @@ class TestComponentSlot:
         template_str: str = """
             {% load component_tags %}
             {% with slotname="header" %}
-                {% component 'test' %}
+                {% comp 'test' %}
                     {% fill slotname %}Hi there!{% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endwith %}
         """
         template = Template(template_str)
@@ -249,8 +249,8 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}
-            {% endcomponent %}
+            {% comp 'test' %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -277,9 +277,9 @@ class TestComponentSlot:
         template_str: str = """
             {% load component_tags %}
             <body>
-                {% component "test" %}
+                {% comp "test" %}
                     ABC: {{ name }} {{ some }}
-                {% endcomponent %}
+                {% endcomp %}
             </body>
         """
         self.template = Template(template_str)
@@ -314,9 +314,9 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}
+            {% comp 'test' %}
                 {% fill "default" %}Custom title{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -344,10 +344,10 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}
+            {% comp 'test' %}
                 {% fill "title" %}Custom title{% endfill %}
                 {% fill "title" %}Another title{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -373,10 +373,10 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}
+            {% comp 'test' %}
                 {% fill "default" %}Custom title{% endfill %}
                 {% fill "title" %}Another title{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -401,10 +401,10 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}
+            {% comp 'test' %}
                 {% fill "default" %}Custom title{% endfill %}
                 {% fill "default" %}Another title{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -483,11 +483,11 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "slotted" %}
+            {% comp "slotted" %}
                 {% fill "header" %}Custom header{% endfill %}
                 {% fill "main" %}Custom main{% endfill %}
                 {% fill "footer" %}Custom footer{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
 
         rendered = Template(template_str).render(Context({}))
@@ -511,11 +511,11 @@ class TestComponentSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "broken_component" %}
+            {% comp "broken_component" %}
                 {% fill "header" %}Custom header {% endfill %}
                 {% fill "main" %}Custom main{% endfill %}
                 {% fill "footer" %}Custom footer{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
 
         with pytest.raises(
@@ -538,9 +538,9 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
               <p>This fills the 'main' slot.</p>
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -566,9 +566,9 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
               {% fill "main" %}<p>This fills the 'main' slot.</p>{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         expected = """
@@ -594,9 +594,9 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
               {% fill "main" %}<p>This fills the 'main' slot.</p>{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         expected = """
@@ -621,9 +621,9 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
               {% fill "main" %}<p>This fills the 'main' slot.</p>{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -648,8 +648,8 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
-            {% endcomponent %}
+            {% comp 'test_comp' %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -673,13 +673,13 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
-              {% component "slotted" %}
+            {% comp 'test_comp' %}
+              {% comp "slotted" %}
                 {% fill "header" %}This Is Allowed{% endfill %}
                 {% fill "main" %}{% endfill %}
                 {% fill "footer" %}{% endfill %}
-              {% endcomponent %}
-            {% endcomponent %}
+              {% endcomp %}
+            {% endcomp %}
         """
         template = Template(template_str)
         expected = """
@@ -708,10 +708,10 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
                 {% fill "main" %}Main content{% endfill %}
                 <p>And add this too!</p>
-            {% endcomponent %}
+            {% endcomp %}
         """
         with pytest.raises(
             TemplateSyntaxError,
@@ -733,13 +733,13 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
               <p>Main Content</p>
               {% comment %}
               This won't show up in the rendered HTML
               {% endcomment %}
               {# Nor will this #}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template_str).render(Context())
         assertHTMLEqual(
@@ -755,9 +755,9 @@ class TestComponentSlotDefault:
         registry.register("test_comp", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' %}
+            {% comp 'test_comp' %}
               <p>Component with no 'default' slot still accepts the fill, it just won't render it</p>
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -791,9 +791,9 @@ class TestComponentSlotDefault:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test_comp' var=var %}
+            {% comp 'test_comp' var=var %}
               123
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -841,7 +841,7 @@ class TestPassthroughSlots:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% if slot_names %}
                     {% for slot in slot_names %}
                         {% fill name=slot fallback="fallback" %}
@@ -855,7 +855,7 @@ class TestPassthroughSlots:
                         FOOTER
                     {% endfill %}
                 {% endif %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -896,13 +896,13 @@ class TestPassthroughSlots:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% with slot="header" %}
                     {% fill name=slot fallback="fallback" %}
                         OVERRIDEN_SLOT "{{ slot }}" - ORIGINAL "{{ fallback }}"
                     {% endfill %}
                 {% endwith %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -939,7 +939,7 @@ class TestPassthroughSlots:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% if slot_names %}
                     {% for slot in slot_names %}
                         {{ forloop.counter0 }}
@@ -954,7 +954,7 @@ class TestPassthroughSlots:
                         FOOTER
                     {% endfill %}
                 {% endif %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -985,14 +985,14 @@ class TestPassthroughSlots:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test_comp" %}
+            {% comp "test_comp" %}
                 {% fill "header" %}
                     CUSTOM HEADER
                 {% endfill %}
                 {% fill "main" %}
                     CUSTOM MAIN
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -1017,26 +1017,26 @@ class TestPassthroughSlots:
             template: str = """
                 {% load component_tags %}
                 <div>
-                    {% component "slotted" %}
+                    {% comp "slotted" %}
                         {% for slot_name in slots %}
                             {% fill name=slot_name %}
                                 {% slot name=slot_name %}{% endslot %}
                             {% endfill %}
                         {% endfor %}
-                    {% endcomponent %}
+                    {% endcomp %}
                 </div>
             """
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test_comp" %}
+            {% comp "test_comp" %}
                 {% fill "header" %}
                     CUSTOM HEADER
                 {% endfill %}
                 {% fill "main" %}
                     CUSTOM MAIN
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -1067,26 +1067,26 @@ class TestPassthroughSlots:
             template: str = """
                 {% load component_tags %}
                 <div>
-                    {% component "slotted" %}
+                    {% comp "slotted" %}
                         {% for slot_name in slots %}
                             {% fill name=slot_name %}
                                 {% slot name=slot_name %}{% endslot %}
                             {% endfill %}
                         {% endfor %}
-                    {% endcomponent %}
+                    {% endcomp %}
                 </div>
             """
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test_comp" %}
+            {% comp "test_comp" %}
                 {% fill "header1" %}
                     CUSTOM HEADER
                 {% endfill %}
                 {% fill "main" %}
                     CUSTOM MAIN
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -1137,8 +1137,8 @@ class TestNestedSlots:
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'example' %}
-            {% endcomponent %}
+            {% comp 'example' %}
+            {% endcomp %}
         """
 
         rendered = Template(template_str).render(Context())
@@ -1162,13 +1162,13 @@ class TestNestedSlots:
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'example' %}
+            {% comp 'example' %}
                 {% fill 'wrapper' %}
                     <div>
                         Entire Wrapper Replaced
                     </div>
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
 
         rendered = Template(template_str).render(Context())
@@ -1183,13 +1183,13 @@ class TestNestedSlots:
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'example' %}
+            {% comp 'example' %}
                 {% fill 'parent1' %}
                     <div>
                         Parent1 Replaced
                     </div>
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
 
         rendered = Template(template_str).render(Context())
@@ -1210,13 +1210,13 @@ class TestNestedSlots:
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'example' %}
+            {% comp 'example' %}
                 {% fill 'child1' %}
                     <div>
                         Child1 Replaced
                     </div>
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
 
         rendered = Template(template_str).render(Context())
@@ -1240,7 +1240,7 @@ class TestNestedSlots:
         registry.register("example", self._gen_nested_slots_component())
         template_str: str = """
             {% load component_tags %}
-            {% component 'example' %}
+            {% comp 'example' %}
                 {% fill 'child1' %}
                     <div>
                         Child1 Replaced
@@ -1256,7 +1256,7 @@ class TestNestedSlots:
                         Entire Wrapper Replaced
                     </div>
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
 
         rendered = Template(template_str).render(Context())
@@ -1284,7 +1284,7 @@ class TestSlottedTemplateRegression:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'test' %}{% endcomponent %}
+            {% comp 'test' %}{% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -1306,11 +1306,11 @@ class TestSlotFallback:
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "header" fallback="header" %}Before: {{ header }}{% endfill %}
                 {% fill "main" fallback="main" %}{{ main }}{% endfill %}
                 {% fill "footer" fallback="footer" %}{{ footer }}, after{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -1330,12 +1330,12 @@ class TestSlotFallback:
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "header" fallback="header" %}
                     First: {{ header }};
                     Second: {{ header }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -1355,7 +1355,7 @@ class TestSlotFallback:
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "header" fallback="header" %}
                     {% for i in range %}
                         {% if forloop.first %}
@@ -1365,7 +1365,7 @@ class TestSlotFallback:
                         {% endif %}
                     {% endfor %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({"range": range(3)}))
@@ -1385,10 +1385,10 @@ class TestSlotFallback:
         registry.register("test", _gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "header" fallback="header1" %}
                     header1_in_header1: {{ header1 }}
-                    {% component "test" %}
+                    {% comp "test" %}
                         {% fill "header" fallback="header2" %}
                             header1_in_header2: {{ header1 }}
                             header2_in_header2: {{ header2 }}
@@ -1397,9 +1397,9 @@ class TestSlotFallback:
                             header1_in_footer2: {{ header1 }}
                             footer2_in_footer2: {{ footer2 }}
                         {% endfill %}
-                    {% endcomponent %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -1448,12 +1448,12 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -1482,12 +1482,12 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -1516,13 +1516,13 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" fallback="fallback" %}
                     {{ fallback }}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -1553,12 +1553,12 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -1586,12 +1586,12 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -1621,13 +1621,13 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill name="default" data="slot_data_in_fill" fallback="slot_var" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_var }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = """
@@ -1656,11 +1656,11 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_var" fallback="slot_var" %}
                     {{ slot_var }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         with pytest.raises(
             RuntimeError,
@@ -1688,11 +1688,11 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" %}
                     overriden
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = "<div> overriden </div>"
@@ -1710,11 +1710,11 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="data" %}
                     {{ data|safe }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = "<div> {} </div>"
@@ -1738,8 +1738,8 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
-            {% endcomponent %}
+            {% comp "test" %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
         expected = "<div> Default text </div>"
@@ -1763,12 +1763,12 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill fill_name data=data_var %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(
             Context(
@@ -1805,12 +1805,12 @@ class TestScopedSlot:
 
         template: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "my_slot" data="slot_data_in_fill" %}
                     {{ slot_data_in_fill.abc }}
                     {{ slot_data_in_fill.var123 }}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         rendered = Template(template).render(Context())
 
@@ -1840,17 +1840,17 @@ class TestScopedSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" input=1 %}
+            {% comp "test" input=1 %}
                 {% fill "my_slot" data="data1" %}
                     data1_in_slot1: {{ data1|safe }}
-                    {% component "test" input=2 %}
+                    {% comp "test" input=2 %}
                         {% fill "my_slot" data="data2" %}
                             data1_in_slot2: {{ data1|safe }}
                             data2_in_slot2: {{ data2|safe }}
                         {% endfill %}
-                    {% endcomponent %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -1893,12 +1893,12 @@ class TestDuplicateSlot:
                 {% load component_tags %}
                 {% slot "header" %}START{% endslot %}
                 <div class="dashboard-component">
-                {% component "calendar" date="2020-06-06" %}
+                {% comp "calendar" date="2020-06-06" %}
                     {% fill "header" %}  {# fills and slots with same name relate to diff. things. #}
                         {% slot "header" %}NESTED{% endslot %}
                     {% endfill %}
                     {% fill "body" %}Here are your to-do items for today:{% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
                 <ol>
                     {% for item in items %}
                         <li>{{ item }}</li>
@@ -1941,14 +1941,14 @@ class TestDuplicateSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "duplicate_slot" name=comp_input %}
+            {% comp "duplicate_slot" name=comp_input %}
                 {% fill "header" %}
                     Name: {{ name }}
                 {% endfill %}
                 {% fill "footer" %}
                     Hello
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         self.template = Template(template_str)
 
@@ -1968,8 +1968,8 @@ class TestDuplicateSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "duplicate_slot" %}
-            {% endcomponent %}
+            {% comp "duplicate_slot" %}
+            {% endcomp %}
         """
         self.template = Template(template_str)
         rendered = self.template.render(Context({}))
@@ -1990,11 +1990,11 @@ class TestDuplicateSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "duplicate_slot_nested" items=items %}
+            {% comp "duplicate_slot_nested" items=items %}
                 {% fill "header" %}
                     OVERRIDDEN!
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         self.template = Template(template_str)
         rendered = self.template.render(Context({"items": [1, 2, 3]}))
@@ -2032,8 +2032,8 @@ class TestDuplicateSlot:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "duplicate_slot_nested" items=items %}
-            {% endcomponent %}
+            {% comp "duplicate_slot_nested" items=items %}
+            {% endcomp %}
         """
         self.template = Template(template_str)
         rendered = self.template.render(Context({"items": [1, 2, 3]}))
@@ -2085,10 +2085,10 @@ class TestSlotFillTemplateSyntaxError:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "header" %}Custom header {% endfill %}
                 {% fill "header" %}Other header{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         with pytest.raises(
             TemplateSyntaxError,
@@ -2105,10 +2105,10 @@ class TestSlotFillTemplateSyntaxError:
         template_str: str = """
             {% load component_tags %}
             {% with var1="header" var2="header" %}
-                {% component "test" %}
+                {% comp "test" %}
                     {% fill var1 %}Custom header {% endfill %}
                     {% fill var2 %}Other header{% endfill %}
-                {% endcomponent %}
+                {% endcomp %}
             {% endwith %}
         """
         with pytest.raises(
@@ -2144,7 +2144,7 @@ class TestSlotBehavior:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" name='Igor' %}
+            {% comp "test" name='Igor' %}
                 {% fill "header" %}
                     Name: {{ name }}
                 {% endfill %}
@@ -2152,16 +2152,16 @@ class TestSlotBehavior:
                     Day: {{ day }}
                 {% endfill %}
                 {% fill "footer" %}
-                    {% component "test" name='Joe2' %}
+                    {% comp "test" name='Joe2' %}
                         {% fill "header" %}
                             Name2: {{ name }}
                         {% endfill %}
                         {% fill "main" %}
                             Day2: {{ day }}
                         {% endfill %}
-                    {% endcomponent %}
+                    {% endcomp %}
                 {% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         return Template(template_str)
 
@@ -2227,12 +2227,12 @@ class TestSlotInput:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" input=1 %}
+            {% comp "test" input=1 %}
                 {% fill "header" data="data1" %}
                     data1_in_slot1: {{ data1|safe }}
                 {% endfill %}
                 {% fill "main" %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         template.render(Context())

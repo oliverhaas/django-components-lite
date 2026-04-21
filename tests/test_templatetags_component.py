@@ -53,7 +53,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% component "test" variable="variable" %}{% endcomponent %}
+            {% comp "test" variable="variable" %}{% endcomp %}
         """
 
         template = Template(simple_tag_template)
@@ -65,7 +65,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% componentsc "test" variable="variable" %}
+            {% compc "test" variable="variable" %}
         """
 
         template = Template(simple_tag_template)
@@ -77,7 +77,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% component "test" variable="variable" %}{% endcomponent %}
+            {% comp "test" variable="variable" %}{% endcomp %}
         """
 
         template = Template(simple_tag_template)
@@ -89,7 +89,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% component "test" variable="variable" %}{% endcomponent %}
+            {% comp "test" variable="variable" %}{% endcomp %}
         """
 
         template = Template(simple_tag_template)
@@ -114,7 +114,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% component "test" variable="variable" variable2="hej" %}{% endcomponent %}
+            {% comp "test" variable="variable" variable2="hej" %}{% endcomp %}
         """
 
         template = Template(simple_tag_template)
@@ -132,7 +132,7 @@ class TestComponentTemplateTag:
 
         simple_tag_template: str = """
             {% load component_tags %}
-            {% component 'test' variable="variable" %}{% endcomponent %}
+            {% comp 'test' variable="variable" %}{% endcomp %}
         """
 
         template = Template(simple_tag_template)
@@ -145,7 +145,7 @@ class TestComponentTemplateTag:
         simple_tag_template: str = """
             {% load component_tags %}
             {% with component_name="test" %}
-                {% component component_name variable="variable" %}{% endcomponent %}
+                {% comp component_name variable="variable" %}{% endcomp %}
             {% endwith %}
         """
 
@@ -171,8 +171,8 @@ class TestComponentTemplateTag:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" variable="provided value" %}
-            {% endcomponent %}
+            {% comp "test" variable="provided value" %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -192,10 +192,10 @@ class TestMultiComponent:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'first_component' %}
-            {% endcomponent %}
-            {% component 'second_component' variable='xyz' %}
-            {% endcomponent %}
+            {% comp 'first_component' %}
+            {% endcomp %}
+            {% comp 'second_component' variable='xyz' %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -226,12 +226,12 @@ class TestMultiComponent:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'first_component' %}
+            {% comp 'first_component' %}
                 {% fill "header" %}<p>Slot #1</p>{% endfill %}
-            {% endcomponent %}
-            {% component 'second_component' variable='xyz' %}
+            {% endcomp %}
+            {% comp 'second_component' variable='xyz' %}
                 {% fill "header" %}<div>Slot #2</div>{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context())
@@ -262,11 +262,11 @@ class TestMultiComponent:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'first_component' %}
+            {% comp 'first_component' %}
                 {% fill "header" %}<p>Slot #1</p>{% endfill %}
-            {% endcomponent %}
-            {% component 'second_component' variable='xyz' %}
-            {% endcomponent %}
+            {% endcomp %}
+            {% comp 'second_component' variable='xyz' %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -297,11 +297,11 @@ class TestMultiComponent:
 
         template_str: str = """
             {% load component_tags %}
-            {% component 'first_component' %}
-            {% endcomponent %}
-            {% component 'second_component' variable='xyz' %}
+            {% comp 'first_component' %}
+            {% endcomp %}
+            {% comp 'second_component' variable='xyz' %}
                 {% fill "header" %}<div>Slot #2</div>{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
         rendered = template.render(Context({}))
@@ -342,15 +342,15 @@ class TestComponentIsolation:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% fill "header" %}Override header{% endfill %}
-            {% endcomponent %}
-            {% component "test" %}
+            {% endcomp %}
+            {% comp "test" %}
                 {% fill "main" %}Override main{% endfill %}
-            {% endcomponent %}
-            {% component "test" %}
+            {% endcomp %}
+            {% comp "test" %}
                 {% fill "footer" %}Override footer{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -387,9 +387,9 @@ class TestComponentTemplateSyntaxError:
         # template compilation time.
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {{ anything }}
-            {% endcomponent %}
+            {% endcomp %}
         """
         Template(template_str)
 
@@ -400,9 +400,9 @@ class TestComponentTemplateSyntaxError:
         # template compilation time.
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 Text
-            {% endcomponent %}
+            {% endcomp %}
         """
         Template(template_str)
 
@@ -410,10 +410,10 @@ class TestComponentTemplateSyntaxError:
         registry.register("test", gen_slotted_component())
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
                 {% lorem 3 w random %}
                 {% fill "header" %}{% endfill %}
-            {% endcomponent %}
+            {% endcomp %}
         """
         template = Template(template_str)
 
@@ -430,11 +430,11 @@ class TestComponentTemplateSyntaxError:
 
         template_str: str = """
             {% load component_tags %}
-            {% component "test" %}
+            {% comp "test" %}
             {% fill "header" %}{% endfill %}
         """
         with pytest.raises(
             TemplateSyntaxError,
-            match=re.escape("Unclosed tag on line 3: 'component'"),
+            match=re.escape("Unclosed tag on line 3: 'comp'"),
         ):
             Template(template_str)
