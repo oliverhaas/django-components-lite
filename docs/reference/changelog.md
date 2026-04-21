@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+### Added
+
+- Positional tag arguments are now routed to named parameters on ``Component.get_context_data``. ``{% comp "form_input_label" "Email" "email" %}`` now binds cleanly to ``def get_context_data(self, label, for_)``. Mixed positional + keyword args follow Python function-call semantics: passing the same parameter both ways raises ``TypeError``, as does exceeding the declared positional count. Overrides that declare ``*args`` receive positional tag args natively. The base ``def get_context_data(self, **kwargs)`` is unchanged — positional args remain accessible via ``self.args``.
+
 ## 0.3.0
 
 ### Breaking

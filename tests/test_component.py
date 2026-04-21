@@ -404,6 +404,93 @@ class TestGetContextDataOverrides:
         assert MyComponent.render(kwargs={"a": 1, "b": 2}) == "a: 1, b: 2"
 
 
+class TestPositionalArgRouting:
+    """Template-tag positional args route to named `get_context_data` params."""
+
+    def test_positional_args_routed_to_named_params(self):
+        class MyComponent(Component):
+            template: str = "label: {{ label }}, for: {{ for_ }}"
+
+            def get_context_data(self, label, for_):
+                return {"label": label, "for_": for_}
+
+        assert MyComponent.render(args=["Email", "email"]) == "label: Email, for: email"
+
+    def test_positional_via_tag(self):
+        @register("form_input_label")
+        class FormInputLabel(Component):
+            template: str = '<label for="{{ for_ }}">{{ text }}</label>'
+
+            def get_context_data(self, text, for_):
+                return {"text": text, "for_": for_}
+
+        tpl = Template(
+            '{% load component_tags %}{% comp "form_input_label" "Email" "email" %}{% endcomp %}',
+        )
+        assert tpl.render(Context()) == '<label for="email">Email</label>'
+
+    def test_positional_mixed_with_kwargs(self):
+        class MyComponent(Component):
+            template: str = "a: {{ a }}, b: {{ b }}, c: {{ c }}"
+
+            def get_context_data(self, a, b=None, **kwargs):
+                return {"a": a, "b": b, "c": kwargs.get("c")}
+
+        out = MyComponent.render(args=["x"], kwargs={"b": "y", "c": "z"})
+        assert out == "a: x, b: y, c: z"
+
+    def test_kwarg_can_be_passed_as_positional(self):
+        class MyComponent(Component):
+            template: str = "label: {{ label }}"
+
+            def get_context_data(self, label, **kwargs):
+                return {"label": label}
+
+        assert MyComponent.render(args=["Email"]) == "label: Email"
+
+    def test_positional_and_same_kwarg_raises(self):
+        class MyComponent(Component):
+            template: str = ""
+
+            def get_context_data(self, label, **kwargs):
+                return {}
+
+        with pytest.raises(TypeError, match="multiple values for argument 'label'"):
+            MyComponent.render(args=["Email"], kwargs={"label": "other"})
+
+    def test_too_many_positional_args_raises(self):
+        class MyComponent(Component):
+            template: str = ""
+
+            def get_context_data(self, label):
+                return {}
+
+        with pytest.raises(TypeError, match="takes 1 positional arguments but 2 were given"):
+            MyComponent.render(args=["Email", "extra"])
+
+    def test_var_positional_receives_all_args(self):
+        class MyComponent(Component):
+            template: str = "args: {{ joined }}"
+
+            def get_context_data(self, *args, **kwargs):
+                return {"joined": "|".join(str(a) for a in args)}
+
+        assert MyComponent.render(args=["a", "b", "c"]) == "args: a|b|c"
+
+    def test_no_positional_params_leaves_self_args(self):
+        captured: list = []
+
+        class MyComponent(Component):
+            template: str = ""
+
+            def get_context_data(self, **kwargs):
+                captured.extend(self.args)
+                return {}
+
+        MyComponent.render(args=["a", "b"])
+        assert captured == ["a", "b"]
+
+
 class TestComponentRender:
     def test_render_minimal(self):
         class SimpleComponent(Component):

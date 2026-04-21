@@ -15,6 +15,14 @@ class Card(Component):
         return {"title": title, "body": body}
 ```
 
+Positional tag args are routed to named parameters on ``get_context_data``. For example:
+
+```django
+{% comp "card" "My Title" "Body text" %}{% endcomp %}
+```
+
+binds ``title="My Title"`` and ``body="Body text"``. Mixed positional + keyword args (``{% comp "card" "My Title" body="..." %}``) work the same way as a normal Python function call — passing the same parameter both ways raises ``TypeError``. If your override declares ``*args``, positional tag args are forwarded as ``args`` natively.
+
 ## Template
 
 The template uses standard Django template syntax plus component-specific tags:

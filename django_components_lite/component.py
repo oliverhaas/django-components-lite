@@ -1,5 +1,6 @@
 # ruff: noqa: N804
 import contextlib
+import inspect
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import (
@@ -103,6 +104,55 @@ def get_component_by_class_id(comp_cls_id: str) -> type["Component"]:
 
 def _get_component_name(cls: type["Component"], registered_name: str | None = None) -> str:
     return default(registered_name, cls.__name__)
+
+
+def _positional_param_info(func: Any) -> tuple[tuple[str, ...], bool]:
+    """
+    Return ``(positional_param_names, has_var_positional)`` for ``func``.
+
+    Only ``POSITIONAL_OR_KEYWORD`` params are listed (excluding ``self``,
+    keyword-only, and ``**kwargs``). ``has_var_positional`` signals whether
+    the function accepts ``*args``.
+    """
+    sig = inspect.signature(func)
+    params = list(sig.parameters.values())[1:]  # skip `self`
+    pos_names = tuple(p.name for p in params if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    has_var_pos = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params)
+    return pos_names, has_var_pos
+
+
+def _call_get_context_data(component: "Component", args: list[Any], kwargs: dict[str, Any]) -> Any:
+    """
+    Call ``component.get_context_data(...)`` routing template-tag positional
+    args into the corresponding named parameters on the override's signature.
+
+    Uses metadata cached at ``__init_subclass__`` time. Fast-paths the common
+    case where no positional routing is needed.
+    """
+    cls = component.__class__
+    if cls._gctx_has_var_positional:
+        # Override declares `*args` - pass positional args through natively.
+        return component.get_context_data(*args, **kwargs)
+
+    pos_names = cls._gctx_positional_names
+    if not args or not pos_names:
+        return component.get_context_data(**kwargs)
+
+    if len(args) > len(pos_names):
+        raise TypeError(
+            f"{cls.__name__}.get_context_data() takes {len(pos_names)} positional "
+            f"arguments but {len(args)} were given",
+        )
+    call_kwargs = dict(kwargs)
+    # ``strict=False`` because len(args) < len(pos_names) is valid:
+    # the remaining params either have defaults or are supplied via kwargs.
+    for name, value in zip(pos_names, args, strict=False):
+        if name in call_kwargs:
+            raise TypeError(
+                f"{cls.__name__}.get_context_data() got multiple values for argument {name!r}",
+            )
+        call_kwargs[name] = value
+    return component.get_context_data(**call_kwargs)
 
 
 # Descriptor to pass getting/setting of `template_name` onto `template_file`
@@ -431,6 +481,19 @@ class Component(metaclass=ComponentMeta):
         comp_cls_id_mapping[cls.class_id] = cls
 
         ALL_COMPONENTS.append(cached_ref(cls))
+
+        # If the subclass overrides get_context_data, cache its positional-
+        # parameter metadata so _render can route tag positional args into
+        # the right parameter slots without re-inspecting the signature on
+        # every render.
+        gctx = cls.__dict__.get("get_context_data")
+        if gctx is not None:
+            cls._gctx_positional_names, cls._gctx_has_var_positional = _positional_param_info(gctx)
+
+    # Defaults used when the base ``get_context_data(**kwargs)`` is not
+    # overridden: no positional routing, no ``*args``.
+    _gctx_positional_names: ClassVar[tuple[str, ...]] = ()
+    _gctx_has_var_positional: ClassVar[bool] = False
 
     ########################################
     # INSTANCE PROPERTIES
@@ -1146,7 +1209,12 @@ class Component(metaclass=ComponentMeta):
         # component failures surface with the full component path prepended
         # to the exception message.
         try:
-            template_data = component.get_context_data(**kwargs_dict) or {}
+            # Fast path: common case has no positional routing to do, so avoid
+            # the extra function call and attribute lookups.
+            if args_list and (comp_cls._gctx_positional_names or comp_cls._gctx_has_var_positional):
+                template_data = _call_get_context_data(component, args_list, kwargs_dict) or {}
+            else:
+                template_data = component.get_context_data(**kwargs_dict) or {}
 
             template = get_component_template(component)
             component_ctx.template_name = template.name if template else None
