@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+### Fixed
+
+- `Component.get_context_data` now declared as `Any` at the class body so subclass overrides with narrowed signatures (e.g. `def get_context_data(self, *, user): ...`) don't trigger mypy's `[override]` Liskov-substitution check. Runtime behavior is unchanged.
+
 ## 0.2.0
 
 ### Performance

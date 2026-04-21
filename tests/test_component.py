@@ -382,6 +382,28 @@ class TestComponentRenderAPI:
         assert comp.node is None
 
 
+class TestGetContextDataOverrides:
+    """Override hook accepts any subclass signature."""
+
+    def test_override_with_named_kwargs(self):
+        class MyComponent(Component):
+            template: str = "user: {{ user }}"
+
+            def get_context_data(self, user=None):
+                return {"user": user}
+
+        assert MyComponent.render(kwargs={"user": "alice"}) == "user: alice"
+
+    def test_override_with_positional_and_kwargs(self):
+        class MyComponent(Component):
+            template: str = "a: {{ a }}, b: {{ b }}"
+
+            def get_context_data(self, a, b=None):
+                return {"a": a, "b": b}
+
+        assert MyComponent.render(kwargs={"a": 1, "b": 2}) == "a: 1, b: 2"
+
+
 class TestComponentRender:
     def test_render_minimal(self):
         class SimpleComponent(Component):

@@ -1182,7 +1182,12 @@ class Component(metaclass=ComponentMeta):
 
         return mark_safe(html) if html is not None else ""  # noqa: S308
 
-    def get_context_data(self, **kwargs: Any) -> dict:
+    # User-override hook. Typed as Any so subclasses can narrow the signature
+    # (e.g. `def get_context_data(self, *, user): ...`) without triggering
+    # mypy's [override] check for Liskov violations.
+    get_context_data: Any
+
+    def get_context_data(self, **kwargs: Any) -> dict:  # type: ignore[no-redef]
         """
         Override this to provide template context variables.
 
