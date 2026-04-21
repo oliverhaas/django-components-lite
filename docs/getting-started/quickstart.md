@@ -9,7 +9,7 @@ from django_components_lite import Component, register
 
 @register("greeting")
 class Greeting(Component):
-    template_name = "greeting/greeting.html"
+    template_file = "greeting.html"
 
     def get_context_data(self, name="World"):
         return {"name": name}
@@ -58,19 +58,17 @@ components/greeting/
     greeting.js
 ```
 
-Define them in your component class:
+Declare them as `css_file` / `js_file` attributes on the component class:
 
 ```python
 @register("greeting")
 class Greeting(Component):
-    template_name = "greeting/greeting.html"
-
-    class Media:
-        css = "greeting/greeting.css"
-        js = "greeting/greeting.js"
+    template_file = "greeting.html"
+    css_file = "greeting.css"
+    js_file = "greeting.js"
 
     def get_context_data(self, name="World"):
         return {"name": name}
 ```
 
-The CSS and JS tags are automatically prepended to the component's rendered HTML.
+Paths are resolved relative to the component's Python file. When the component renders, `<link>` and `<script>` tags for the declared files are automatically prepended to the output.

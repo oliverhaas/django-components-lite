@@ -9,7 +9,7 @@ from django_components_lite import Component, register
 
 @register("my_component")
 class MyComponent(Component):
-    template_name = "my_component/my_component.html"
+    template_file = "my_component.html"
 
     def get_context_data(self, **kwargs):
         return {"key": "value"}
@@ -17,14 +17,25 @@ class MyComponent(Component):
 
 **Key attributes:**
 
-- `template_name` - Path to the component's template file
-- `template` - Inline template string (alternative to `template_name`)
+- `template_file` - Path to the component's template file. Resolved relative to the component's Python file, then relative to `COMPONENTS.dirs`, then Django template dirs.
+- `template` - Inline template string (alternative to `template_file`).
+- `template_name` - Legacy alias for `template_file`. Works as a descriptor for Django-style templating.
+- `css_file` - Path to a CSS file whose `<link>` tag is prepended to the rendered output. Resolved the same way as `template_file`.
+- `js_file` - Path to a JS file whose `<script>` tag is prepended to the rendered output.
+
+**Instance attributes (available in `get_context_data`):**
+
+- `self.args` - Positional arguments passed to the component.
+- `self.kwargs` - Keyword arguments passed to the component.
+- `self.slots` - Dict of slot name to `Slot` instance. Use `"name" in self.slots` to check if a slot was filled.
+- `self.context` - The outer Django `Context` at the call site.
+- `self.request` - The `HttpRequest` if available (e.g. via `RequestContext`), else `None`.
 
 **Key methods:**
 
-- `get_context_data(**kwargs)` - Return a dict of context variables for the template
-- `render(kwargs=None, slots=None)` - Render the component to an HTML string (class method)
-- `render_to_response(kwargs=None, slots=None)` - Render and return an `HttpResponse` (class method)
+- `get_context_data(**kwargs)` - Return a dict of context variables for the template. Override with any signature; mypy will not complain.
+- `render(args=None, kwargs=None, slots=None, context=None, request=None)` - Render the component to an HTML string (class method).
+- `render_to_response(...)` - Render and return an `HttpResponse` (class method). Accepts the same arguments as `render()`.
 
 ## Registration
 

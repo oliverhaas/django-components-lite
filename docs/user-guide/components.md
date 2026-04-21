@@ -9,7 +9,7 @@ from django_components_lite import Component, register
 
 @register("card")
 class Card(Component):
-    template_name = "card/card.html"
+    template_file = "card.html"
 
     def get_context_data(self, title, body=""):
         return {"title": title, "body": body}

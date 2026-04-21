@@ -63,10 +63,11 @@ INSTALLED_APPS = [
 
 ```python
 # myapp/components/greeting/greeting.py
-from django_components_lite import Component
+from django_components_lite import Component, register
 
+@register("greeting")
 class Greeting(Component):
-    template_name = "greeting/greeting.html"
+    template_file = "greeting.html"
 
     def get_context_data(self, name):
         return {"name": name}
