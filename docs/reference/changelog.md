@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.2.0
+
+### Performance
+
+Render pipeline rewritten around a flat `Context` instead of stacked `context.update()` pushes. On a 3000-component props-only page, per-component overhead dropped from ~30 µs to ~5.7 µs, bringing total render time to within 1.57x of plain `{% include %}` (was 3.49x) and 1.37x of Django's `@register.inclusion_tag` (was ~3x).
+
+Key changes:
+
+- Build the render `Context` flat: `template_data`, context processors, and internal keys merged into the base dict, no per-render stack pushes.
+- Skip the `context.new()` / `copy.copy()` path when creating the isolated context; construct the `Context` directly.
+- Skip the outer-context snapshot when no slots are passed (filled slots are the only consumer).
+- Skip `resolve_fills` when the `{% component %}` tag has no body.
+- Skip `normalize_slot_fills` when no slots are passed.
+- Skip `context_processors_data` property access when no request is set.
+- Inline the `component_error_message` context manager as a direct try/except.
+- Drop the inner `snapshot_context` call (leftover from the removed flat-queue nested-render machinery).
+- Dedupe `_get_parent_component_context` and `_get_component_name` lookups.
+
+### Removed (public API)
+
+- `Component.on_render()` overridable hook - the template is rendered directly.
+- `ComponentVars` class and the `component_vars` context key. Check slot presence via `'name' in self.slots` in Python instead of `{% if component_vars.slots.name %}`.
+- `prepare_component_template` / `_maybe_bind_template` helpers (internal, exported via `template.py`).
+
 ## 0.1.0a1
 
 Initial release. Forked from [django-components](https://github.com/django-components/django-components) v0.143.0.
