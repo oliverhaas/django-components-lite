@@ -693,6 +693,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#020" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -813,6 +841,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#020" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -911,6 +967,11 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Component.get_context_data</code> now declared as <code>Any</code> at the class body so subclass overrides with narrowed signatures (e.g. <code>def get_context_data(self, *, user): ...</code>) don't trigger mypy's <code>[override]</code> Liskov-substitution check. Runtime behavior is unchanged.</li>
+</ul>
 <h2 id="020">0.2.0<a class="headerlink" href="#020" title="Permanent link">&para;</a></h2>
 <h3 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
 <p>Render pipeline rewritten around a flat <code>Context</code> instead of stacked <code>context.update()</code> pushes. On a 3000-component props-only page, per-component overhead dropped from ~30 µs to ~5.7 µs, bringing total render time to within 1.57x of plain <code>{% include %}</code> (was 3.49x) and 1.37x of Django's <code>@register.inclusion_tag</code> (was ~3x).</p>
