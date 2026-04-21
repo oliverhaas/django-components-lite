@@ -693,6 +693,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#021" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -841,6 +880,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#021" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -967,6 +1045,18 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="030">0.3.0<a class="headerlink" href="#030" title="Permanent link">&para;</a></h2>
+<h3 id="breaking">Breaking<a class="headerlink" href="#breaking" title="Permanent link">&para;</a></h3>
+<p>The default component tag names changed: <code>{% component %}</code> / <code>{% endcomponent %}</code> / <code>{% componentsc %}</code> are now <code>{% comp %}</code> / <code>{% endcomp %}</code> / <code>{% compc %}</code>. If you want the old names back, add to your Django settings:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">COMPONENTS</span> <span class="o">=</span> <span class="n">ComponentsSettings</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;component&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">tag_name_sc</span><span class="o">=</span><span class="s2">&quot;componentsc&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tag_name</code> and <code>tag_name_sc</code> settings to configure the component tag names. The end tag is always derived as <code>f"end{tag_name}"</code>. See <a href="../../user-guide/settings/#customizing-tag-names">Settings</a>.</li>
+</ul>
 <h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
 <ul>
@@ -980,7 +1070,7 @@
 <li>Build the render <code>Context</code> flat: <code>template_data</code>, context processors, and internal keys merged into the base dict, no per-render stack pushes.</li>
 <li>Skip the <code>context.new()</code> / <code>copy.copy()</code> path when creating the isolated context; construct the <code>Context</code> directly.</li>
 <li>Skip the outer-context snapshot when no slots are passed (filled slots are the only consumer).</li>
-<li>Skip <code>resolve_fills</code> when the <code>{% component %}</code> tag has no body.</li>
+<li>Skip <code>resolve_fills</code> when the <code>{% comp %}</code> tag has no body.</li>
 <li>Skip <code>normalize_slot_fills</code> when no slots are passed.</li>
 <li>Skip <code>context_processors_data</code> property access when no request is set.</li>
 <li>Inline the <code>component_error_message</code> context manager as a direct try/except.</li>
