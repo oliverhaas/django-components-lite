@@ -693,6 +693,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (public API)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#010a1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -774,6 +813,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (public API)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#010a1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -833,6 +911,27 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="020">0.2.0<a class="headerlink" href="#020" title="Permanent link">&para;</a></h2>
+<h3 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
+<p>Render pipeline rewritten around a flat <code>Context</code> instead of stacked <code>context.update()</code> pushes. On a 3000-component props-only page, per-component overhead dropped from ~30 µs to ~5.7 µs, bringing total render time to within 1.57x of plain <code>{% include %}</code> (was 3.49x) and 1.37x of Django's <code>@register.inclusion_tag</code> (was ~3x).</p>
+<p>Key changes:</p>
+<ul>
+<li>Build the render <code>Context</code> flat: <code>template_data</code>, context processors, and internal keys merged into the base dict, no per-render stack pushes.</li>
+<li>Skip the <code>context.new()</code> / <code>copy.copy()</code> path when creating the isolated context; construct the <code>Context</code> directly.</li>
+<li>Skip the outer-context snapshot when no slots are passed (filled slots are the only consumer).</li>
+<li>Skip <code>resolve_fills</code> when the <code>{% component %}</code> tag has no body.</li>
+<li>Skip <code>normalize_slot_fills</code> when no slots are passed.</li>
+<li>Skip <code>context_processors_data</code> property access when no request is set.</li>
+<li>Inline the <code>component_error_message</code> context manager as a direct try/except.</li>
+<li>Drop the inner <code>snapshot_context</code> call (leftover from the removed flat-queue nested-render machinery).</li>
+<li>Dedupe <code>_get_parent_component_context</code> and <code>_get_component_name</code> lookups.</li>
+</ul>
+<h3 id="removed-public-api">Removed (public API)<a class="headerlink" href="#removed-public-api" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Component.on_render()</code> overridable hook - the template is rendered directly.</li>
+<li><code>ComponentVars</code> class and the <code>component_vars</code> context key. Check slot presence via <code>'name' in self.slots</code> in Python instead of <code>{% if component_vars.slots.name %}</code>.</li>
+<li><code>prepare_component_template</code> / <code>_maybe_bind_template</code> helpers (internal, exported via <code>template.py</code>).</li>
+</ul>
 <h2 id="010a1">0.1.0a1<a class="headerlink" href="#010a1" title="Permanent link">&para;</a></h2>
 <p>Initial release. Forked from <a href="https://github.com/django-components/django-components">django-components</a> v0.143.0.</p>
 <h3 id="removed-from-upstream">Removed from upstream<a class="headerlink" href="#removed-from-upstream" title="Permanent link">&para;</a></h3>
