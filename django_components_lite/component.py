@@ -1085,9 +1085,7 @@ class Component(metaclass=ComponentMeta):
         # Allow to provide no args/kwargs/slots/context.
         args_list: list[Any] = [] if args is None else list(args)
         kwargs_dict: dict[str, Any] = {} if kwargs is None else kwargs
-        slots_dict = (
-            normalize_slot_fills(slots, component_name=component_name) if slots else {}
-        )
+        slots_dict = normalize_slot_fills(slots, component_name=component_name) if slots else {}
         # Use RequestContext if request is provided, so that child non-component template tags
         # can access the request object too.
         context = context if context is not None else (RequestContext(request) if request else Context())
@@ -1126,11 +1124,7 @@ class Component(metaclass=ComponentMeta):
         #       because that would prevent the component from being garbage collected.
         # Only snapshot outer_context when slots were passed: filled slots are
         # the only code path that consults ComponentContext.outer_context.
-        ctx_outer = (
-            snapshot_context(outer_context)
-            if slots_dict and outer_context is not None
-            else None
-        )
+        ctx_outer = snapshot_context(outer_context) if slots_dict and outer_context is not None else None
         component_ctx = ComponentContext(
             component=ref(component),
             component_path=component_path,

@@ -1,4 +1,3 @@
-
 from django.http import HttpResponse
 
 from django_components_lite import Component, register

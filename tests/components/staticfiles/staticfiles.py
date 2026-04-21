@@ -1,4 +1,3 @@
-
 from django_components_lite import Component, register
 
 
