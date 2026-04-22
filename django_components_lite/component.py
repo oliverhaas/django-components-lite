@@ -1,6 +1,5 @@
 # ruff: noqa: N804
 import contextlib
-import inspect
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import (
@@ -106,19 +105,31 @@ def _get_component_name(cls: type["Component"], registered_name: str | None = No
     return default(registered_name, cls.__name__)
 
 
+# CO_VARARGS flag on the function's code object - set when the function
+# declares ``*args``. Documented at
+# https://docs.python.org/3/library/inspect.html#inspect.CO_VARARGS (0x04).
+_CO_VARARGS = 0x04
+
+
 def _positional_param_info(func: Any) -> tuple[tuple[str, ...], bool]:
     """
-    Return ``(positional_param_names, has_var_positional)`` for ``func``.
+    Return ``(positional_or_keyword_param_names, has_var_positional)`` for ``func``.
 
-    Only ``POSITIONAL_OR_KEYWORD`` params are listed (excluding ``self``,
-    keyword-only, and ``**kwargs``). ``has_var_positional`` signals whether
-    the function accepts ``*args``.
+    Reads the names straight off ``func.__code__`` instead of going through
+    ``inspect.signature``. On Python 3.14+ ``inspect.signature`` eagerly
+    resolves annotations (PEP 649), which fails with ``NameError`` for
+    ``TYPE_CHECKING``-guarded forward references in user code. We only need
+    parameter names and the ``*args`` flag, so the code-object read is both
+    immune to that and faster.
     """
-    sig = inspect.signature(func)
-    params = list(sig.parameters.values())[1:]  # skip `self`
-    pos_names = tuple(p.name for p in params if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD)
-    has_var_pos = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params)
-    return pos_names, has_var_pos
+    code = func.__code__
+    # [posonly : argcount] is the positional-or-keyword slice.
+    # Drop `self` if the method hasn't been decorated to make it positional-only.
+    names = code.co_varnames[code.co_posonlyargcount : code.co_argcount]
+    if names and names[0] == "self":
+        names = names[1:]
+    has_var_positional = bool(code.co_flags & _CO_VARARGS)
+    return tuple(names), has_var_positional
 
 
 def _call_get_context_data(component: "Component", args: list[Any], kwargs: dict[str, Any]) -> Any:

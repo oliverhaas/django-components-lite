@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Fixed
+
+- Component subclasses with `TYPE_CHECKING`-guarded forward-reference annotations on `get_context_data` no longer crash at class-creation time on Python 3.14. The positional-parameter introspection now reads `func.__code__` directly instead of going through `inspect.signature`, which on 3.14 eagerly evaluates `__annotate__` (PEP 649) and raises `NameError` for unresolved names. The fix is also version-agnostic and slightly faster.
+
 ## 0.4.0
 
 ### Added

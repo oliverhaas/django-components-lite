@@ -490,6 +490,28 @@ class TestPositionalArgRouting:
         MyComponent.render(args=["a", "b"])
         assert captured == ["a", "b"]
 
+    def test_forward_ref_annotation_under_type_checking(self):
+        # Repros the 3.14 PEP 649 eager-annotation bug: on Python 3.14+
+        # inspect.signature() evaluates __annotate__ eagerly, which raises
+        # NameError for names that only exist under `if TYPE_CHECKING:`.
+        # We read __code__ directly, so the annotation is never touched.
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            # A name that exists ONLY for type-checking. At runtime this
+            # branch doesn't execute, so the name is undefined.
+            class UndefinedAtRuntime: ...
+
+        class MyComponent(Component):
+            template: str = "x: {{ x }}"
+
+            def get_context_data(self, x: "list[UndefinedAtRuntime]", **kwargs):
+                return {"x": x}
+
+        # Class creation must not crash (was NameError on Python 3.14).
+        # The positional arg must still bind to `x` by name.
+        assert MyComponent.render(args=[[42]]) == "x: [42]"
+
 
 class TestComponentRender:
     def test_render_minimal(self):
