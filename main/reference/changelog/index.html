@@ -693,6 +693,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#041" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.4.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#040" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -772,7 +800,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -908,6 +936,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#041" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.4.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#040" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -987,7 +1043,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1101,6 +1157,11 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="041">0.4.1<a class="headerlink" href="#041" title="Permanent link">&para;</a></h2>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Component subclasses with <code>TYPE_CHECKING</code>-guarded forward-reference annotations on <code>get_context_data</code> no longer crash at class-creation time on Python 3.14. The positional-parameter introspection now reads <code>func.__code__</code> directly instead of going through <code>inspect.signature</code>, which on 3.14 eagerly evaluates <code>__annotate__</code> (PEP 649) and raises <code>NameError</code> for unresolved names. The fix is also version-agnostic and slightly faster.</li>
+</ul>
 <h2 id="040">0.4.0<a class="headerlink" href="#040" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1119,7 +1180,7 @@
 <li><code>tag_name</code> and <code>tag_name_sc</code> settings to configure the component tag names. The end tag is always derived as <code>f"end{tag_name}"</code>. See <a href="../../user-guide/settings/#customizing-tag-names">Settings</a>.</li>
 </ul>
 <h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
-<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>Component.get_context_data</code> now declared as <code>Any</code> at the class body so subclass overrides with narrowed signatures (e.g. <code>def get_context_data(self, *, user): ...</code>) don't trigger mypy's <code>[override]</code> Liskov-substitution check. Runtime behavior is unchanged.</li>
 </ul>
