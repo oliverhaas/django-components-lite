@@ -68,7 +68,6 @@ def _djc_isolation():
     from django_components_lite.app_settings import app_settings
     from django_components_lite.component import ALL_COMPONENTS, component_node_subclasses_by_name
     from django_components_lite.component_registry import ALL_REGISTRIES
-    from django_components_lite.template import _reset_component_template_file_cache, loading_components
 
     # --- Setup ---
 
@@ -78,15 +77,6 @@ def _djc_isolation():
         (reg_ref, list(reg_ref()._registry.keys())) for reg_ref in ALL_REGISTRIES if reg_ref() is not None
     ]
 
-    # Deterministic ID generation
-    id_count = 10599485
-
-    def mock_gen_id(*_args, **_kwargs):
-        nonlocal id_count
-        id_count += 1
-        return f"{id_count:x}"
-
-    id_patcher = patch("django_components_lite.util.misc.generate", side_effect=mock_gen_id)
     csrf_patcher = patch("django.middleware.csrf.get_token", return_value="predictabletoken")
 
     # Start patchers and set testing flag
@@ -97,7 +87,6 @@ def _djc_isolation():
             app_settings._load_settings()
 
     setting_changed.connect(on_setting_changed)
-    id_patcher.start()
     csrf_patcher.start()
     app_settings._load_settings()
 
@@ -105,7 +94,6 @@ def _djc_isolation():
 
     # --- Teardown ---
 
-    id_patcher.stop()
     csrf_patcher.stop()
     setting_changed.disconnect(on_setting_changed)
 
@@ -141,10 +129,6 @@ def _djc_isolation():
         current_keys = set(registry._registry.keys())
         for key in current_keys - initial_keys:
             registry.unregister(key)
-
-    # Clear component template cache and other state
-    _reset_component_template_file_cache()
-    loading_components.clear()
 
     # Clear Django caches
     all_caches: list[BaseCache] = list(caches.all())

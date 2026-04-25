@@ -3,41 +3,11 @@
 from django.template import Context, Template
 from pytest_django.asserts import assertHTMLEqual
 
-from django_components_lite import Component, register, registry
+from django_components_lite import Component, registry
 
 #######################
 # TESTS
 #######################
-
-
-class TestMultilineTags:
-    def test_multiline_tags(self):
-        @register("test_component")
-        class SimpleComponent(Component):
-            template: str = """
-                Variable: <strong>{{ variable }}</strong>
-            """
-
-            def get_context_data(self, **kwargs):
-                return {
-                    "variable": kwargs["variable"],
-                    "variable2": kwargs.get("variable2", "default"),
-                }
-
-        template: str = """
-            {% load component_tags %}
-            {% comp
-                "test_component"
-                variable=123
-                variable2="abc"
-            %}
-            {% endcomp %}
-        """
-        rendered = Template(template).render(Context())
-        expected = """
-            Variable: <strong>123</strong>
-        """
-        assertHTMLEqual(rendered, expected)
 
 
 class TestNestedTags:

@@ -2,20 +2,16 @@ import functools
 import inspect
 import keyword
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import Any, ClassVar, cast
 
 from django.template import Context, Library
 from django.template.base import FilterExpression, Node, NodeList, Parser, Token
 from django.template.exceptions import TemplateSyntaxError
 
-from django_components_lite.util.misc import gen_id
 from django_components_lite.util.template_tag import (
     TagParam,
     validate_params,
 )
-
-if TYPE_CHECKING:
-    from django_components_lite.component import Component
 
 
 # Normally, when `Node.render()` is called, it receives only a single argument `context`.
@@ -426,13 +422,6 @@ class BaseNode(Node, metaclass=NodeMeta):
     The `contents` will be `"<div> ... </div>"`.
     """
 
-    node_id: str
-    """
-    The unique ID of the node.
-
-    Extensions can use this ID to store additional information.
-    """
-
     template_name: str | None
     """
     The name of the [`Template`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Template)
@@ -448,12 +437,6 @@ class BaseNode(Node, metaclass=NodeMeta):
     ```
     """
 
-    template_component: type["Component"] | None
-    """
-    If the template that contains this node belongs to a [`Component`](../api#django_components_lite.Component),
-    then this will be the [`Component`](../api#django_components_lite.Component) class.
-    """
-
     # #####################################
     # MISC
     # #####################################
@@ -463,21 +446,17 @@ class BaseNode(Node, metaclass=NodeMeta):
         params: tuple[list[FilterExpression], dict[str, FilterExpression]] | None = None,
         flags: dict[str, bool] | None = None,
         nodelist: NodeList | None = None,
-        node_id: str | None = None,
         contents: str | None = None,
         template_name: str | None = None,
-        template_component: type["Component"] | None = None,
     ) -> None:
         self.params = params if params is not None else ([], {})
         self.flags = flags or dict.fromkeys(self.allowed_flags or [], False)
         self.nodelist = nodelist or NodeList()
-        self.node_id = node_id or gen_id()
         self.contents = contents
         self.template_name = template_name
-        self.template_component = template_component
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}: {self.node_id}. Contents: {self.contents}. Flags: {self.active_flags}>"
+        return f"<{self.__class__.__name__}: contents={self.contents!r}. flags={self.active_flags}>"
 
     @property
     def active_flags(self) -> list[str]:
@@ -513,10 +492,6 @@ class BaseNode(Node, metaclass=NodeMeta):
 
         To register the tag, you can use [`BaseNode.register()`](../api#django_components_lite.BaseNode.register).
         """
-        # NOTE: Avoids circular import
-        from django_components_lite.template import get_component_from_origin
-
-        tag_id = gen_id()
         bits = token.split_contents()
         tag_name = bits[0]
 
@@ -562,10 +537,8 @@ class BaseNode(Node, metaclass=NodeMeta):
             params=(args, tag_kwargs),
             flags=all_flags,
             nodelist=nodelist,
-            node_id=tag_id,
             contents=contents,
             template_name=parser.origin.name if parser.origin else None,
-            template_component=get_component_from_origin(parser.origin) if parser.origin else None,
             **kwargs,
         )
 

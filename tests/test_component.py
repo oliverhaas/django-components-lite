@@ -3,7 +3,6 @@ Tests focusing on the Component class.
 For tests focusing on the `component` tag, see `test_templatetags_component.py`
 """
 
-import re
 from typing import Any
 
 import pytest
@@ -313,7 +312,6 @@ class TestComponentRenderAPI:
         assert comp.registered_name == "test"
 
         assert comp.node is not None
-        assert comp.node.template_component is None
         assert comp.node.template_name == "<unknown source>"
 
     def test_metadata__component(self):
@@ -804,10 +802,8 @@ class TestComponentRender:
 
         with pytest.raises(
             TemplateSyntaxError,
-            match=re.escape(
-                "An error occured while rendering components Other:\n"
-                "Invalid block tag on line 4: 'endif', expected 'endcomp'",
-            ),
+            match=r"An error occured while rendering components Other:[\s\S]*"
+            r"Invalid block tag on line 4: 'endif', expected 'endcomp'",
         ):
             Other.render()
 
@@ -821,9 +817,7 @@ class TestComponentRender:
 
         with pytest.raises(
             TemplateSyntaxError,
-            match=re.escape(
-                "An error occured while rendering components Other:\nUnclosed tag on line 3: 'comp'",
-            ),
+            match=r"An error occured while rendering components Other:[\s\S]*Unclosed tag on line 3: 'comp'",
         ):
             Other.render()
 

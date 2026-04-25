@@ -270,20 +270,6 @@ class Slot[TSlotData: Mapping]:
     Extensions can use this info to handle slots differently based on their source.
 
     See [Slot metadata](../../concepts/fundamentals/slots#slot-metadata).
-
-    **Example:**
-
-    You can use this to find the [`Component`](../api/#django_components_lite.Component) in whose
-    template the [`{% fill %}`](../template_tags#fill) tag was defined:
-
-    ```python
-    class MyTable(Component):
-        def get_template_data(self, args, kwargs, slots, context):
-            footer_slot = slots.get("footer")
-            if footer_slot is not None and footer_slot.fill_node is not None:
-                owner_component = footer_slot.fill_node.template_component
-                # ...
-    ```
     """
     extra: dict[str, Any] = field(default_factory=dict)
     """

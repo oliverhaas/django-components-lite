@@ -1,7 +1,5 @@
 import inspect
-import os
 import re
-from typing import cast
 
 import pytest
 from django.template import Context, Template
@@ -9,7 +7,6 @@ from django.template.base import FilterExpression, TextNode, VariableNode
 from django.template.defaulttags import IfNode, LoremNode
 from django.template.exceptions import TemplateSyntaxError
 
-from django_components_lite import Component
 from django_components_lite.node import BaseNode
 from django_components_lite.templatetags import component_tags
 
@@ -309,13 +306,9 @@ class TestNode:
         TestNode1.register(component_tags.register)
 
         template1 = Template(
-            """
-            {% load component_tags %}
-            {% mytag 'John'
-                123 456 789 msg='Hello' a=1 b=2 c=3 required
-                data-id=123 class="pa-4" @click.once="myVar"
-            %}
-        """,
+            "{% load component_tags %}"
+            "{% mytag 'John' 123 456 789 msg='Hello' a=1 b=2 c=3 required"
+            ' data-id=123 class="pa-4" @click.once="myVar" %}',
         )
         template1.render(Context({}))
         assert captured == (
@@ -342,17 +335,9 @@ class TestNode:
 
         # Test with various kwargs including non-identifier keys
         template = Template(
-            """
-            {% load component_tags %}
-            {% mytag
-                name='John'
-                age=25
-                data-id=123
-                class="header"
-                @click="handleClick"
-                v-if="isVisible"
-            %}
-            """,
+            "{% load component_tags %}"
+            "{% mytag name='John' age=25 data-id=123 class=\"header\""
+            ' @click="handleClick" v-if="isVisible" %}',
         )
         template.render(Context({}))
 
@@ -514,10 +499,8 @@ class TestSignatureBasedValidation:
                 captured = (
                     self.params,
                     self.nodelist,
-                    self.node_id,
                     self.contents,
                     self.template_name,
-                    self.template_component,
                 )
                 return f"Hello, {name}!"
 
@@ -533,7 +516,7 @@ class TestSignatureBasedValidation:
         template1 = Template(template_str1)
         template1.render(Context({}))
 
-        params1, nodelist1, node_id1, contents1, template_name1, template_component1 = captured  # type: ignore[misc]
+        params1, nodelist1, contents1, template_name1 = captured  # type: ignore[misc]
         # params is now (args_list, kwargs_dict)
         args1, kwargs1 = params1
         assert len(args1) == 1
@@ -553,9 +536,7 @@ class TestSignatureBasedValidation:
             contents1
             == "\n              INSIDE TAG {{ my_var }} {# comment #} {% lorem 1 w %} {% if True %} henlo {% endif %}\n            "
         )
-        assert node_id1 == "a1bc3e"
         assert template_name1 == "<unknown source>"
-        assert template_component1 is None
 
         captured = None  # Reset captured
 
@@ -567,16 +548,14 @@ class TestSignatureBasedValidation:
         template2 = Template(template_str2)
         template2.render(Context({}))
 
-        params2, nodelist2, node_id2, contents2, template_name2, template_component2 = captured  # type: ignore[misc]
+        params2, nodelist2, contents2, template_name2 = captured  # type: ignore[misc]
         args2, kwargs2 = params2  # type: ignore[has-type]
         assert len(args2) == 1  # type: ignore[has-type]
         assert isinstance(args2[0], FilterExpression)  # type: ignore[has-type]
         assert kwargs2 == {}  # type: ignore[has-type]
         assert len(nodelist2) == 0  # type: ignore[has-type]
         assert contents2 == ""  # type: ignore[has-type]
-        assert node_id2 == "a1bc3f"  # type: ignore[has-type]
         assert template_name2 == "<unknown source>"  # type: ignore[has-type]
-        assert template_component2 is None  # type: ignore[has-type]
 
         captured = None  # Reset captured
 
@@ -590,10 +569,8 @@ class TestSignatureBasedValidation:
                 captured = (
                     self.params,
                     self.nodelist,
-                    self.node_id,
                     self.contents,
                     self.template_name,
-                    self.template_component,
                 )
                 return f"Hello, {name}!"
 
@@ -606,41 +583,14 @@ class TestSignatureBasedValidation:
         template3 = Template(template_str3)
         template3.render(Context({}))
 
-        params3, nodelist3, node_id3, contents3, template_name3, template_component3 = captured  # type: ignore[misc]
+        params3, nodelist3, contents3, template_name3 = captured  # type: ignore[misc]
         args3, kwargs3 = params3  # type: ignore[has-type]
         assert len(args3) == 1  # type: ignore[has-type]
         assert isinstance(args3[0], FilterExpression)  # type: ignore[has-type]
         assert kwargs3 == {}  # type: ignore[has-type]
         assert len(nodelist3) == 0  # type: ignore[has-type]
         assert contents3 is None  # type: ignore[has-type]
-        assert node_id3 == "a1bc40"  # type: ignore[has-type]
         assert template_name3 == "<unknown source>"  # type: ignore[has-type]
-        assert template_component3 is None  # type: ignore[has-type]
-
-        # Case 4 - Node nested in Component
-        class TestComponent(Component):
-            template = """
-                {% load component_tags %}
-                {% mytag2 'John' %}
-            """
-
-        TestComponent.render(Context({}))
-
-        params4, nodelist4, node_id4, contents4, template_name4, template_component4 = captured  # type: ignore[misc]
-        args4, _kwargs4 = params4  # type: ignore[has-type]
-        assert len(args4) == 1  # type: ignore[has-type]
-        assert isinstance(args4[0], FilterExpression)  # type: ignore[has-type]
-        assert len(nodelist4) == 0  # type: ignore[has-type]
-        assert contents4 is None  # type: ignore[has-type]
-        assert node_id4 == "a1bc41"  # type: ignore[has-type]
-
-        if os.name == "nt":
-            assert cast("str", template_name4).endswith("\\tests\\test_node.py::TestComponent")  # type: ignore[has-type]
-        else:
-            assert cast("str", template_name4).endswith("/tests/test_node.py::TestComponent")  # type: ignore[has-type]
-
-        assert template_name4 == f"{__file__}::TestComponent"  # type: ignore[has-type]
-        assert template_component4 is TestComponent  # type: ignore[has-type]
 
         # Cleanup
         TestNodeWithEndTag.unregister(component_tags.register)
@@ -843,13 +793,9 @@ class TestSignatureBasedValidation:
         TestNode1.register(component_tags.register)
 
         template1 = Template(
-            """
-            {% load component_tags %}
-            {% mytag 'John'
-                123 456 789 msg='Hello' a=1 b=2 c=3 required
-                data-id=123 class="pa-4" @click.once="myVar"
-            %}
-        """,
+            "{% load component_tags %}"
+            "{% mytag 'John' 123 456 789 msg='Hello' a=1 b=2 c=3 required"
+            ' data-id=123 class="pa-4" @click.once="myVar" %}',
         )
         template1.render(Context({}))
         assert captured == (
@@ -877,17 +823,9 @@ class TestSignatureBasedValidation:
 
         # Test with various kwargs including non-identifier keys
         template = Template(
-            """
-            {% load component_tags %}
-            {% mytag
-                name='John'
-                age=25
-                data-id=123
-                class="header"
-                @click="handleClick"
-                v-if="isVisible"
-            %}
-            """,
+            "{% load component_tags %}"
+            "{% mytag name='John' age=25 data-id=123 class=\"header\""
+            ' @click="handleClick" v-if="isVisible" %}',
         )
         template.render(Context({}))
 

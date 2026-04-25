@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.5.0
+
+Lean-out release. Roughly 870 LOC removed (~12% of the package).
+
+### Breaking
+
+- Removed the `tag_name` and `tag_name_sc` settings. The component tag names are now fixed at `{% comp %}` / `{% endcomp %}` / `{% compc %}` and cannot be configured.
+- Removed the `multiline_tags` setting and its underlying monkeypatch of `django.template.base.tag_re`. Component tag invocations must now fit on a single line. If you need multi-line tag args, install the patch yourself in your app config:
+
+```python
+import re
+from django.template import base
+base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
+```
+
+- Removed nested-tag-in-string-arg syntax. Calls like `{% comp "x" desc="{% lorem 3 w %}" / %}` are no longer supported. Workaround:
+
+```django
+{% lorem 3 w as desc %}
+{% comp "x" desc=desc / %}
+```
+
+The custom template parser (`util/template_parser.py`, ~220 LOC) and the associated `compile_nodelist` monkeypatch are gone.
+
+- Removed `RegistrySettings`. It was an empty `NamedTuple` reserved for future use; the `settings` parameter on `ComponentRegistry.__init__` is also gone.
+- Removed `BaseNode.node_id` (and the `node_id` argument it accepted). It was only used for `__repr__` and a now-removed extension hook.
+- Removed `BaseNode.template_component` (and `ComponentNode.template_component`). The field exposed the `Component` class that owned a tag's template — used only by user code via `Slot.fill_node.template_component` for introspection. Internal code never read it. Together with the supporting `Origin.component_cls` plumbing, the `cache_component_template_file` registry, and the `monkeypatch_template_init` patch, this was ~150 LOC of infrastructure for a niche, observation-only API.
+
+### Removed (internal cleanup)
+
+- `util/cache.py` — hand-rolled LRU cache, never imported anywhere.
+- `util/nanoid.py` and `constants.py` — only used by `node_id`.
+- The `monkeypatch_inclusion_node` patches that set `_DJC_INSIDE_INCLUSION_TAG`. The flag was set but never read after the JS/CSS dependency system was removed.
+- The `monkeypatch_template_cls` patch and the entire `util/django_monkeypatch.py` module — only existed to support `template_component`. Django's `Template` class is no longer monkeypatched.
+- Stale `PROTECTED_TAGS` entries (`component_css_dependencies`, `component_js_dependencies`).
+
 ## 0.4.1
 
 ### Fixed

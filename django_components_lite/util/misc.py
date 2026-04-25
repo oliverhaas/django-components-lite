@@ -16,28 +16,11 @@ from typing import (
 )
 from urllib import parse
 
-from django_components_lite.constants import UID_LENGTH
-from django_components_lite.util.nanoid import generate
-
 if TYPE_CHECKING:
     from django_components_lite.component import Component
 
 T = TypeVar("T")
 U = TypeVar("U")
-
-
-# Based on nanoid implementation from
-# https://github.com/puyuan/py-nanoid/tree/99e5b478c450f42d713b6111175886dccf16f156/nanoid
-def gen_id() -> str:
-    """Generate a unique ID that can be associated with a Node"""
-    # Alphabet is only alphanumeric. Compared to the default alphabet used by nanoid,
-    # we've omitted `-` and `_`.
-    # With this alphabet, at 6 chars, the chance of collision is 1 in 3.3M.
-    # See https://zelark.github.io/nano-id-cc/
-    return generate(
-        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        size=UID_LENGTH,
-    )
 
 
 def is_str_wrapped_in_quotes(s: str) -> bool:

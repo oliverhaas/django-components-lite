@@ -5,7 +5,6 @@ from weakref import ReferenceType, finalize
 from django.template import Library, TemplateSyntaxError
 from django.template.base import Parser, Token
 
-from django_components_lite.app_settings import app_settings
 from django_components_lite.library import is_tag_protected, mark_protected_tags, register_tag
 from django_components_lite.util.misc import is_str_wrapped_in_quotes
 from django_components_lite.util.weakref import cached_ref
@@ -42,10 +41,6 @@ class NotRegisteredError(Exception):
 class ComponentRegistryEntry(NamedTuple):
     cls: type["Component"]
     tag: str
-
-
-class RegistrySettings(NamedTuple):
-    """Configuration for a ComponentRegistry. Currently empty  -  reserved for future settings."""
 
 
 # We keep track of all registries that exist so that, when users want to
@@ -88,11 +83,6 @@ class ComponentRegistry:
         library (Library, optional): Django\
             [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#code-layout)\
             associated with this registry. If omitted, the default Library instance from django_components_lite is used.
-        settings (Union[RegistrySettings, Callable[[ComponentRegistry], RegistrySettings]], optional): Configure\
-            how the components registered with this registry will behave when rendered.\
-            See [`RegistrySettings`](./api.md#django_components_lite.RegistrySettings). Can be either\
-            a static value or a callable that returns the settings. If omitted, the settings from\
-            [`COMPONENTS`](./settings.md#django_components_lite.app_settings.ComponentsSettings) are used.
 
     **Notes:**
 
@@ -148,15 +138,10 @@ class ComponentRegistry:
 
     """
 
-    def __init__(
-        self,
-        library: Library | None = None,
-        settings: RegistrySettings | Callable[["ComponentRegistry"], RegistrySettings] | None = None,
-    ) -> None:
+    def __init__(self, library: Library | None = None) -> None:
         self._registry: dict[str, ComponentRegistryEntry] = {}  # component name -> component_entry mapping
         self._tags: dict[str, set[str]] = {}  # tag -> list[component names]
         self._library = library
-        self._settings = settings
 
         ALL_REGISTRIES.append(cached_ref(self))
 
@@ -165,7 +150,7 @@ class ComponentRegistry:
         self.clear()
 
     def __copy__(self) -> "ComponentRegistry":
-        new_registry = ComponentRegistry(self.library, self._settings)
+        new_registry = ComponentRegistry(self.library)
         new_registry._registry = self._registry.copy()
         new_registry._tags = self._tags.copy()
         return new_registry
@@ -190,13 +175,6 @@ class ComponentRegistry:
             mark_protected_tags(tag_library)
             lib = self._library = tag_library
         return lib
-
-    @property
-    def settings(self) -> RegistrySettings:
-        """Registry settings configured for this registry."""
-        if callable(self._settings):
-            return self._settings(self) or RegistrySettings()
-        return self._settings or RegistrySettings()
 
     def register(self, name: str, component: type["Component"]) -> None:
         """
@@ -443,13 +421,10 @@ class ComponentRegistry:
 
             return tag_fn
 
-        tag_name = app_settings.TAG_NAME
-        tag_name_sc = app_settings.TAG_NAME_SC
-        end_tag_name = app_settings.END_TAG_NAME
-        register_tag(self.library, tag_name, _make_tag_fn(tag_name, end_tag_name))
-        self.library.tag(tag_name_sc, _make_tag_fn(tag_name_sc, None))
+        register_tag(self.library, "comp", _make_tag_fn("comp", "endcomp"))
+        self.library.tag("compc", _make_tag_fn("compc", None))
 
-        return ComponentRegistryEntry(cls=component, tag=tag_name)
+        return ComponentRegistryEntry(cls=component, tag="comp")
 
 
 # This variable represents the global component registry

@@ -31,7 +31,7 @@ from django_components_lite.slots import (
     normalize_slot_fills,
     resolve_fills,
 )
-from django_components_lite.template import cache_component_template_file, get_component_template
+from django_components_lite.template import get_component_template
 from django_components_lite.util.context import gen_context_processors_data, snapshot_context
 from django_components_lite.util.exception import set_component_error_message
 from django_components_lite.util.misc import (
@@ -201,11 +201,6 @@ class ComponentMeta(type):
         # Files will be resolved on first access instead.
         with contextlib.suppress(Exception):
             resolve_component_files(cls)
-
-        # If the component defined `template_file`, then associate this Component class
-        # with that template file path.
-        if attrs.get("template_file"):
-            cache_component_template_file(cls)
 
         return cls
 
@@ -776,27 +771,6 @@ class Component(metaclass=ComponentMeta):
                 assert self.node.name == "my_component"
     ```
 
-    For example, if `MyComponent` was used in another component - that is,
-    with a `{% component "my_component" %}` tag
-    in a template that belongs to another component - then you can use
-    [`self.node.template_component`](../api/#django_components_lite.ComponentNode.template_component)
-    to access the owner [`Component`](../api/#django_components_lite.Component) class.
-
-    ```djc_py
-    class Parent(Component):
-        template: str = '''
-            <div>
-                {% component "my_component" / %}
-            </div>
-        '''
-
-    @register("my_component")
-    class MyComponent(Component):
-        def get_template_data(self, context, template):
-            if self.node is not None:
-                assert self.node.template_component == Parent
-    ```
-
     !!! info
 
         `Component.node` is `None` if the component is created by
@@ -1343,8 +1317,6 @@ class ComponentNode(BaseNode):
     args and kwargs.
     """
 
-    # Defaults; may be overridden by `component_tags.py` at library-load time
-    # based on `COMPONENTS.tag_name` / `COMPONENTS.tag_name_sc` settings.
     tag = "comp"
     end_tag = "endcomp"
     allowed_flags = ()
@@ -1359,19 +1331,15 @@ class ComponentNode(BaseNode):
         params: tuple[list[FilterExpression], dict[str, FilterExpression]] | None = None,
         flags: dict[str, bool] | None = None,
         nodelist: NodeList | None = None,
-        node_id: str | None = None,
         contents: str | None = None,
         template_name: str | None = None,
-        template_component: type["Component"] | None = None,
     ) -> None:
         super().__init__(
             params=params,
             flags=flags,
             nodelist=nodelist,
-            node_id=node_id,
             contents=contents,
             template_name=template_name,
-            template_component=template_component,
         )
 
         self.name = name

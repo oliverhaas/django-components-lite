@@ -13,13 +13,7 @@ class TagProtectedError(Exception):
     """
 
 
-PROTECTED_TAGS = [
-    "component_css_dependencies",
-    "component_js_dependencies",
-    "fill",
-    "html_attrs",
-    "slot",
-]
+PROTECTED_TAGS = ["fill", "html_attrs", "slot"]
 """
 These are the names that users cannot choose for their components,
 as they would conflict with other tags in the Library.

@@ -1,3 +1,4 @@
+import uuid
 from typing import cast
 
 from django.http import HttpRequest
@@ -6,13 +7,12 @@ from django.test import override_settings
 from pytest_django.asserts import assertHTMLEqual, assertInHTML
 
 from django_components_lite import Component, register, registry
-from django_components_lite.util.misc import gen_id
 
 
 # Context processor that generates a unique ID. This is used to test that the context
 # processor is generated only once, as each time this is called, it should generate a different ID.
 def dummy_context_processor(request):
-    return {"dummy": gen_id()}
+    return {"dummy": uuid.uuid4().hex[:6]}
 
 
 #########################
@@ -879,8 +879,9 @@ class TestContextProcessors:
         assert list(parent_data.keys()) == ["csrf_token", "dummy"]
         assert list(child_data.keys()) == ["csrf_token", "dummy"]
 
-        assert parent_data["dummy"] == "a1bc3e"
-        assert child_data["dummy"] == "a1bc3e"
+        # Both calls should see the same value: the context processor only runs
+        # once per request and the result is cached.
+        assert parent_data["dummy"] == child_data["dummy"]
         assert parent_data["csrf_token"] == child_data["csrf_token"]
 
     def test_context_processors_data_outside_of_rendering(self):
