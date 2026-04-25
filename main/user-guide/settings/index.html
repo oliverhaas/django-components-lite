@@ -588,17 +588,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#customizing-tag-names" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Customizing tag names
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -769,17 +758,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#customizing-tag-names" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Customizing tag names
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -808,10 +786,9 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">autodiscover</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">dirs</span><span class="o">=</span><span class="p">[</span><span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;components&quot;</span><span class="p">],</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">app_dirs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">],</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">multiline_tags</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">static_files_allowed</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.css&quot;</span><span class="p">,</span> <span class="s2">&quot;.js&quot;</span><span class="p">],</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">static_files_forbidden</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.html&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">],</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">static_files_allowed</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.css&quot;</span><span class="p">,</span> <span class="s2">&quot;.js&quot;</span><span class="p">],</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">static_files_forbidden</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.html&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">],</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="available-settings">Available settings<a class="headerlink" href="#available-settings" title="Permanent link">&para;</a></h2>
 <table>
@@ -839,21 +816,6 @@
 <td>Subdirectory name within apps to search for components</td>
 </tr>
 <tr>
-<td><code>multiline_tags</code></td>
-<td><code>True</code></td>
-<td>Allow component tag arguments to span multiple lines</td>
-</tr>
-<tr>
-<td><code>tag_name</code></td>
-<td><code>"comp"</code></td>
-<td>Name of the block-form component tag. End tag is always <code>f"end{tag_name}"</code>.</td>
-</tr>
-<tr>
-<td><code>tag_name_sc</code></td>
-<td><code>f"{tag_name}c"</code></td>
-<td>Name of the self-closing component tag.</td>
-</tr>
-<tr>
 <td><code>static_files_allowed</code></td>
 <td>CSS, JS, images, fonts</td>
 <td>File extensions served as static files</td>
@@ -865,14 +827,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="customizing-tag-names">Customizing tag names<a class="headerlink" href="#customizing-tag-names" title="Permanent link">&para;</a></h2>
-<p>The default component tag names are <code>{% comp %}</code> / <code>{% endcomp %}</code> / <code>{% compc %}</code>. Override them via <code>tag_name</code> and <code>tag_name_sc</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">COMPONENTS</span> <span class="o">=</span> <span class="n">ComponentsSettings</span><span class="p">(</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;component&quot;</span><span class="p">,</span>      <span class="c1"># `{% component %}...{% endcomponent %}`</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">tag_name_sc</span><span class="o">=</span><span class="s2">&quot;componentsc&quot;</span><span class="p">,</span> <span class="c1"># `{% componentsc &quot;x&quot; / %}`</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
-</span></code></pre></div>
-<p>If you only set <code>tag_name</code>, <code>tag_name_sc</code> defaults to <code>f"{tag_name}c"</code>. The end tag is always derived as <code>f"end{tag_name}"</code> and cannot be set independently.</p>
+<p>The component tag names are fixed: <code>{% comp %}</code> / <code>{% endcomp %}</code> / <code>{% compc %}</code>. They are not configurable.</p>
 
 
 
