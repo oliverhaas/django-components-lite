@@ -46,8 +46,8 @@ def resolve_component_files(comp_cls: type["Component"]) -> None:
         if not filepath or not isinstance(filepath, str):
             continue
 
-        # Skip URLs
-        if filepath.startswith(("http://", "https://", "://", "/")):
+        # Skip URLs and absolute paths (incl. protocol-relative `//cdn/...`).
+        if filepath.startswith(("http://", "https://", "//", "/")):
             continue
 
         # Check if the file exists relative to the component's directory

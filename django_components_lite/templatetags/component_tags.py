@@ -8,19 +8,18 @@ from django_components_lite.slots import FillNode, SlotNode
 # See https://docs.djangoproject.com/en/5.2/howto/custom-template-tags
 register = django.template.Library()
 
+class ComponentScNode(ComponentNode):
+    """Self-closing form of `{% comp %}`: `{% compc "x" / %}`. No body, no slots."""
+
+    tag = "compc"
+    end_tag = None
+
+
 ComponentNode.register(register)
+ComponentScNode.register(register)
 FillNode.register(register)
 HtmlAttrsNode.register(register)
 SlotNode.register(register)
-
-# Register the self-closing component tag. ComponentScNode is identical to
-# ComponentNode but without an end tag, so it parses as `{% compc "x" / %}`.
-ComponentScNode: type[ComponentNode] = type(
-    "ComponentScNode",
-    (ComponentNode,),
-    {"tag": "compc", "end_tag": None},
-)
-ComponentScNode.register(register)
 
 # Aliases for Python imports
 component = ComponentNode.parse

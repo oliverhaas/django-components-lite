@@ -1,20 +1,16 @@
 # ruff: noqa: N802
 import re
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
 from typing import (
     NamedTuple,
-    TypeVar,
     cast,
 )
 
 from django.conf import settings
 
 from django_components_lite.util.misc import default
-
-T = TypeVar("T")
 
 
 # This is the source of truth for the settings that are available. If the documentation
@@ -178,31 +174,24 @@ class ComponentsSettings(NamedTuple):
     """
 
 
-# NOTE: Some defaults depend on the Django settings, which may not yet be
-# initialized at the time that these settings are generated. For such cases
-# we define the defaults as a factory function, and use the `Dynamic` class to
-# mark such fields.
-@dataclass(frozen=True)
-class Dynamic[T]:
-    getter: Callable[[], T]
-
-
 # This is the source of truth for the settings defaults. If the documentation
 # does NOT match it, the documentation should be updated.
 #
-# NOTE: Because we need to access Django settings to generate default dirs
-#       for `COMPONENTS.dirs`, we do it lazily.
-# NOTE 2: We show the defaults in the documentation, together with the comments
-#        (except for the `Dynamic` instances and comments like `type: ignore`).
-#        So `fmt: off` turns off Black/Ruff formatting and `snippet:defaults` allows
-#        us to extract the snippet from the file.
+# `dirs` defaults to `None` here because its real default depends on
+# `settings.BASE_DIR`, which is unsafe to read at import time; it's resolved
+# lazily in `_load_settings()` below.
+#
+# NOTE: We show the defaults in the documentation, together with the comments
+#       (except for `type: ignore` markers).
+#       So `fmt: off` turns off Black/Ruff formatting and `snippet:defaults` allows
+#       us to extract the snippet from the file.
 #
 # fmt: off
 # --snippet:defaults--
 defaults = ComponentsSettings(
     autodiscover=True,
-    # Root-level "components" dirs, e.g. `/path/to/proj/components/`
-    dirs=Dynamic(lambda: [Path(settings.BASE_DIR) / "components"]),  # type: ignore[arg-type]
+    # Resolved at runtime to `[Path(settings.BASE_DIR) / "components"]`.
+    dirs=None,
     # App-level "components" dirs, e.g. `[app]/components/`
     app_dirs=["components"],
     static_files_allowed=[
@@ -242,12 +231,8 @@ class InternalSettings:
         data = getattr(settings, "COMPONENTS", {})
         components_settings = ComponentsSettings(**data) if not isinstance(data, ComponentsSettings) else data
 
-        # Merge we defaults and otherwise initialize if necessary
-
-        # For DIRS setting, we use a getter for the default value, because the default value
-        # uses Django settings, which may not yet be initialized at the time these settings are generated.
-        dirs_default_fn = cast("Dynamic[Sequence[str | tuple[str, str]]]", defaults.dirs)
-        dirs_default = dirs_default_fn.getter()
+        # `dirs` default depends on `settings.BASE_DIR`, only safe to read at call time.
+        dirs_default: Sequence[str | tuple[str, str]] = [Path(settings.BASE_DIR) / "components"]
 
         self._settings = ComponentsSettings(
             autodiscover=default(components_settings.autodiscover, defaults.autodiscover),

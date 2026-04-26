@@ -1,6 +1,7 @@
 import os
 import re
 from collections.abc import Iterable
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -149,15 +150,14 @@ class ComponentsFileSystemFinder(BaseFinder):
                         yield path, storage
 
     def _is_path_valid(self, path: str) -> bool:
-        # Normalize patterns to regexes
-        allowed_patterns = [
-            # Convert suffixes like `.html` to regex `\.html$`
-            re.compile(rf"\{p}$") if isinstance(p, str) else p
-            for p in app_settings.STATIC_FILES_ALLOWED
-        ]
-        forbidden_patterns = [
-            # Convert suffixes like `.html` to regex `\.html$`
-            re.compile(rf"\{p}$") if isinstance(p, str) else p
-            for p in app_settings.STATIC_FILES_FORBIDDEN
-        ]
-        return any_regex_match(path, allowed_patterns) and no_regex_match(path, forbidden_patterns)
+        allowed = _compile_patterns(tuple(app_settings.STATIC_FILES_ALLOWED))
+        forbidden = _compile_patterns(tuple(app_settings.STATIC_FILES_FORBIDDEN))
+        return any_regex_match(path, allowed) and no_regex_match(path, forbidden)
+
+
+# Convert suffixes like `.html` to regex `\.html$`. Cached because the settings
+# tuples are stable across the process and listing files may compile thousands
+# of times during `collectstatic`.
+@cache
+def _compile_patterns(patterns: tuple[str | re.Pattern, ...]) -> list[re.Pattern]:
+    return [re.compile(rf"\{p}$") if isinstance(p, str) else p for p in patterns]
