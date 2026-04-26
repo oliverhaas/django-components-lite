@@ -19,44 +19,20 @@ StyleValue = Sequence["StyleValue"] | str | StyleDict
 
 class HtmlAttrsNode(BaseNode):
     """
-    Generate HTML attributes (`key="value"`), combining data from multiple sources,
-    whether its template variables or static text.
-
-    It is designed to easily merge HTML attributes passed from outside as well as inside the component.
+    Render an HTML attribute string (`key="value" ...`) merging multiple sources.
 
     **Args:**
 
-    - `attrs` (dict, optional): Optional dictionary that holds HTML attributes. On conflict, overrides
-        values in the `default` dictionary.
-    - `default` (str, optional): Optional dictionary that holds HTML attributes. On conflict, is overriden
-        with values in the `attrs` dictionary.
-    - Any extra kwargs will be appended to the corresponding keys
-
-    The attributes in `attrs` and `defaults` are merged and resulting dict is rendered as HTML attributes
-    (`key="value"`).
-
-    Extra kwargs (`key=value`) are concatenated to existing keys. So if we have
-
-    ```python
-    attrs = {"class": "my-class"}
-    ```
-
-    Then
-
-    ```django
-    {% html_attrs attrs class="extra-class" %}
-    ```
-
-    will result in `class="my-class extra-class"`.
+    - `attrs` (dict, optional): Attribute overrides; takes precedence over `defaults`.
+    - `defaults` (dict, optional): Fallback attributes used when `attrs` doesn't supply a key.
+    - Extra kwargs are appended to the corresponding keys (e.g. extending `class` / `style`).
 
     **Example:**
+
+    Given `attrs = {"class": "my-class"}`:
+
     ```django
-    <div {% html_attrs
-        attrs
-        defaults:class="default-class"
-        class="extra-class"
-        data-id="123"
-    %}>
+    <div {% html_attrs attrs defaults class="extra-class" data-id="123" %}>
     ```
 
     renders
@@ -64,9 +40,6 @@ class HtmlAttrsNode(BaseNode):
     ```html
     <div class="my-class extra-class" data-id="123">
     ```
-
-    See more usage examples in
-    [HTML attributes](../../concepts/fundamentals/html_attributes#examples-for-html_attrs).
     """
 
     tag = "html_attrs"

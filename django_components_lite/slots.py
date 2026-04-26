@@ -27,7 +27,7 @@ from django_components_lite.util.exception import add_slot_to_error_message
 from django_components_lite.util.misc import default, get_last_index, is_identifier
 
 if TYPE_CHECKING:
-    from django_components_lite.component import Component, ComponentNode
+    from django_components_lite.component import ComponentNode
 
 TSlotData = TypeVar("TSlotData", bound=Mapping)
 
@@ -193,17 +193,14 @@ class Slot[TSlotData: Mapping]:
     )
     ```
 
-    Accessing slots inside the components:
+    Accessing slots inside a component (via `self.slots`):
 
     ```python
     from django_components_lite import Component
 
     class MyComponent(Component):
-        def get_template_data(self, args, kwargs, slots, context):
-            my_slot = slots["my_slot"]
-            return {
-                "my_slot": my_slot,
-            }
+        def get_context_data(self, **kwargs):
+            return {"my_slot": self.slots["my_slot"]}
     ```
 
     Rendering slots:
@@ -238,46 +235,20 @@ class Slot[TSlotData: Mapping]:
 
     # Following fields are only for debugging
     component_name: str | None = None
-    """
-    Name of the component that originally received this slot fill.
-
-    See [Slot metadata](../../concepts/fundamentals/slots#slot-metadata).
-    """
+    """Name of the component that originally received this slot fill."""
     slot_name: str | None = None
-    """
-    Slot name to which this Slot was initially assigned.
-
-    See [Slot metadata](../../concepts/fundamentals/slots#slot-metadata).
-    """
+    """Slot name to which this Slot was initially assigned."""
     nodelist: NodeList | None = None
-    """
-    If the slot was defined with [`{% fill %}`](../template_tags#fill) tag,
-    this will be the Nodelist of the fill's content.
-
-    See [Slot metadata](../../concepts/fundamentals/slots#slot-metadata).
-    """
+    """For `{% fill %}`-derived slots, the `NodeList` of the fill's body."""
     fill_node: Union["FillNode", "ComponentNode"] | None = None
     """
-    If the slot was created from a [`{% fill %}`](../template_tags#fill) tag,
-    this will be the [`FillNode`](../api/#django_components_lite.FillNode) instance.
-
-    If the slot was a default slot created from a [`{% component %}`](../template_tags#component) tag,
-    this will be the [`ComponentNode`](../api/#django_components_lite.ComponentNode) instance.
-
-    Otherwise, this will be `None`.
-
-    Extensions can use this info to handle slots differently based on their source.
-
-    See [Slot metadata](../../concepts/fundamentals/slots#slot-metadata).
+    The originating [`FillNode`](../api/#django_components_lite.FillNode) (for `{% fill %}`)
+    or [`ComponentNode`](../api/#django_components_lite.ComponentNode) (for a default-slot
+    `{% comp %}` body), or `None` for slots constructed in Python.
     """
     extra: dict[str, Any] = field(default_factory=dict)
     """
-    Dictionary that can be used to store arbitrary metadata about the slot.
-
-    See [Slot metadata](../../concepts/fundamentals/slots#slot-metadata).
-
-    See [Pass slot metadata](../../concepts/advanced/extensions#pass-slot-metadata)
-    for usage for extensions.
+    Dictionary for arbitrary user metadata about the slot.
 
     **Example:**
 
@@ -657,31 +628,17 @@ class SlotNode(BaseNode):
         # IF SUCH FILL EXISTS. Otherwise, we use the slot's name.
         fill_name = DEFAULT_SLOT_KEY if is_default and DEFAULT_SLOT_KEY in slot_fills else slot_name
 
-        # NOTE: TBH not sure why this happens. But there's an edge case when:
-        # 1. Using the "django" context behavior
-        # 2. AND the slot fill is defined in the root template
-        #
-        # Then `ctx_with_fills.component.slots` does NOT contain any fills (`{% fill %}`). So in this case,
-        # we need to use a different strategy to find the fills Context layer that contains the fills.
-        #
-        # ------------------------------------------------------------------------------------------
-        #
-        # Context:
-        # When we render slot fills, we want to use the context as was OUTSIDE of the component.
-        # E.g. In this example, we want to render `{{ item.name }}` inside the `{% fill %}` tag:
+        # When we render slot fills, we want to use the context as was OUTSIDE of the
+        # component. E.g. in this template, `{{ item.name }}` inside the `{% fill %}`
+        # must resolve against the loop's context, not the component's:
         #
         # ```django
         # {% for item in items %}
-        #   {% component "my_component" %}
-        #     {% fill "my_slot" %}
-        #       {{ item.name }}
-        #     {% endfill %}
-        #   {% endcomponent %}
+        #   {% comp "my_component" %}
+        #     {% fill "my_slot" %}{{ item.name }}{% endfill %}
+        #   {% endcomp %}
         # {% endfor %}
         # ```
-        #
-        # In this case, we need to find the context that was used to render the component,
-        # and use the fills from that context.
         if fill_name in slot_fills:
             slot_is_filled = True
             slot = slot_fills[fill_name]
@@ -719,66 +676,37 @@ class SlotNode(BaseNode):
                     msg += f"\nDid you mean '{fuzzy_fill_name_matches[0]}'?"
             raise TemplateSyntaxError(msg)
 
-        extra_context: dict[str, Any] = {}
-
-        # NOTE: If a user defines a `{% slot %}` tag inside a `{% fill %}` tag, two things
-        # may happen based on the context mode:
-        # 1. In the "isolated" mode, the context inside the fill is the same as outside of the component
-        #    so any slots fill be filled with that same (parent) context.
-        # 2. In the "django" mode, the context inside the fill is the same as the one inside the component,
-        #
-        # The "django" mode is problematic, because if we define a fill with the same name as the slot,
-        # then we will enter an endless loop. E.g.:
-        # ```django
-        # {% component "mycomponent" %}
-        #   {% slot "content" %}    <--,
-        #     {% fill "content" %}  ---'
-        #       ...
-        #     {% endfill %}
-        #   {% endslot %}
-        # {% endcomponent %}
-        # ```
-        #
         fallback = SlotFallback(self, context)
 
-        # For the user-provided slot fill, we want to use the context of where the slot
-        # came from (or current context if configured so)
-        used_ctx = self._resolve_slot_context(context, slot_is_filled, component, outer_context)
-        with used_ctx.update(extra_context):
-            # Required for compatibility with Django's {% extends %} tag
-            # This makes sure that the render context used outside of a component
-            # is the same as the one used inside the slot.
+        # User-provided fills render against the outer context (where the slot was filled);
+        # unfilled slots render their fallback content against the current (inner) context.
+        used_ctx = self._resolve_slot_context(context, slot_is_filled, outer_context)
+
+        # Push an empty data layer so the slot body sees a fresh stack frame for any
+        # `{% with %}` it does, without polluting the caller's context.
+        with used_ctx.update({}):
+            # Required for compatibility with Django's {% extends %} tag: the render context
+            # used outside of a component must match the one used inside the slot.
             # See https://github.com/django-components/django-components/pull/859
             if len(used_ctx.render_context.dicts) > 1 and "block_context" in used_ctx.render_context.dicts[-2]:
                 render_ctx_layer = used_ctx.render_context.dicts[-2]
             else:
-                # Otherwise we simply re-use the last layer, so that following logic uses `with` in either case
                 render_ctx_layer = used_ctx.render_context.dicts[-1]
 
             with used_ctx.render_context.push(render_ctx_layer), add_slot_to_error_message(component_name, slot_name):
-                # Render slot as a function
-                # NOTE: While `{% fill %}` tag has to opt in for the `fallback` and `data` variables,
-                #       the render function ALWAYS receives them.
-                output = slot(data=kwargs, fallback=fallback, context=used_ctx)
-
-        return output
+                # The render function ALWAYS receives `data` and `fallback`; `{% fill %}` opts into them.
+                return slot(data=kwargs, fallback=fallback, context=used_ctx)
 
     def _resolve_slot_context(
         self,
         context: Context,
         slot_is_filled: bool,
-        component: "Component",
         outer_context: Context | None,
     ) -> Context:
-        """Prepare the context used in a slot fill based on the settings."""
-        # If slot is NOT filled, we use the slot's fallback AKA content between
-        # the `{% slot %}` tags. These should be evaluated as if the `{% slot %}`
-        # tags weren't even there, which means that we use the current context.
+        """Pick the context a slot renders against: outer (caller's) for filled slots,
+        current (inner) for unfilled slot fallbacks."""
         if not slot_is_filled:
             return context
-
-        # Filled slots use the outer (caller's) context  -  isolated behavior,
-        # matching Django's inclusion_tag convention.
         return outer_context if outer_context is not None else Context()
 
 
@@ -895,17 +823,14 @@ class FillNode(BaseNode):
     on the [`{% fill %}`](../template_tags#fill) tag.
 
     First pass a [`Slot`](../api#django_components_lite.Slot) instance to the template
-    with the [`get_template_data()`](../api#django_components_lite.Component.get_template_data)
-    method:
+    via [`get_context_data()`](../api#django_components_lite.Component.get_context_data):
 
     ```python
-    from django_components_lite import component, Slot
+    from django_components_lite import Component, Slot
 
     class Table(Component):
-      def get_template_data(self, args, kwargs, slots, context):
-        return {
-            "my_slot": Slot(lambda ctx: "Hello, world!"),
-        }
+      def get_context_data(self, **kwargs):
+        return {"my_slot": Slot(lambda ctx: "Hello, world!")}
     ```
 
     Then pass the slot to the [`{% fill %}`](../template_tags#fill) tag:
@@ -1012,7 +937,7 @@ class FillNode(BaseNode):
 
     def _extract_fill(self, context: Context, data: "FillWithData") -> None:
         # `FILL_GEN_CONTEXT_KEY` is only ever set when we are rendering content between the
-        # `{% component %}...{% endcomponent %}` tags. This is done in order to collect all fill tags.
+        # `{% comp %}...{% endcomp %}` tags, to collect all fill tags.
         # E.g.
         #   {% for slot_name in exposed_slots %}
         #     {% fill name=slot_name %}
@@ -1262,7 +1187,7 @@ def _extract_fill_content(
         content = mark_safe(nodes.render(context).strip())  # noqa: S308
 
     # If we did not encounter any fills (not accounting for those nested in other
-    # {% componenet %} tags), then we treat the content as default slot.
+    # {% comp %} tags), then we treat the content as default slot.
     if not captured_fills:
         return False
 
@@ -1391,35 +1316,18 @@ def _nodelist_to_slot(
         if fallback_var:
             context[fallback_var] = ctx.fallback
 
-        # NOTE: If a `{% fill %}` tag inside a `{% component %}` tag is inside a forloop,
-        # the `extra_context` contains the forloop variables. We want to make these available
-        # to the slot fill content.
-        #
-        # However, we cannot simply append the `extra_context` to the Context as the latest stack layer
-        # because then the forloop variables override the slot fill variables. Instead, we have to put
-        # the `extra_context` into the correct layer.
-        #
-        # Currently the `extra_context` is set only in `FillNode._extract_fill()` method
-        # that is run when we render a `{% component %}` tag inside a template, and we need
-        # to extract the fills from the tag's body.
-        #
-        # Thus, when we get here and `extra_context` is not None, it means that the component
-        # is being rendered from within the template. And so we know that we're inside `Component._render()`.
-        # And that means that the context MUST contain our internal context keys like `_COMPONENT_CONTEXT_KEY`.
-        #
-        # And so we want to put the `extra_context` into the same layer that contains `_COMPONENT_CONTEXT_KEY`.
-        #
-        # HOWEVER, the layer with `_COMPONENT_CONTEXT_KEY` also contains user-defined data from `get_template_data()`.
-        # Data from `get_template_data()` should take precedence over `extra_context`. So we have to insert
-        # the forloop variables BEFORE that.
+        # When a `{% fill %}` tag inside a `{% comp %}` tag sits inside a forloop, `extra_context`
+        # carries the forloop variables. We must inject them into the same layer as
+        # `_COMPONENT_CONTEXT_KEY` so they're visible to the fill body, but BEFORE the layer
+        # holding user data from `get_context_data()` so user data wins on conflict.
         index_of_last_component_layer = get_last_index(context.dicts, lambda d: _COMPONENT_CONTEXT_KEY in d)
         if index_of_last_component_layer is None:
             index_of_last_component_layer = 0
 
         index_of_last_component_layer -= 1
 
-        # Insert the `extra_context` layer BEFORE the layer that defines the variables from get_template_data.
-        # Thus, get_template_data will overshadow these on conflict.
+        # Insert the `extra_context` layer BEFORE the layer holding `get_context_data()` output,
+        # so user-supplied template data wins on conflict.
         context.dicts.insert(index_of_last_component_layer, extra_context or {})
 
         rendered = template.render(context)

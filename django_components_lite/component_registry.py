@@ -61,18 +61,17 @@ def all_registries() -> list["ComponentRegistry"]:
 class ComponentRegistry:
     """
     Manages [components](./api.md#django_components_lite.Component) and makes them available
-    in the template, by default as [`{% component %}`](./template_tags.md#component)
-    tags.
+    in templates as [`{% comp %}`](./template_tags.md#component) tags.
 
     ```django
-    {% component "my_comp" key=value %}
-    {% endcomponent %}
+    {% comp "my_comp" key=value %}
+    {% endcomp %}
     ```
 
     To enable a component to be used in a template, the component must be registered with a component registry.
 
     When you register a component to a registry, behind the scenes the registry
-    automatically adds the component's template tag (e.g. `{% component %}` to
+    automatically adds the component's template tag (e.g. `{% comp %}` to
     the [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#code-layout).
     And the opposite happens when you unregister a component - the tag is removed.
 
@@ -131,8 +130,8 @@ class ComponentRegistry:
 
     4. Use the registered components in your templates:
         ```django
-        {% component "button" %}
-        {% endcomponent %}
+        {% comp "button" %}
+        {% endcomp %}
         ```
 
     """
@@ -178,8 +177,8 @@ class ComponentRegistry:
 
         A component MUST be registered before it can be used in a template such as:
         ```django
-        {% component "my_comp" %}
-        {% endcomponent %}
+        {% comp "my_comp" %}
+        {% endcomp %}
         ```
 
         Args:
@@ -463,7 +462,7 @@ def register(
 
     Args:
         name (str): Registered name. This is the name by which the component will be accessed\
-            from within a template when using the [`{% component %}`](./template_tags.md#component) tag. Required.
+            from within a template when using the [`{% comp %}`](./template_tags.md#component) tag. Required.
         registry (ComponentRegistry, optional): Specify the [registry](./#django_components_lite.ComponentRegistry)\
             to which to register this component. If omitted, component is registered to the default registry.
 
