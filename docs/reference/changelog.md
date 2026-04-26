@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.5.1
+
+Production-readiness pass. No breaking changes.
+
+### Fixed
+
+- `ComponentRegistry.unregister()` now removes both the `comp` and `compc` tags from the Library (only `comp` was tracked, so `compc` leaked).
+- `_extends_context_reset` now restores `extends_context` in a `finally` block, so a raised exception during fill extraction no longer leaks state across renders.
+- Type-checker friendliness: `ComponentNode.end_tag` is annotated `ClassVar[str | None]` so subclasses (e.g. `ComponentScNode`) can set it to `None` without tripping mypy.
+- `Slot._resolve_slot_context` no longer accepts an unused `component` parameter.
+- `FillNode` validation now consistently raises `TemplateSyntaxError` (was `RuntimeError` for three checks).
+
+### Removed (internal cleanup)
+
+- Dropped `ComponentRegistry.__del__` and the `weakref.finalize` callback on the component class — both fragile or never firing in practice.
+- Dropped ~250 LOC of dead helpers and unused branches: `template.load_component_template`, `_STRATEGY_CONTEXT_KEY` / `DJC_DEPS_STRATEGY`, the unused `_template` and `_signature` class attributes, `name_escape_re`, the `app_settings.Dynamic[T]` wrapper, and ten unused helpers in `util/misc.py` (`snake_to_pascal`, `is_nonempty_str`, `is_glob`, `flatten`, `to_dict`, `format_url`, `format_as_ascii_table`, `is_generator`, `convert_class_to_namedtuple`, `get_index`).
+- `playwright` removed from dev dependencies; CI no longer installs Chromium.
+
+### Performance
+
+- `finders.py`: cache compiled regex patterns on the (immutable) settings tuple so `collectstatic` doesn't rebuild them per file.
+- Tests: drop the per-test `gc.collect()` in `conftest.py`; suite runs ~7× faster (~3.4s → ~0.5s).
+
+### Docs
+
+- Trim docstrings and comments package-wide. Roughly 2300 lines removed (-43% LOC) by collapsing inherited multi-paragraph upstream docstrings to one or two sentences and dropping references to features that no longer exist in this fork.
+- Quickstart: move `{% load component_tags %}` to the top of the template.
+- Document `{% compc %}`, `{% html_attrs %}`, `format_attributes`, and `merge_attributes` in `docs/reference/api.md`.
+- Ship `tests/` in the sdist so downstream packagers can run them.
+
 ## 0.5.0
 
 Lean-out release. Roughly 870 LOC removed (~12% of the package).
