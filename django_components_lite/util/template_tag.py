@@ -45,7 +45,6 @@ def _validate_params(
     has_var_positional = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params_by_name.values())
     has_var_keyword = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in params_by_name.values())
 
-    # Count positional parameters (excluding *args)
     max_positional = 0
     for sig_param in params_by_name.values():
         if sig_param.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD):
@@ -57,7 +56,6 @@ def _validate_params(
 
     for param in params:
         if param.key is None:
-            # Positional arg
             if seen_kwargs:
                 raise TypeError("positional argument follows keyword argument")
             if not has_var_positional and next_pos >= max_positional:
@@ -74,7 +72,6 @@ def _validate_params(
             validated_args.append(param.value)
             next_pos += 1
         else:
-            # Keyword arg
             seen_kwargs = True
             if param.key in used_param_names:
                 raise TypeError(f"got multiple values for argument '{param.key}'")
@@ -88,7 +85,6 @@ def _validate_params(
             raise TypeError(f"got an unexpected keyword argument '{next(iter(extra_kwargs))}'")
         validated_kwargs.update(extra_kwargs)
 
-    # Check for missing required args and apply defaults
     for name, sig_param in params_by_name.items():
         if name in used_param_names or name in validated_kwargs:
             continue

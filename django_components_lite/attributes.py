@@ -18,28 +18,10 @@ StyleValue = Sequence["StyleValue"] | str | StyleDict
 
 
 class HtmlAttrsNode(BaseNode):
-    """
-    Render an HTML attribute string (`key="value" ...`) merging multiple sources.
+    """Render an HTML attribute string from `attrs` over `defaults`, with extra kwargs merged in.
 
-    **Args:**
-
-    - `attrs` (dict, optional): Attribute overrides; takes precedence over `defaults`.
-    - `defaults` (dict, optional): Fallback attributes used when `attrs` doesn't supply a key.
-    - Extra kwargs are appended to the corresponding keys (e.g. extending `class` / `style`).
-
-    **Example:**
-
-    Given `attrs = {"class": "my-class"}`:
-
-    ```django
-    <div {% html_attrs attrs defaults class="extra-class" data-id="123" %}>
-    ```
-
-    renders
-
-    ```html
-    <div class="my-class extra-class" data-id="123">
-    ```
+    Example - given `attrs = {"class": "my-class"}`,
+    `{% html_attrs attrs defaults class="extra" %}` renders `class="my-class extra"`.
     """
 
     tag = "html_attrs"
@@ -53,34 +35,16 @@ class HtmlAttrsNode(BaseNode):
         defaults: dict | None = None,
         **kwargs: Any,
     ) -> SafeString:
-        # Merge
         final_attrs = {}
         final_attrs.update(defaults or {})
         final_attrs.update(attrs or {})
         final_attrs = merge_attributes(final_attrs, kwargs)
 
-        # Render to HTML attributes
         return format_attributes(final_attrs)
 
 
 def format_attributes(attributes: Mapping[str, Any]) -> str:
-    """
-    Format a dict of attributes into an HTML attributes string.
-
-    Read more about [HTML attributes](../../concepts/fundamentals/html_attributes).
-
-    **Example:**
-
-    ```python
-    format_attributes({"class": "my-class", "data-id": "123"})
-    ```
-
-    will return
-
-    ```py
-    'class="my-class" data-id="123"'
-    ```
-    """
+    """Format a dict of attributes into an HTML attribute string."""
     attr_list = []
 
     for key, value in attributes.items():
@@ -95,85 +59,7 @@ def format_attributes(attributes: Mapping[str, Any]) -> str:
 
 
 def merge_attributes(*attrs: dict) -> dict:
-    """
-    Merge a list of dictionaries into a single dictionary.
-
-    The dictionaries are treated as HTML attributes and are merged accordingly:
-
-    - If a same key is present in multiple dictionaries, the values are joined with a space
-      character.
-    - The `class` and `style` keys are handled specially, similar to
-      [how Vue does it](https://vuejs.org/api/render-function#mergeprops).
-
-    Read more about [HTML attributes](../../concepts/fundamentals/html_attributes).
-
-    **Example:**
-
-    ```python
-    merge_attributes(
-        {"my-attr": "my-value", "class": "my-class"},
-        {"my-attr": "extra-value", "data-id": "123"},
-    )
-    ```
-
-    will result in
-
-    ```python
-    {
-        "my-attr": "my-value extra-value",
-        "class": "my-class",
-        "data-id": "123",
-    }
-    ```
-
-    **The `class` attribute**
-
-    The `class` attribute can be given as a string, or a dictionary.
-
-    - If given as a string, it is used as is.
-    - If given as a dictionary, only the keys with a truthy value are used.
-
-    **Example:**
-
-    ```python
-    merge_attributes(
-        {"class": "my-class extra-class"},
-        {"class": {"truthy": True, "falsy": False}},
-    )
-    ```
-
-    will result in
-
-    ```python
-    {
-        "class": "my-class extra-class truthy",
-    }
-    ```
-
-    **The `style` attribute**
-
-    The `style` attribute can be given as a string, a list, or a dictionary.
-
-    - If given as a string, it is used as is.
-    - If given as a dictionary, it is converted to a style attribute string.
-
-    **Example:**
-
-    ```python
-    merge_attributes(
-        {"style": "color: red; background-color: blue;"},
-        {"style": {"background-color": "green", "color": False}},
-    )
-    ```
-
-    will result in
-
-    ```python
-    {
-        "style": "color: red; background-color: blue; background-color: green;",
-    }
-    ```
-    """
+    """Merge HTML attribute dicts; same-key values join with a space, with `class`/`style` handled like Vue's `mergeProps`."""
     result: dict = {}
 
     classes: list[ClassValue] = []
@@ -185,13 +71,11 @@ def merge_attributes(*attrs: dict) -> dict:
             elif key == "style":
                 styles.append(value)
             elif key in result:
-                # Other keys are concatenated with a space character as separator
-                # if given multiple times.
                 result[key] = str(result[key]) + " " + str(value)
             else:
                 result[key] = value
 
-    # Style and class have special handling based on how Vue does it.
+    # `class`/`style` use Vue-style merging.
     if classes:
         result["class"] = normalize_class(classes)
     if styles:
@@ -201,57 +85,17 @@ def merge_attributes(*attrs: dict) -> dict:
 
 
 def normalize_class(value: ClassValue) -> str:
-    """
-    Normalize a class value.
-
-    Class may be given as a string, a list, or a dictionary:
-
-    - If given as a string, it is used as is.
-    - If given as a dictionary, only the keys with a truthy value are used.
-    - If given as a list, each item is converted to a dict, the dicts are merged, and resolved as above.
-
-    If a class is given multiple times, the last value is used.
-
-    This is based on Vue's [`mergeProps` function](https://vuejs.org/api/render-function#mergeprops).
-
-    **Example:**
-
-    ```python
-    normalize_class([
-        "my-class other-class",
-        {"extra-class": True, "other-class": False}
-    ])
-    ```
-
-    will result in
-    ```python
-    "my-class extra-class"
-    ```
-
-    Where:
-    - `my-class` is used as is
-    - `extra-class` is used because it has a truthy value
-    - `other-class` is ignored because it's last value is falsy
-    """
+    """Normalize a class value (str, dict of `{name: truthy}`, or list of either) into a class string."""
     res: dict[str, bool] = {}
     if isinstance(value, str):
         return value.strip()
     if isinstance(value, (list, tuple)):
-        # List items may be strings, dicts, or other lists/tuples
         for item in value:
-            # NOTE: One difference from Vue is that if a class is given multiple times,
-            # and the last value is falsy, then it will be removed.
-            # E.g.
-            # `{"class": ["my-class", "extra-class", {"extra-class": False}]}`
-            # will result in `class="my-class"`
-            # while in Vue it will result in `class="my-class extra-class"`
+            # NOTE: Differs from Vue: a later falsy entry removes an earlier truthy one.
+            # `["my-class", "extra-class", {"extra-class": False}]` -> `"my-class"`.
             normalized = _normalize_class(item)
             res.update(normalized)
     elif isinstance(value, dict):
-        # Take only those keys whose value is truthy. So
-        # `{"class": True, "extra": False}` will result in `class="extra"`
-        # while
-        # `{"class": True, "extra": True}` will result in `class="class extra"`
         res = value
     else:
         raise TypeError(f"Invalid class value: {value}")
@@ -266,14 +110,13 @@ def normalize_class(value: ClassValue) -> str:
 whitespace_re = re.compile(r"\s+")
 
 
-# Similar to `normalize_class`, but returns a dict instead of a string.
+# Like `normalize_class` but returns the intermediate dict.
 def _normalize_class(value: ClassValue) -> dict[str, bool]:
     res: dict[str, bool] = {}
     if isinstance(value, str):
         class_parts = whitespace_re.split(value)
         res.update({part: True for part in class_parts if part})
     elif isinstance(value, (list, tuple)):
-        # List items may be strings, dicts, or other lists/tuples
         for item in value:
             normalized = _normalize_class(item)
             res.update(normalized)
@@ -285,62 +128,20 @@ def _normalize_class(value: ClassValue) -> dict[str, bool]:
 
 
 def normalize_style(value: StyleValue) -> str:
-    """
-    Normalize a style value.
-
-    Style may be given as a string, a list, or a dictionary:
-
-    - If given as a string, it is parsed as an inline CSS style,
-      e.g. `"color: red; background-color: blue;"`.
-    - If given as a dictionary, it is assumed to be a dict of style properties,
-      e.g. `{"color": "red", "background-color": "blue"}`.
-    - If given as a list, each item may itself be a list, string, or a dict.
-      The items are converted to dicts and merged.
-
-    If a style property is given multiple times, the last value is used.
-
-    If, after merging, a style property has a literal `False` value, it is removed.
-
-    Properties with a value of `None` are ignored.
-
-    This is based on Vue's [`mergeProps` function](https://vuejs.org/api/render-function#mergeprops).
-
-    **Example:**
-
-    ```python
-    normalize_style([
-        "color: red; background-color: blue; width: 100px;",
-        {"color": "green", "background-color": None, "width": False},
-    ])
-    ```
-
-    will result in
-    ```python
-    "color: green; background-color: blue;"
-    ```
-
-    Where:
-    - `color: green` overwrites `color: red`
-    - `background-color": None` is ignored, so `background-color: blue` is used
-    - `width` is omitted because it is given with a `False` value
-    """
+    """Normalize a style value (str, dict, or list of either) into a CSS style string; `None`/`False` entries are dropped."""
     res: StyleDict = {}
     if isinstance(value, str):
         return value.strip()
     if isinstance(value, (list, tuple)):
-        # List items may be strings, dicts, or other lists/tuples
         for item in value:
             normalized = _normalize_style(item)
             res.update(normalized)
     elif isinstance(value, dict):
-        # Remove entries with `None` value
         res = _normalize_style(value)
     else:
         raise TypeError(f"Invalid style value: {value}")
 
-    # By the time we get here, all `None` values have been removed.
-    # If the final dict has `None` or `False` values, they are removed, so those
-    # properties are not rendered.
+    # Drop `None`/`False` so those properties don't render.
     res_parts = []
     for key, val in res.items():
         if val is not None and val is not False:
@@ -351,16 +152,14 @@ def normalize_style(value: StyleValue) -> str:
 def _normalize_style(value: StyleValue) -> StyleDict:
     res: StyleDict = {}
     if isinstance(value, str):
-        # Generate a dict of style properties from a string
         normalized = parse_string_style(value)
         res.update(normalized)
     elif isinstance(value, (list, tuple)):
-        # List items may be strings, dicts, or other lists/tuples
         for item in value:
             normalized = _normalize_style(item)
             res.update(normalized)
     elif isinstance(value, dict):
-        # Skip assigning entries with `None` value
+        # Skip `None` entries so they don't override later values.
         for key, val in value.items():
             if val is not None:
                 res[key] = val
@@ -378,27 +177,12 @@ property_delimiter_re = re.compile(r":(.+)", re.DOTALL)
 
 
 def parse_string_style(css_text: str) -> StyleDict:
-    """
-    Parse a string of CSS style properties into a dictionary.
-
-    **Example:**
-
-    ```python
-    parse_string_style("color: red; background-color: blue; /* comment */")
-    ```
-
-    will result in
-
-    ```python
-    {"color": "red", "background-color": "blue"}
-    ```
-    """
-    # Remove comments
+    """Parse an inline CSS style string into a `{property: value}` dict; CSS comments are stripped."""
     css_text = style_comment_re.sub("", css_text)
 
     ret: StyleDict = {}
 
-    # Split by semicolon, but not inside parentheses
+    # Split by semicolon, but not inside parentheses (e.g. `rgb(0, 0, 0)`).
     for item in list_delimiter_re.split(css_text):
         if item:
             parts = property_delimiter_re.split(item)

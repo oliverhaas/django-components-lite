@@ -10,9 +10,9 @@ if TYPE_CHECKING:
 
 
 def get_component_template(component: "Component") -> Template | None:
-    """Resolve the Template instance for a Component, or None if no template is defined."""
+    """Resolve the Template for a Component, or None if no template is defined."""
     if component.template_file is not None:
-        # Cache the resolved Template on the class - avoids re-loading on every render.
+        # Cache the loaded Template on the class to avoid reloading every render.
         cached = getattr(component.__class__, "_cached_template", None)
         if cached is not None:
             return cached
@@ -27,8 +27,8 @@ def get_component_template(component: "Component") -> Template | None:
 
 
 def _create_template_from_string(component: type["Component"], template_string: str) -> Template:
-    # Build a synthetic Origin so error messages point at the component's source file
-    # rather than `<unknown source>`. Format: `path/to/component.py::ComponentName`.
+    # Synthetic Origin so error messages reference `path/to/component.py::ComponentName`
+    # instead of `<unknown source>`.
     from django.template import Origin
 
     _, _, module_filepath = get_module_info(component)

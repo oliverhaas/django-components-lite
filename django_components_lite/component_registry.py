@@ -20,36 +20,25 @@ TComponent = TypeVar("TComponent", bound="Component")
 
 
 class AlreadyRegisteredError(Exception):
-    """
-    Raised when you try to register a [Component](./api.md#django_components_lite.Component),
-    but it's already registered with given
-    [ComponentRegistry](./api.md#django_components_lite.ComponentRegistry).
-    """
+    """Raised when registering a component name that is already taken in the registry."""
 
 
 class NotRegisteredError(Exception):
-    """
-    Raised when you try to access a [Component](./api.md#django_components_lite.Component),
-    but it's NOT registered with given
-    [ComponentRegistry](./api.md#django_components_lite.ComponentRegistry).
-    """
+    """Raised when accessing a component name that is not registered."""
 
 
-# We store the tags with the components so we can automatically add/remove
-# them from Django's tag Library when a component is (un)registered.
+# Tags are tracked per-entry so we can remove them from the Library on unregister.
 class ComponentRegistryEntry(NamedTuple):
     cls: type["Component"]
     tags: tuple[str, ...]
 
 
-# We keep track of all registries that exist so that, when users want to
-# dynamically resolve component name to component class, they would be able
-# to search across all registries.
+# Track all registries so component names can be resolved across them.
 ALL_REGISTRIES: AllRegistries = []
 
 
 def all_registries() -> list["ComponentRegistry"]:
-    """Get a list of all created [`ComponentRegistry`](./api.md#django_components_lite.ComponentRegistry) instances."""
+    """Return all live `ComponentRegistry` instances."""
     registries: list[ComponentRegistry] = []
     for reg_ref in ALL_REGISTRIES:
         reg = reg_ref()
@@ -59,82 +48,7 @@ def all_registries() -> list["ComponentRegistry"]:
 
 
 class ComponentRegistry:
-    """
-    Manages [components](./api.md#django_components_lite.Component) and makes them available
-    in templates as [`{% comp %}`](./template_tags.md#component) tags.
-
-    ```django
-    {% comp "my_comp" key=value %}
-    {% endcomp %}
-    ```
-
-    To enable a component to be used in a template, the component must be registered with a component registry.
-
-    When you register a component to a registry, behind the scenes the registry
-    automatically adds the component's template tag (e.g. `{% comp %}` to
-    the [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#code-layout).
-    And the opposite happens when you unregister a component - the tag is removed.
-
-    See [Registering components](../concepts/advanced/component_registry.md).
-
-    Args:
-        library (Library, optional): Django\
-            [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#code-layout)\
-            associated with this registry. If omitted, the default Library instance from django_components_lite is used.
-
-    **Notes:**
-
-    - The default registry is available as [`django_components_lite.registry`](./api.md#django_components_lite.registry).
-    - The default registry is used when registering components with [`@register`](./api.md#django_components_lite.register)
-    decorator.
-
-    **Example:**
-
-    ```python
-    # Use with default Library
-    registry = ComponentRegistry()
-
-    # Or a custom one
-    my_lib = Library()
-    registry = ComponentRegistry(library=my_lib)
-
-    # Usage
-    registry.register("button", ButtonComponent)
-    registry.register("card", CardComponent)
-    registry.all()
-    registry.clear()
-    registry.get("button")
-    registry.has("button")
-    ```
-
-    # Using registry to share components
-
-    You can use component registry for isolating or "packaging" components:
-
-    1. Create new instance of `ComponentRegistry` and Library:
-        ```django
-        my_comps = Library()
-        my_comps_reg = ComponentRegistry(library=my_comps)
-        ```
-
-    2. Register components to the registry:
-        ```django
-        my_comps_reg.register("my_button", ButtonComponent)
-        my_comps_reg.register("my_card", CardComponent)
-        ```
-
-    3. In your target project, load the Library associated with the registry:
-        ```django
-        {% load my_comps %}
-        ```
-
-    4. Use the registered components in your templates:
-        ```django
-        {% comp "button" %}
-        {% endcomp %}
-        ```
-
-    """
+    """Maps component names to component classes and exposes them as `{% comp %}` tags."""
 
     def __init__(self, library: Library | None = None) -> None:
         self._registry: dict[str, ComponentRegistryEntry] = {}  # component name -> component_entry mapping
@@ -151,60 +65,29 @@ class ComponentRegistry:
 
     @property
     def library(self) -> Library:
-        """
-        The template tag [`Library`](https://docs.djangoproject.com/en/5.2/howto/custom-template-tags/#code-layout)
-        that is associated with the registry.
-        """
+        """The Django template tag `Library` associated with this registry."""
         # Lazily use the default library if none was passed
         if self._library is not None:
             lib = self._library
         else:
             from django_components_lite.templatetags.component_tags import register as tag_library
 
-            # For the default library, we want to protect our template tags from
-            # being overriden.
-            # On the other hand, if user provided their own Library instance,
-            # it is up to the user to use `mark_protected_tags` if they want
-            # to protect any tags.
+            # Protect built-in tags on the default library only; user-supplied
+            # libraries are left untouched so they can call `mark_protected_tags`
+            # themselves if needed.
             mark_protected_tags(tag_library)
             lib = self._library = tag_library
         return lib
 
     def register(self, name: str, component: type["Component"]) -> None:
-        """
-        Register a [`Component`](./api.md#django_components_lite.Component) class
-        with this registry under the given name.
-
-        A component MUST be registered before it can be used in a template such as:
-        ```django
-        {% comp "my_comp" %}
-        {% endcomp %}
-        ```
-
-        Args:
-            name (str): The name under which the component will be registered. Required.
-            component (Type[Component]): The component class to register. Required.
-
-        **Raises:**
-
-        - [`AlreadyRegisteredError`](./exceptions.md#django_components_lite.AlreadyRegisteredError)
-        if a different component was already registered under the same name.
-
-        **Example:**
-
-        ```python
-        registry.register("button", ButtonComponent)
-        ```
-
-        """
+        """Register `component` under `name`; raises `AlreadyRegisteredError` on conflict."""
         existing_component = self._registry.get(name)
         if existing_component and existing_component.cls.class_id != component.class_id:
             raise AlreadyRegisteredError(f'The component "{name}" has already been registered')
 
         entry = self._register_to_library(name, component)
 
-        # Keep track of which components use which tags, because multiple components may
-        # use the same tag.
+        # Track which components use which tags (multiple components share `comp`/`compc`).
         for tag in entry.tags:
             if tag not in self._tags:
                 self._tags[tag] = set()
@@ -213,36 +96,13 @@ class ComponentRegistry:
         self._registry[name] = entry
 
     def unregister(self, name: str) -> None:
-        """
-        Unregister the [`Component`](./api.md#django_components_lite.Component) class
-        that was registered under the given name.
-
-        Once a component is unregistered, it is no longer available in the templates.
-
-        Args:
-            name (str): The name under which the component is registered. Required.
-
-        **Raises:**
-
-        - [`NotRegisteredError`](./exceptions.md#django_components_lite.NotRegisteredError)
-        if the given name is not registered.
-
-        **Example:**
-
-        ```python
-        # First register component
-        registry.register("button", ButtonComponent)
-        # Then unregister
-        registry.unregister("button")
-        ```
-
-        """
+        """Unregister the component registered under `name`; raises `NotRegisteredError` if missing."""
         # Validate
         self.get(name)
 
         entry = self._registry[name]
 
-        # Unregister each tag from the library if this was the last component using it.
+        # Remove the tag from the library only if no other component still uses it.
         for tag in entry.tags:
             if tag in self._tags and name in self._tags[tag]:
                 self._tags[tag].remove(name)
@@ -254,110 +114,28 @@ class ComponentRegistry:
             else:
                 is_tag_empty = True
 
-            # Only unregister a tag if it's NOT protected and no other component uses it.
             if is_tag_empty and not is_tag_protected(self.library, tag) and tag in self.library.tags:
                 self.library.tags.pop(tag, None)
 
         del self._registry[name]
 
     def get(self, name: str) -> type["Component"]:
-        """
-        Retrieve a [`Component`](./api.md#django_components_lite.Component)
-        class registered under the given name.
-
-        Args:
-            name (str): The name under which the component was registered. Required.
-
-        Returns:
-            Type[Component]: The component class registered under the given name.
-
-        **Raises:**
-
-        - [`NotRegisteredError`](./exceptions.md#django_components_lite.NotRegisteredError)
-          if the given name is not registered.
-
-        **Example:**
-
-        ```python
-        # First register component
-        registry.register("button", ButtonComponent)
-        # Then get
-        registry.get("button")
-        # > ButtonComponent
-        ```
-
-        """
+        """Return the component class registered under `name`; raises `NotRegisteredError` if missing."""
         if name not in self._registry:
             raise NotRegisteredError(f'The component "{name}" is not registered')
 
         return self._registry[name].cls
 
     def has(self, name: str) -> bool:
-        """
-        Check if a [`Component`](./api.md#django_components_lite.Component)
-        class is registered under the given name.
-
-        Args:
-            name (str): The name under which the component was registered. Required.
-
-        Returns:
-            bool: `True` if the component is registered, `False` otherwise.
-
-        **Example:**
-
-        ```python
-        # First register component
-        registry.register("button", ButtonComponent)
-        # Then check
-        registry.has("button")
-        # > True
-        ```
-
-        """
+        """Return True if a component is registered under `name`."""
         return name in self._registry
 
     def all(self) -> dict[str, type["Component"]]:
-        """
-        Retrieve all registered [`Component`](./api.md#django_components_lite.Component) classes.
-
-        Returns:
-            Dict[str, Type[Component]]: A dictionary of component names to component classes
-
-        **Example:**
-
-        ```python
-        # First register components
-        registry.register("button", ButtonComponent)
-        registry.register("card", CardComponent)
-        # Then get all
-        registry.all()
-        # > {
-        # >   "button": ButtonComponent,
-        # >   "card": CardComponent,
-        # > }
-        ```
-
-        """
+        """Return a `{name: component_class}` dict of all registered components."""
         return {key: entry.cls for key, entry in self._registry.items()}
 
     def clear(self) -> None:
-        """
-        Clears the registry, unregistering all components.
-
-        Example:
-
-        ```python
-        # First register components
-        registry.register("button", ButtonComponent)
-        registry.register("card", CardComponent)
-        # Then clear
-        registry.clear()
-        # Then get all
-        registry.all()
-        # > {}
-        ```
-
-        """
+        """Unregister all components."""
         all_comp_names = list(self._registry.keys())
         for comp_name in all_comp_names:
             self.unregister(comp_name)
@@ -375,8 +153,7 @@ class ComponentRegistry:
 
         registry = self
 
-        # Define a tag function that pre-processes the tokens, extracting
-        # the component name and passing the rest to the actual tag function.
+        # Build a tag function that strips the component name token before delegating.
         def _make_tag_fn(start_tag: str, end_tag: str | None) -> Callable[[Parser, Token], ComponentNode]:
             def tag_fn(parser: Parser, token: Token) -> ComponentNode:
                 bits = token.split_contents()
@@ -413,35 +190,8 @@ class ComponentRegistry:
         return ComponentRegistryEntry(cls=component, tags=("comp", "compc"))
 
 
-# This variable represents the global component registry
 registry: ComponentRegistry = ComponentRegistry()
-"""
-The default and global [component registry](./api.md#django_components_lite.ComponentRegistry).
-Use this instance to directly register or remove components:
-
-See [Registering components](../concepts/advanced/component_registry.md).
-
-```python
-# Register components
-registry.register("button", ButtonComponent)
-registry.register("card", CardComponent)
-
-# Get single
-registry.get("button")
-
-# Get all
-registry.all()
-
-# Check if component is registered
-registry.has("button")
-
-# Unregister single
-registry.unregister("button")
-
-# Unregister all
-registry.clear()
-```
-"""
+"""The default global `ComponentRegistry`."""
 
 # NOTE: Aliased so that the arg to `@register` can also be called `registry`
 _the_registry = registry
@@ -454,47 +204,7 @@ def register(
     [type[TComponent]],
     type[TComponent],
 ]:
-    """
-    Class decorator for registering a [component](./#django_components_lite.Component)
-    to a [component registry](./#django_components_lite.ComponentRegistry).
-
-    See [Registering components](../concepts/advanced/component_registry.md).
-
-    Args:
-        name (str): Registered name. This is the name by which the component will be accessed\
-            from within a template when using the [`{% comp %}`](./template_tags.md#component) tag. Required.
-        registry (ComponentRegistry, optional): Specify the [registry](./#django_components_lite.ComponentRegistry)\
-            to which to register this component. If omitted, component is registered to the default registry.
-
-    Raises:
-        AlreadyRegisteredError: If there is already a component registered under the same name.
-
-    **Examples**:
-
-    ```python
-    from django_components_lite import Component, register
-
-    @register("my_component")
-    class MyComponent(Component):
-        ...
-    ```
-
-    Specifing [`ComponentRegistry`](./#django_components_lite.ComponentRegistry) the component
-    should be registered to by setting the `registry` kwarg:
-
-    ```python
-    from django.template import Library
-    from django_components_lite import Component, ComponentRegistry, register
-
-    my_lib = Library()
-    my_reg = ComponentRegistry(library=my_lib)
-
-    @register("my_component", registry=my_reg)
-    class MyComponent(Component):
-        ...
-    ```
-
-    """
+    """Class decorator that registers a `Component` under `name` (default registry unless given)."""
     if registry is None:
         registry = _the_registry
 

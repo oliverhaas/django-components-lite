@@ -1,9 +1,4 @@
-"""
-Simplified JS/CSS dependency management for django-components.
-
-Components' JS/CSS files are served via Django's static files system.
-Each component prepends its own <link>/<script> tags to its rendered HTML.
-"""
+"""Build per-component <link>/<script> dependency tags from JS/CSS file paths."""
 
 from typing import TYPE_CHECKING
 
@@ -14,12 +9,10 @@ if TYPE_CHECKING:
 
 
 def build_dependency_tags(comp_cls: type["Component"]) -> str:
-    """
-    Build <link> and <script> tags for a component's JS/CSS files.
+    """Return cached `<link>`/`<script>` tags for the component's CSS and JS files.
 
-    The result depends only on the class, so it's cached on the class itself.
-    Caching happens on first render (not at class creation), because Django's
-    ``static()`` may not be ready at import time.
+    Cached on first render rather than at class creation, since `static()` may not be
+    ready at import time.
     """
     cached = comp_cls.__dict__.get("_dep_tags")
     if cached is not None:

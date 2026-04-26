@@ -38,7 +38,7 @@ def no_regex_match(string: str, patterns: list[re.Pattern]) -> bool:
 
 # See https://stackoverflow.com/a/2020083/9788634
 def get_import_path(cls_or_fn: type[Any]) -> str:
-    """Get the full import path for a class or a function, e.g. `"path.to.MyClass"`"""
+    """Full import path for a class or function, e.g. `"path.to.MyClass"`."""
     module = cls_or_fn.__module__
     if module == "builtins":
         return cls_or_fn.__qualname__  # avoid outputs like 'builtins.str'
@@ -48,7 +48,7 @@ def get_import_path(cls_or_fn: type[Any]) -> str:
 def get_module_info(
     cls_or_fn: type[Any] | Callable[..., Any],
 ) -> tuple[ModuleType | None, str | None, str | None]:
-    """Get the module, module name and module file path where the class or function is defined."""
+    """Return `(module, module_name, file_path)` for where the class/function is defined."""
     module_name: str | None = getattr(cls_or_fn, "__module__", None)
 
     if module_name:
@@ -80,14 +80,14 @@ def default[T, U](val: T | None, default: U | Callable[[], U] | type[T], factory
 
 
 def get_last_index(lst: list, key: Callable[[Any], bool]) -> int | None:
-    """Get the index of the last item in the list that satisfies the key"""
+    """Index of the last item in `lst` for which `key(item)` is true, or None."""
     for index, item in enumerate(reversed(lst)):
         if key(item):
             return len(lst) - 1 - index
     return None
 
 
-# Convert Component class to something like `TableComp_a91d03`
+# Produce a stable per-class identifier like `TableComp_a91d03`.
 def hash_comp_cls(comp_cls: type["Component"]) -> str:
     full_name = get_import_path(comp_cls)
     name_hash = md5(full_name.encode()).hexdigest()[0:6]  # noqa: S324

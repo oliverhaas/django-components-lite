@@ -1,6 +1,5 @@
-"""Main package for Django Components."""
+"""django-components-lite public API."""
 
-# Public API
 # isort: off
 from django_components_lite.app_settings import ComponentsSettings
 from django_components_lite.attributes import format_attributes, merge_attributes

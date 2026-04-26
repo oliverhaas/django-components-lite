@@ -10,39 +10,11 @@ from django_components_lite.util.logger import logger
 
 
 def get_component_dirs(include_apps: bool = True) -> list[Path]:
+    """Return all directories that may contain component files.
+
+    Combines `COMPONENTS.dirs` with `<app>/<COMPONENTS.app_dirs>` for each installed app.
+    `COMPONENTS.dirs` entries must be absolute paths; `BASE_DIR` is required.
     """
-    Get directories that may contain component files.
-
-    This is the heart of all features that deal with filesystem and file lookup.
-    Autodiscovery, Django template resolution, static file resolution - They all use this.
-
-    Args:
-        include_apps (bool, optional): Include directories from installed Django apps.\
-            Defaults to `True`.
-
-    Returns:
-        List[Path]: A list of directories that may contain component files.
-
-    `get_component_dirs()` searches for dirs set in
-    [`COMPONENTS.dirs`](../settings#django_components_lite.app_settings.ComponentsSettings.dirs)
-    settings. If none set, defaults to searching for a `"components"` app.
-
-    In addition to that, also all installed Django apps are checked whether they contain
-    directories as set in
-    [`COMPONENTS.app_dirs`](../settings#django_components_lite.app_settings.ComponentsSettings.app_dirs)
-    (e.g. `[app]/components`).
-
-    **Notes:**
-
-    - Paths that do not point to directories are ignored.
-
-    - `BASE_DIR` setting is required.
-
-    - The paths in [`COMPONENTS.dirs`](../settings#django_components_lite.app_settings.ComponentsSettings.dirs)
-        must be absolute paths.
-
-    """
-    # Allow to configure from settings which dirs should be checked for components
     component_dirs = app_settings.DIRS
 
     logger.debug(
@@ -50,7 +22,6 @@ def get_component_dirs(include_apps: bool = True) -> list[Path]:
         + "\n".join([f" - {d!s}" for d in component_dirs]),
     )
 
-    # Add `[app]/[APP_DIR]` to the directories. This is, by default `[app]/components`
     app_paths: list[Path] = []
     if include_apps:
         for conf in apps.get_app_configs():
@@ -61,9 +32,8 @@ def get_component_dirs(include_apps: bool = True) -> list[Path]:
 
     directories: set[Path] = set(app_paths)
 
-    # Validate and add other values from the config
     for component_dir in component_dirs:
-        # Consider tuples for STATICFILES_DIRS (See #489)
+        # Accept `(prefix, path)` tuples for STATICFILES_DIRS compatibility (#489).
         # See https://docs.djangoproject.com/en/5.2/ref/settings/#prefixes-optional
         if isinstance(component_dir, (tuple, list)):
             component_dir = component_dir[1]  # noqa: PLW2901
@@ -87,39 +57,18 @@ def get_component_dirs(include_apps: bool = True) -> list[Path]:
 
 
 class ComponentFileEntry(NamedTuple):
-    """Result returned by [`get_component_files()`](../api#django_components_lite.get_component_files)."""
+    """A component file with both its filesystem path and python dot path."""
 
     dot_path: str
-    """The python import path for the module. E.g. `app.components.mycomp`"""
+    """Python import path, e.g. `app.components.mycomp`."""
     filepath: Path
-    """The filesystem path to the module. E.g. `/path/to/project/app/components/mycomp.py`"""
+    """Filesystem path, e.g. `/path/to/project/app/components/mycomp.py`."""
 
 
 def get_component_files(suffix: str | None = None) -> list[ComponentFileEntry]:
-    """
-    Search for files within the component directories (as defined in
-    [`get_component_dirs()`](../api#django_components_lite.get_component_dirs)).
+    """Find files under `get_component_dirs()`, optionally filtered by suffix (e.g. `.py`).
 
-    Requires `BASE_DIR` setting to be set.
-
-    Subdirectories and files starting with an underscore `_` (except `__init__.py`) are ignored.
-
-    Args:
-        suffix (Optional[str], optional): The suffix to search for. E.g. `.py`, `.js`, `.css`.\
-            Defaults to `None`, which will search for all files.
-
-    Returns:
-        List[ComponentFileEntry] A list of entries that contain both the filesystem path and \
-            the python import path (dot path).
-
-    **Example:**
-
-    ```python
-    from django_components_lite import get_component_files
-
-    modules = get_component_files(".py")
-    ```
-
+    Files and subdirectories starting with `_` are skipped (except `__init__.py`).
     """
     search_glob = f"**/*{suffix}" if suffix else "**/*"
 
@@ -128,35 +77,22 @@ def get_component_files(suffix: str | None = None) -> list[ComponentFileEntry]:
 
     project_root = settings.BASE_DIR if hasattr(settings, "BASE_DIR") and settings.BASE_DIR else Path.cwd()
 
-    # NOTE: We handle dirs from `COMPONENTS.dirs` and from individual apps separately.
     modules: list[ComponentFileEntry] = []
 
-    # First let's handle the dirs from `COMPONENTS.dirs`
-    #
-    # Because for dirs in `COMPONENTS.dirs`, we assume they will be nested under `BASE_DIR`,
-    # and that `BASE_DIR` is the current working dir (CWD). So the path relatively to `BASE_DIR`
-    # is ALSO the python import path.
+    # `COMPONENTS.dirs` are assumed to live under `BASE_DIR` (== CWD), so the
+    # path relative to `BASE_DIR` doubles as the python import path.
     for filepath in component_filepaths:
         module_path = _filepath_to_python_module(filepath, project_root, None)
-        # Ignore files starting with dot `.` or files in dirs that start with dot.
-        #
-        # If any of the parts of the path start with a dot, e.g. the filesystem path
-        # is `./abc/.def`, then this gets converted to python module as `abc..def`
-        #
-        # NOTE: This approach also ignores files:
-        #   - with two dots in the middle (ab..cd.py)
-        #   - an extra dot at the end (abcd..py)
-        #   - files outside of the parent component (../abcd.py).
-        # But all these are NOT valid python modules so that's fine.
+        # `..` in the dot path means a dot-prefixed segment (e.g. `./abc/.def` -> `abc..def`)
+        # or a file outside the parent — none of which are valid python modules.
         if ".." in module_path:
             continue
 
         entry = ComponentFileEntry(dot_path=module_path, filepath=filepath)
         modules.append(entry)
 
-    # For for apps, the directories may be outside of the project, e.g. in case of third party
-    # apps. So we have to resolve the python import path relative to the package name / the root
-    # import path for the app.
+    # App dirs may live outside the project (e.g. third-party apps), so resolve
+    # the import path relative to the app's own root module name.
     # See https://github.com/django-components/django-components/issues/669
     for conf in apps.get_app_configs():
         for app_dir in app_settings.APP_DIRS:
@@ -177,36 +113,22 @@ def _filepath_to_python_module(
     root_fs_path: str | Path,
     root_module_path: str | None,
 ) -> str:
-    """
-    Derive python import path from the filesystem path.
-
-    Example:
-    - If project root is `/path/to/project`
-    - And file_path is `/path/to/project/app/components/mycomp.py`
-    - Then the path relative to project root is `app/components/mycomp.py`
-    - Which we then turn into python import path `app.components.mycomp`
-
-    """
+    """Convert a filesystem path under `root_fs_path` into a python dot path."""
     path_cls = PureWindowsPath if os.name == "nt" else PurePosixPath
 
     rel_path = path_cls(file_path).relative_to(path_cls(root_fs_path))
     rel_path_parts = rel_path.with_suffix("").parts
     module_name = ".".join(rel_path_parts)
 
-    # Combine with the base module path
     full_module_name = f"{root_module_path}.{module_name}" if root_module_path else module_name
-    return full_module_name.removesuffix(".__init__")  # Remove the trailing `.__init__`
+    return full_module_name.removesuffix(".__init__")
 
 
 def _search_dirs(dirs: list[Path], search_glob: str) -> list[Path]:
-    """
-    Search the directories for the given glob pattern. Glob search results are returned
-    as a flattened list.
-    """
+    """Glob each directory and return a flat list of matches, skipping `_`-prefixed paths."""
     matched_files: list[Path] = []
     for directory in dirs:
         for path in Path(directory).rglob(search_glob):
-            # Skip any subdirectory or file (under the top-level directory) that starts with an underscore
             rel_dir_parts = list(path.relative_to(directory).parts)
             name_part = rel_dir_parts.pop()
             if any(part.startswith("_") for part in rel_dir_parts):
