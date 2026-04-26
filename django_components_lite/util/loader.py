@@ -139,5 +139,3 @@ def _search_dirs(dirs: list[Path], search_glob: str) -> list[Path]:
             matched_files.append(path)
 
     return matched_files
-
-

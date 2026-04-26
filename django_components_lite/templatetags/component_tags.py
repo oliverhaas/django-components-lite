@@ -8,6 +8,7 @@ from django_components_lite.slots import FillNode, SlotNode
 # See https://docs.djangoproject.com/en/5.2/howto/custom-template-tags
 register = django.template.Library()
 
+
 class ComponentScNode(ComponentNode):
     """Self-closing form of `{% comp %}`: `{% compc "x" / %}`. No body, no slots."""
 
