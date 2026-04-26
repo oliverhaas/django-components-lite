@@ -1,0 +1,1557 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Lightweight reusable template components for Django.">
+      
+      
+      
+        <link rel="canonical" href="https://oliverhaas.github.io/django-components-lite/0.5.1/reference/changelog/">
+      
+      
+        <link rel="prev" href="../api/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Changelog - django-components-lite</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="django-components-lite" class="md-header__button md-logo" aria-label="django-components-lite" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            django-components-lite
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/oliverhaas/django-components-lite" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    oliverhaas/django-components-lite
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="django-components-lite" class="md-nav__button md-logo" aria-label="django-components-lite" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    django-components-lite
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/oliverhaas/django-components-lite" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    oliverhaas/django-components-lite
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/slots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#051" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-internal-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (internal cleanup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#050" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-internal-cleanup_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (internal cleanup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#041" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.4.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.4.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (public API)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010a1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0a1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0a1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed-from-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed from upstream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#051" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-internal-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (internal cleanup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#050" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-internal-cleanup_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (internal cleanup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#041" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.4.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.4.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed (public API)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010a1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0a1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0a1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed-from-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed from upstream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="051">0.5.1<a class="headerlink" href="#051" title="Permanent link">&para;</a></h2>
+<p>Production-readiness pass. No breaking changes.</p>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ComponentRegistry.unregister()</code> now removes both the <code>comp</code> and <code>compc</code> tags from the Library (only <code>comp</code> was tracked, so <code>compc</code> leaked).</li>
+<li><code>_extends_context_reset</code> now restores <code>extends_context</code> in a <code>finally</code> block, so a raised exception during fill extraction no longer leaks state across renders.</li>
+<li>Type-checker friendliness: <code>ComponentNode.end_tag</code> is annotated <code>ClassVar[str | None]</code> so subclasses (e.g. <code>ComponentScNode</code>) can set it to <code>None</code> without tripping mypy.</li>
+<li><code>Slot._resolve_slot_context</code> no longer accepts an unused <code>component</code> parameter.</li>
+<li><code>FillNode</code> validation now consistently raises <code>TemplateSyntaxError</code> (was <code>RuntimeError</code> for three checks).</li>
+</ul>
+<h3 id="removed-internal-cleanup">Removed (internal cleanup)<a class="headerlink" href="#removed-internal-cleanup" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Dropped <code>ComponentRegistry.__del__</code> and the <code>weakref.finalize</code> callback on the component class — both fragile or never firing in practice.</li>
+<li>Dropped ~250 LOC of dead helpers and unused branches: <code>template.load_component_template</code>, <code>_STRATEGY_CONTEXT_KEY</code> / <code>DJC_DEPS_STRATEGY</code>, the unused <code>_template</code> and <code>_signature</code> class attributes, <code>name_escape_re</code>, the <code>app_settings.Dynamic[T]</code> wrapper, and ten unused helpers in <code>util/misc.py</code> (<code>snake_to_pascal</code>, <code>is_nonempty_str</code>, <code>is_glob</code>, <code>flatten</code>, <code>to_dict</code>, <code>format_url</code>, <code>format_as_ascii_table</code>, <code>is_generator</code>, <code>convert_class_to_namedtuple</code>, <code>get_index</code>).</li>
+<li><code>playwright</code> removed from dev dependencies; CI no longer installs Chromium.</li>
+</ul>
+<h3 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>finders.py</code>: cache compiled regex patterns on the (immutable) settings tuple so <code>collectstatic</code> doesn't rebuild them per file.</li>
+<li>Tests: drop the per-test <code>gc.collect()</code> in <code>conftest.py</code>; suite runs ~7× faster (~3.4s → ~0.5s).</li>
+</ul>
+<h3 id="docs">Docs<a class="headerlink" href="#docs" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Trim docstrings and comments package-wide. Roughly 2300 lines removed (-43% LOC) by collapsing inherited multi-paragraph upstream docstrings to one or two sentences and dropping references to features that no longer exist in this fork.</li>
+<li>Quickstart: move <code>{% load component_tags %}</code> to the top of the template.</li>
+<li>Document <code>{% compc %}</code>, <code>{% html_attrs %}</code>, <code>format_attributes</code>, and <code>merge_attributes</code> in <code>docs/reference/api.md</code>.</li>
+<li>Ship <code>tests/</code> in the sdist so downstream packagers can run them.</li>
+</ul>
+<h2 id="050">0.5.0<a class="headerlink" href="#050" title="Permanent link">&para;</a></h2>
+<p>Lean-out release. Roughly 870 LOC removed (~12% of the package).</p>
+<h3 id="breaking">Breaking<a class="headerlink" href="#breaking" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Removed the <code>tag_name</code> and <code>tag_name_sc</code> settings. The component tag names are now fixed at <code>{% comp %}</code> / <code>{% endcomp %}</code> / <code>{% compc %}</code> and cannot be configured.</li>
+<li>Removed the <code>multiline_tags</code> setting and its underlying monkeypatch of <code>django.template.base.tag_re</code>. Component tag invocations must now fit on a single line. If you need multi-line tag args, install the patch yourself in your app config:</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">django.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">base</span><span class="o">.</span><span class="n">tag_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">tag_re</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+</span></code></pre></div>
+<ul>
+<li>Removed nested-tag-in-string-arg syntax. Calls like <code>{% comp "x" desc="{% lorem 3 w %}" / %}</code> are no longer supported. Workaround:</li>
+</ul>
+<div class="language-django highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cp">{%</span> <span class="k">lorem</span> <span class="m">3</span> <span class="nv">w</span> <span class="k">as</span> <span class="nv">desc</span> <span class="cp">%}</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">{%</span> <span class="k">comp</span> <span class="s2">&quot;x&quot;</span> <span class="nv">desc</span><span class="o">=</span><span class="nv">desc</span> <span class="o">/</span> <span class="cp">%}</span>
+</span></code></pre></div>
+<p>The custom template parser (<code>util/template_parser.py</code>, ~220 LOC) and the associated <code>compile_nodelist</code> monkeypatch are gone.</p>
+<ul>
+<li>Removed <code>RegistrySettings</code>. It was an empty <code>NamedTuple</code> reserved for future use; the <code>settings</code> parameter on <code>ComponentRegistry.__init__</code> is also gone.</li>
+<li>Removed <code>BaseNode.node_id</code> (and the <code>node_id</code> argument it accepted). It was only used for <code>__repr__</code> and a now-removed extension hook.</li>
+<li>Removed <code>BaseNode.template_component</code> (and <code>ComponentNode.template_component</code>). The field exposed the <code>Component</code> class that owned a tag's template, used only by user code via <code>Slot.fill_node.template_component</code> for introspection. Internal code never read it. Together with the supporting <code>Origin.component_cls</code> plumbing, the <code>cache_component_template_file</code> registry, and the <code>monkeypatch_template_init</code> patch, this was ~150 LOC of infrastructure for a niche, observation-only API.</li>
+</ul>
+<h3 id="removed-internal-cleanup_1">Removed (internal cleanup)<a class="headerlink" href="#removed-internal-cleanup_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>util/cache.py</code>: hand-rolled LRU cache, never imported anywhere.</li>
+<li><code>util/nanoid.py</code> and <code>constants.py</code>: only used by <code>node_id</code>.</li>
+<li>The <code>monkeypatch_inclusion_node</code> patches that set <code>_DJC_INSIDE_INCLUSION_TAG</code>. The flag was set but never read after the JS/CSS dependency system was removed.</li>
+<li>The <code>monkeypatch_template_cls</code> patch and the entire <code>util/django_monkeypatch.py</code> module: only existed to support <code>template_component</code>. Django's <code>Template</code> class is no longer monkeypatched.</li>
+<li>Stale <code>PROTECTED_TAGS</code> entries (<code>component_css_dependencies</code>, <code>component_js_dependencies</code>).</li>
+</ul>
+<h2 id="041">0.4.1<a class="headerlink" href="#041" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Component subclasses with <code>TYPE_CHECKING</code>-guarded forward-reference annotations on <code>get_context_data</code> no longer crash at class-creation time on Python 3.14. The positional-parameter introspection now reads <code>func.__code__</code> directly instead of going through <code>inspect.signature</code>, which on 3.14 eagerly evaluates <code>__annotate__</code> (PEP 649) and raises <code>NameError</code> for unresolved names. The fix is also version-agnostic and slightly faster.</li>
+</ul>
+<h2 id="040">0.4.0<a class="headerlink" href="#040" title="Permanent link">&para;</a></h2>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Positional tag arguments are now routed to named parameters on <code>Component.get_context_data</code>. <code>{% comp "form_input_label" "Email" "email" %}</code> now binds cleanly to <code>def get_context_data(self, label, for_)</code>. Mixed positional + keyword args follow Python function-call semantics: passing the same parameter both ways raises <code>TypeError</code>, as does exceeding the declared positional count. Overrides that declare <code>*args</code> receive positional tag args natively. The base <code>def get_context_data(self, **kwargs)</code> is unchanged; positional args remain accessible via <code>self.args</code>.</li>
+</ul>
+<h2 id="030">0.3.0<a class="headerlink" href="#030" title="Permanent link">&para;</a></h2>
+<h3 id="breaking_1">Breaking<a class="headerlink" href="#breaking_1" title="Permanent link">&para;</a></h3>
+<p>The default component tag names changed: <code>{% component %}</code> / <code>{% endcomponent %}</code> / <code>{% componentsc %}</code> are now <code>{% comp %}</code> / <code>{% endcomp %}</code> / <code>{% compc %}</code>. If you want the old names back, add to your Django settings:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">COMPONENTS</span> <span class="o">=</span> <span class="n">ComponentsSettings</span><span class="p">(</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;component&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">tag_name_sc</span><span class="o">=</span><span class="s2">&quot;componentsc&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tag_name</code> and <code>tag_name_sc</code> settings to configure the component tag names. The end tag is always derived as <code>f"end{tag_name}"</code>. (Removed again in 0.5.0.)</li>
+</ul>
+<h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Component.get_context_data</code> now declared as <code>Any</code> at the class body so subclass overrides with narrowed signatures (e.g. <code>def get_context_data(self, *, user): ...</code>) don't trigger mypy's <code>[override]</code> Liskov-substitution check. Runtime behavior is unchanged.</li>
+</ul>
+<h2 id="020">0.2.0<a class="headerlink" href="#020" title="Permanent link">&para;</a></h2>
+<h3 id="performance_1">Performance<a class="headerlink" href="#performance_1" title="Permanent link">&para;</a></h3>
+<p>Render pipeline rewritten around a flat <code>Context</code> instead of stacked <code>context.update()</code> pushes. On a 3000-component props-only page, per-component overhead dropped from ~30 µs to ~5.7 µs, bringing total render time to within 1.57x of plain <code>{% include %}</code> (was 3.49x) and 1.37x of Django's <code>@register.inclusion_tag</code> (was ~3x).</p>
+<p>Key changes:</p>
+<ul>
+<li>Build the render <code>Context</code> flat: <code>template_data</code>, context processors, and internal keys merged into the base dict, no per-render stack pushes.</li>
+<li>Skip the <code>context.new()</code> / <code>copy.copy()</code> path when creating the isolated context; construct the <code>Context</code> directly.</li>
+<li>Skip the outer-context snapshot when no slots are passed (filled slots are the only consumer).</li>
+<li>Skip <code>resolve_fills</code> when the <code>{% comp %}</code> tag has no body.</li>
+<li>Skip <code>normalize_slot_fills</code> when no slots are passed.</li>
+<li>Skip <code>context_processors_data</code> property access when no request is set.</li>
+<li>Inline the <code>component_error_message</code> context manager as a direct try/except.</li>
+<li>Drop the inner <code>snapshot_context</code> call (leftover from the removed flat-queue nested-render machinery).</li>
+<li>Dedupe <code>_get_parent_component_context</code> and <code>_get_component_name</code> lookups.</li>
+</ul>
+<h3 id="removed-public-api">Removed (public API)<a class="headerlink" href="#removed-public-api" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Component.on_render()</code> overridable hook - the template is rendered directly.</li>
+<li><code>ComponentVars</code> class and the <code>component_vars</code> context key. Check slot presence via <code>'name' in self.slots</code> in Python instead of <code>{% if component_vars.slots.name %}</code>.</li>
+<li><code>prepare_component_template</code> / <code>_maybe_bind_template</code> helpers (internal, exported via <code>template.py</code>).</li>
+</ul>
+<h2 id="010a1">0.1.0a1<a class="headerlink" href="#010a1" title="Permanent link">&para;</a></h2>
+<p>Initial release. Forked from <a href="https://github.com/django-components/django-components">django-components</a> v0.143.0.</p>
+<h3 id="removed-from-upstream">Removed from upstream<a class="headerlink" href="#removed-from-upstream" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Extension system</li>
+<li>Built-in components (DynamicComponent, ErrorFallback)</li>
+<li>Component caching</li>
+<li>Provide/Inject system (<code>inject()</code> method, <code>{% provide %}</code> tag)</li>
+<li>Template expressions</li>
+<li>Management commands</li>
+<li>JS/CSS data methods and dependency management</li>
+<li>Type validation (Args/Kwargs/Slots/TemplateData)</li>
+<li><code>on_render()</code> generator system and deferred rendering</li>
+<li><code>context_behavior</code> setting (always isolated)</li>
+<li>Tag formatters</li>
+<li>Component views and URLs</li>
+<li><code>libraries</code> setting and <code>import_libraries()</code> function</li>
+<li><code>reload_on_file_change</code> setting</li>
+<li>All deprecated setting aliases (<code>debug_highlight_components</code>, <code>debug_highlight_slots</code>, <code>dynamic_component_name</code>, <code>template_cache_size</code>, <code>reload_on_template_change</code>, <code>forbidden_static_files</code>)</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Renamed package to <code>django-components-lite</code> (import: <code>django_components_lite</code>)</li>
+<li>Python 3.12+ and Django 5.2+ only</li>
+<li>Switched build system from setuptools to hatchling</li>
+<li>Switched from pip/tox to uv</li>
+<li>Moved source from <code>src/</code> to flat layout</li>
+<li>Moved <code>sampleproject/</code> to <code>examples/simple/</code></li>
+<li>Rewrote documentation from scratch</li>
+<li>Simplified CI workflows</li>
+<li>Automatic tagging and PyPI publishing on version bump</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.sections", "navigation.expand", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
