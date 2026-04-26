@@ -80,9 +80,6 @@ class NodeMeta(type):
         validation_params = validation_params[2:]
         validation_signature = signature.replace(parameters=validation_params)
 
-        # NOTE: This is used for creating docs by `_format_tag_signature()` in `docs/scripts/reference.py`
-        cls._signature = validation_signature
-
         @functools.wraps(orig_render)
         def wrapper_render(self: "BaseNode", context: Context) -> str:
             # Resolve FilterExpressions to actual values

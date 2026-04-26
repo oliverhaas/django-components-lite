@@ -48,12 +48,9 @@ class ComponentsFileSystemFinder(BaseFinder):
         # Maps dir paths to an appropriate storage instance
         self.storages: dict[str, FileSystemStorage] = {}
         for root in component_dirs:
-            if isinstance(root, (list, tuple)):
-                prefix, root = root  # noqa: PLW2901
-            else:
-                prefix = ""
-            if (prefix, root) not in self.locations:
-                self.locations.append((prefix, root))
+            entry = ("", root)
+            if entry not in self.locations:
+                self.locations.append(entry)
         for prefix, root in self.locations:
             filesystem_storage = FileSystemStorage(location=root)
             filesystem_storage.prefix = prefix

@@ -9,7 +9,6 @@ and the list of all internal keys that we define on the `Context` object.
 from django.template import Context
 
 _COMPONENT_CONTEXT_KEY = "_DJC_COMPONENT_CTX"
-_STRATEGY_CONTEXT_KEY = "DJC_DEPS_STRATEGY"
 
 # Django's Context._reset_dicts builds this dict fresh every __init__.
 # We hand it in pre-built so every context we create shares the same object.

@@ -12,7 +12,7 @@ from typing import (
 from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 
 from django.http import HttpRequest, HttpResponse
-from django.template.base import FilterExpression, NodeList, Parser, Template, Token
+from django.template.base import FilterExpression, NodeList, Parser, Token
 from django.template.context import Context, RequestContext
 from django.utils.safestring import mark_safe
 
@@ -437,15 +437,6 @@ class Component(metaclass=ComponentMeta):
     Unique ID of the component class, e.g. `MyComponent_ab01f2`.
 
     This is derived from the component class' module import path, e.g. `path.to.my.MyComponent`.
-    """
-
-    _template: Template | None = None
-    """
-    Cached [`Template`](https://docs.djangoproject.com/en/5.2/ref/templates/api/#django.template.Template)
-    instance for the [`Component`](../api#django_components_lite.Component),
-    created from
-    [`Component.template`](#django_components_lite.Component.template) or
-    [`Component.template_file`](#django_components_lite.Component.template_file).
     """
 
     do_not_call_in_templates: ClassVar[bool] = True

@@ -9,18 +9,6 @@ if TYPE_CHECKING:
     from django_components_lite.component import Component
 
 
-def load_component_template(
-    component_cls: type["Component"],
-    filepath: str | None = None,
-    content: str | None = None,
-) -> Template:
-    if filepath is not None:
-        return _load_django_template(filepath)
-    if content is not None:
-        return _create_template_from_string(component_cls, content)
-    raise ValueError("Either `filepath` or `content` must be provided.")
-
-
 def get_component_template(component: "Component") -> Template | None:
     """Resolve the Template instance for a Component, or None if no template is defined."""
     if component.template_file is not None:

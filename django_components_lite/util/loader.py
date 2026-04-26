@@ -219,10 +219,3 @@ def _search_dirs(dirs: list[Path], search_glob: str) -> list[Path]:
     return matched_files
 
 
-def resolve_file(filepath: str, dirs: list[Path] | None = None) -> Path | None:
-    dirs = dirs if dirs is not None else get_component_dirs()
-    for directory in dirs:
-        full_path = Path(directory) / filepath
-        if full_path.exists():
-            return full_path
-    return None

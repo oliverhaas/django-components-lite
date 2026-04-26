@@ -1,5 +1,4 @@
 import difflib
-import re
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -440,9 +439,6 @@ class SlotFallback:
     # Render the slot when the template coerces SlotFallback to string
     def __str__(self) -> str:
         return mark_safe(self._slot.nodelist.render(self._context))  # noqa: S308
-
-
-name_escape_re = re.compile(r"[^\w]")
 
 
 class SlotNode(BaseNode):
@@ -1426,8 +1422,7 @@ def _nodelist_to_slot(
         # Thus, get_template_data will overshadow these on conflict.
         context.dicts.insert(index_of_last_component_layer, extra_context or {})
 
-        with context.push({"DJC_DEPS_STRATEGY": "ignore"}):
-            rendered = template.render(context)
+        rendered = template.render(context)
 
         # After the rendering is done, remove the `extra_context` from the context stack
         context.dicts.pop(index_of_last_component_layer)
