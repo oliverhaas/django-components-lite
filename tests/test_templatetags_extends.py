@@ -76,7 +76,7 @@ class TestExtendsCompat:
                 {% endcomp %}
             {% endblock %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -125,7 +125,7 @@ class TestExtendsCompat:
                 {% endcomp %}
             {% endblock %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -192,7 +192,7 @@ class TestExtendsCompat:
             {% endblock %}
         """
         template = Template(template_str)
-        rendered = template.render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = template.render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -258,7 +258,7 @@ class TestExtendsCompat:
                 {% endcomp %}
             {% endblock %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -310,7 +310,7 @@ class TestExtendsCompat:
             </body>
             </html>
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -357,7 +357,7 @@ class TestExtendsCompat:
             </body>
             </html>
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -408,7 +408,7 @@ class TestExtendsCompat:
                 {% endcomp %}
             {% endblock %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -452,7 +452,7 @@ class TestExtendsCompat:
                 {% compc "extended_component" %}
             {% endblock %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
 
         expected = """
             <!DOCTYPE html>
@@ -470,7 +470,7 @@ class TestExtendsCompat:
         assertHTMLEqual(rendered, expected)
 
         # second rendering after cache built
-        rendered_2 = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered_2 = Template(template).render(Context())
 
         expected_2 = """
             <!DOCTYPE html>
@@ -487,10 +487,6 @@ class TestExtendsCompat:
         """
         assertHTMLEqual(rendered_2, expected_2)
 
-    # In this case, `{% include %}` is NOT nested inside a `{% comp %}` tag.
-    # We need to ensure that the component inside the `{% include %}` is rendered as if with deps_strategy="ignore",
-    # so the parent template decides how to render the JS/CSS.
-    # See https://github.com/django-components/django-components/issues/1296
     def test_component_with_media_inside_include(self):
         registry.register("test_component", gen_component_inside_include())
 
@@ -503,7 +499,6 @@ class TestExtendsCompat:
             </body>
         """
 
-        # Dependency tags are prepended directly to the component's HTML  -  DJC_DEPS_STRATEGY has no effect.
         expected = """
             <body>
                 <outer>
@@ -514,7 +509,7 @@ class TestExtendsCompat:
             </body>
         """
 
-        rendered_raw = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered_raw = Template(template).render(Context())
         assertHTMLEqual(rendered_raw, expected)
 
         rendered = Template(template).render(Context())
@@ -556,7 +551,7 @@ class TestExtendsCompat:
             </html>
         """
 
-        rendered_raw = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered_raw = Template(template).render(Context())
         assertHTMLEqual(rendered_raw, expected)
 
         rendered = Template(template).render(Context())
@@ -577,7 +572,7 @@ class TestExtendsCompat:
             {% endcomp %}
             {% endblock %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
         expected = """
             <!DOCTYPE html>
             <html lang="en">
@@ -605,7 +600,7 @@ class TestExtendsCompat:
             {% load component_tags %}
             {% comp "relative_file_component_using_template_file" %}{% endcomp %}
         """
-        rendered = Template(template).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered = Template(template).render(Context())
         expected = """
             <!DOCTYPE html>
             <html lang="en">
@@ -707,7 +702,7 @@ class TestExtendsCompat:
                 {% endcomp %}
             {% endblock %}
         """
-        rendered2 = Template(template2).render(Context({"DJC_DEPS_STRATEGY": "ignore"}))
+        rendered2 = Template(template2).render(Context())
 
         expected2 = """
             <!DOCTYPE html>

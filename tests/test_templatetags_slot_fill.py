@@ -282,13 +282,13 @@ class TestComponentSlot:
                 {% endcomp %}
             </body>
         """
-        self.template = Template(template_str)
+        template = Template(template_str)
 
-        nested_ctx = Context({"DJC_DEPS_STRATEGY": "ignore"})
+        nested_ctx = Context()
         # Check that the component can access vars across different context layers
         nested_ctx.push({"some": "var"})
         nested_ctx.push({"name": "carl"})
-        rendered = self.template.render(nested_ctx)
+        rendered = template.render(nested_ctx)
 
         assertHTMLEqual(
             rendered,
@@ -1950,9 +1950,9 @@ class TestDuplicateSlot:
                 {% endfill %}
             {% endcomp %}
         """
-        self.template = Template(template_str)
+        template = Template(template_str)
 
-        rendered = self.template.render(Context({"name": "Jannete", "comp_input": None}))
+        rendered = template.render(Context({"name": "Jannete", "comp_input": None}))
         assertHTMLEqual(
             rendered,
             """
@@ -1971,8 +1971,8 @@ class TestDuplicateSlot:
             {% comp "duplicate_slot" %}
             {% endcomp %}
         """
-        self.template = Template(template_str)
-        rendered = self.template.render(Context({}))
+        template = Template(template_str)
+        rendered = template.render(Context({}))
 
         # NOTE: Slots should have different fallbacks even though they use the same name
         assertHTMLEqual(
@@ -1996,8 +1996,8 @@ class TestDuplicateSlot:
                 {% endfill %}
             {% endcomp %}
         """
-        self.template = Template(template_str)
-        rendered = self.template.render(Context({"items": [1, 2, 3]}))
+        template = Template(template_str)
+        rendered = template.render(Context({"items": [1, 2, 3]}))
 
         # NOTE: Slots should have different fallbacks even though they use the same name
         assertHTMLEqual(
@@ -2035,8 +2035,8 @@ class TestDuplicateSlot:
             {% comp "duplicate_slot_nested" items=items %}
             {% endcomp %}
         """
-        self.template = Template(template_str)
-        rendered = self.template.render(Context({"items": [1, 2, 3]}))
+        template = Template(template_str)
+        rendered = template.render(Context({"items": [1, 2, 3]}))
 
         # NOTE: Slots should have different fallbacks even though they use the same name
         assertHTMLEqual(

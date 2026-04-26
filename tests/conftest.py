@@ -1,6 +1,5 @@
 """Pytest configuration and fixtures for django-components-lite tests."""
 
-import gc
 from pathlib import Path
 from unittest.mock import patch
 
@@ -135,5 +134,4 @@ def _djc_isolation():
     for cache in all_caches:
         cache.clear()
 
-    gc.collect()
     app_settings._load_settings()

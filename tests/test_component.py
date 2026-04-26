@@ -194,7 +194,7 @@ class TestComponent:
         with pytest.raises(KeyError):
             get_component_by_class_id("nonexistent")
 
-    def test_get_template_data_returns_none(self):
+    def test_get_context_data_returns_none(self):
         class SimpleComponent(Component):
             template_file = "test_component/get-context-data-returns-none.html"
 
