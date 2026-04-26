@@ -764,7 +764,7 @@ class ComponentNode(BaseNode):
     """
 
     tag = "comp"
-    end_tag = "endcomp"
+    end_tag: ClassVar[str | None] = "endcomp"
     allowed_flags = ()
     _skip_param_validation = True
 

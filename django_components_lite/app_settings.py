@@ -232,7 +232,9 @@ class InternalSettings:
         components_settings = ComponentsSettings(**data) if not isinstance(data, ComponentsSettings) else data
 
         # `dirs` default depends on `settings.BASE_DIR`, only safe to read at call time.
-        dirs_default: Sequence[str | tuple[str, str]] = [Path(settings.BASE_DIR) / "components"]
+        dirs_default: Sequence[str | PathLike | tuple[str, str] | tuple[str, PathLike]] = [
+            Path(settings.BASE_DIR) / "components",
+        ]
 
         self._settings = ComponentsSettings(
             autodiscover=default(components_settings.autodiscover, defaults.autodiscover),
