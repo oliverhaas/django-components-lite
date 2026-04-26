@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from typing import TYPE_CHECKING, NamedTuple, TypeVar
-from weakref import ReferenceType, finalize
+from weakref import ReferenceType
 
 from django.template import Library, TemplateSyntaxError
 from django.template.base import Parser, Token
@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from django_components_lite.component import Component
 
 
-# NOTE: `ReferenceType` is NOT a generic pre-3.9
 AllRegistries = list[ReferenceType["ComponentRegistry"]]
 
 
@@ -40,7 +39,7 @@ class NotRegisteredError(Exception):
 # them from Django's tag Library when a component is (un)registered.
 class ComponentRegistryEntry(NamedTuple):
     cls: type["Component"]
-    tag: str
+    tags: tuple[str, ...]
 
 
 # We keep track of all registries that exist so that, when users want to
@@ -145,10 +144,6 @@ class ComponentRegistry:
 
         ALL_REGISTRIES.append(cached_ref(self))
 
-    def __del__(self) -> None:
-        # Unregister all components when the registry is deleted
-        self.clear()
-
     def __copy__(self) -> "ComponentRegistry":
         new_registry = ComponentRegistry(self.library)
         new_registry._registry = self._registry.copy()
@@ -211,15 +206,12 @@ class ComponentRegistry:
 
         # Keep track of which components use which tags, because multiple components may
         # use the same tag.
-        tag = entry.tag
-        if tag not in self._tags:
-            self._tags[tag] = set()
-        self._tags[tag].add(name)
+        for tag in entry.tags:
+            if tag not in self._tags:
+                self._tags[tag] = set()
+            self._tags[tag].add(name)
 
         self._registry[name] = entry
-
-        # If the component class is deleted, unregister it from this registry.
-        finalize(entry.cls, lambda: self.unregister(name) if name in self._registry else None)
 
     def unregister(self, name: str) -> None:
         """
@@ -250,28 +242,23 @@ class ComponentRegistry:
         self.get(name)
 
         entry = self._registry[name]
-        tag = entry.tag
 
-        # Unregister the tag from library.
-        # If this was the last component using this tag, unlink component from tag.
-        if tag in self._tags:
-            if name in self._tags[tag]:
+        # Unregister each tag from the library if this was the last component using it.
+        for tag in entry.tags:
+            if tag in self._tags and name in self._tags[tag]:
                 self._tags[tag].remove(name)
+                if not self._tags[tag]:
+                    self._tags.pop(tag, None)
+                    is_tag_empty = True
+                else:
+                    is_tag_empty = False
+            else:
+                is_tag_empty = True
 
-            # Cleanup
-            is_tag_empty = not len(self._tags[tag])
-            if is_tag_empty:
-                self._tags.pop(tag, None)
-        else:
-            is_tag_empty = True
+            # Only unregister a tag if it's NOT protected and no other component uses it.
+            if is_tag_empty and not is_tag_protected(self.library, tag) and tag in self.library.tags:
+                self.library.tags.pop(tag, None)
 
-        # Only unregister a tag if it's NOT protected
-        is_protected = is_tag_protected(self.library, tag)
-        # Unregister the tag from library if this was the last component using this tag
-        if not is_protected and is_tag_empty and tag in self.library.tags:
-            self.library.tags.pop(tag, None)
-
-        entry = self._registry[name]
         del self._registry[name]
 
     def get(self, name: str) -> type["Component"]:
@@ -422,9 +409,9 @@ class ComponentRegistry:
             return tag_fn
 
         register_tag(self.library, "comp", _make_tag_fn("comp", "endcomp"))
-        self.library.tag("compc", _make_tag_fn("compc", None))
+        register_tag(self.library, "compc", _make_tag_fn("compc", None))
 
-        return ComponentRegistryEntry(cls=component, tag="comp")
+        return ComponentRegistryEntry(cls=component, tags=("comp", "compc"))
 
 
 # This variable represents the global component registry

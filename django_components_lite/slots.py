@@ -1467,8 +1467,7 @@ def _is_extracting_fill(context: Context) -> bool:
 @contextmanager
 def _extends_context_reset(context: Context) -> Generator[None, None, None]:
     b4_ctx_extends = context.render_context.setdefault("extends_context", []).copy()
-
-    yield
-
-    # Reset the state of what extends have been seen.
-    context.render_context["extends_context"] = b4_ctx_extends
+    try:
+        yield
+    finally:
+        context.render_context["extends_context"] = b4_ctx_extends
