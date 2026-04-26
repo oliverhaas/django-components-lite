@@ -1256,14 +1256,14 @@
 <ul>
 <li>Removed <code>RegistrySettings</code>. It was an empty <code>NamedTuple</code> reserved for future use; the <code>settings</code> parameter on <code>ComponentRegistry.__init__</code> is also gone.</li>
 <li>Removed <code>BaseNode.node_id</code> (and the <code>node_id</code> argument it accepted). It was only used for <code>__repr__</code> and a now-removed extension hook.</li>
-<li>Removed <code>BaseNode.template_component</code> (and <code>ComponentNode.template_component</code>). The field exposed the <code>Component</code> class that owned a tag's template — used only by user code via <code>Slot.fill_node.template_component</code> for introspection. Internal code never read it. Together with the supporting <code>Origin.component_cls</code> plumbing, the <code>cache_component_template_file</code> registry, and the <code>monkeypatch_template_init</code> patch, this was ~150 LOC of infrastructure for a niche, observation-only API.</li>
+<li>Removed <code>BaseNode.template_component</code> (and <code>ComponentNode.template_component</code>). The field exposed the <code>Component</code> class that owned a tag's template, used only by user code via <code>Slot.fill_node.template_component</code> for introspection. Internal code never read it. Together with the supporting <code>Origin.component_cls</code> plumbing, the <code>cache_component_template_file</code> registry, and the <code>monkeypatch_template_init</code> patch, this was ~150 LOC of infrastructure for a niche, observation-only API.</li>
 </ul>
 <h3 id="removed-internal-cleanup">Removed (internal cleanup)<a class="headerlink" href="#removed-internal-cleanup" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>util/cache.py</code> — hand-rolled LRU cache, never imported anywhere.</li>
-<li><code>util/nanoid.py</code> and <code>constants.py</code> — only used by <code>node_id</code>.</li>
+<li><code>util/cache.py</code>: hand-rolled LRU cache, never imported anywhere.</li>
+<li><code>util/nanoid.py</code> and <code>constants.py</code>: only used by <code>node_id</code>.</li>
 <li>The <code>monkeypatch_inclusion_node</code> patches that set <code>_DJC_INSIDE_INCLUSION_TAG</code>. The flag was set but never read after the JS/CSS dependency system was removed.</li>
-<li>The <code>monkeypatch_template_cls</code> patch and the entire <code>util/django_monkeypatch.py</code> module — only existed to support <code>template_component</code>. Django's <code>Template</code> class is no longer monkeypatched.</li>
+<li>The <code>monkeypatch_template_cls</code> patch and the entire <code>util/django_monkeypatch.py</code> module: only existed to support <code>template_component</code>. Django's <code>Template</code> class is no longer monkeypatched.</li>
 <li>Stale <code>PROTECTED_TAGS</code> entries (<code>component_css_dependencies</code>, <code>component_js_dependencies</code>).</li>
 </ul>
 <h2 id="041">0.4.1<a class="headerlink" href="#041" title="Permanent link">&para;</a></h2>
@@ -1274,7 +1274,7 @@
 <h2 id="040">0.4.0<a class="headerlink" href="#040" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Positional tag arguments are now routed to named parameters on <code>Component.get_context_data</code>. <code>{% comp "form_input_label" "Email" "email" %}</code> now binds cleanly to <code>def get_context_data(self, label, for_)</code>. Mixed positional + keyword args follow Python function-call semantics: passing the same parameter both ways raises <code>TypeError</code>, as does exceeding the declared positional count. Overrides that declare <code>*args</code> receive positional tag args natively. The base <code>def get_context_data(self, **kwargs)</code> is unchanged — positional args remain accessible via <code>self.args</code>.</li>
+<li>Positional tag arguments are now routed to named parameters on <code>Component.get_context_data</code>. <code>{% comp "form_input_label" "Email" "email" %}</code> now binds cleanly to <code>def get_context_data(self, label, for_)</code>. Mixed positional + keyword args follow Python function-call semantics: passing the same parameter both ways raises <code>TypeError</code>, as does exceeding the declared positional count. Overrides that declare <code>*args</code> receive positional tag args natively. The base <code>def get_context_data(self, **kwargs)</code> is unchanged; positional args remain accessible via <code>self.args</code>.</li>
 </ul>
 <h2 id="030">0.3.0<a class="headerlink" href="#030" title="Permanent link">&para;</a></h2>
 <h3 id="breaking_1">Breaking<a class="headerlink" href="#breaking_1" title="Permanent link">&para;</a></h3>
@@ -1286,7 +1286,7 @@
 </span></code></pre></div>
 <h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>tag_name</code> and <code>tag_name_sc</code> settings to configure the component tag names. The end tag is always derived as <code>f"end{tag_name}"</code>. See <a href="../../user-guide/settings/#customizing-tag-names">Settings</a>.</li>
+<li><code>tag_name</code> and <code>tag_name_sc</code> settings to configure the component tag names. The end tag is always derived as <code>f"end{tag_name}"</code>. (Removed again in 0.5.0.)</li>
 </ul>
 <h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
 <h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>

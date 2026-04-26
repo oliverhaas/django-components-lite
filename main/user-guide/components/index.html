@@ -859,7 +859,7 @@
 <p>Positional tag args are routed to named parameters on <code>get_context_data</code>. For example:</p>
 <div class="language-django highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cp">{%</span> <span class="k">comp</span> <span class="s2">&quot;card&quot;</span> <span class="s2">&quot;My Title&quot;</span> <span class="s2">&quot;Body text&quot;</span> <span class="cp">%}{%</span> <span class="k">endcomp</span> <span class="cp">%}</span>
 </span></code></pre></div>
-<p>binds <code>title="My Title"</code> and <code>body="Body text"</code>. Mixed positional + keyword args (<code>{% comp "card" "My Title" body="..." %}</code>) work the same way as a normal Python function call — passing the same parameter both ways raises <code>TypeError</code>. If your override declares <code>*args</code>, positional tag args are forwarded as <code>args</code> natively.</p>
+<p>binds <code>title="My Title"</code> and <code>body="Body text"</code>. Mixed positional + keyword args (<code>{% comp "card" "My Title" body="..." %}</code>) follow normal Python call semantics: passing the same parameter both ways raises <code>TypeError</code>. If your override declares <code>*args</code>, positional tag args are forwarded as <code>args</code> natively.</p>
 <h2 id="template">Template<a class="headerlink" href="#template" title="Permanent link">&para;</a></h2>
 <p>The template uses standard Django template syntax plus component-specific tags:</p>
 <div class="language-html highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>{% load component_tags %}

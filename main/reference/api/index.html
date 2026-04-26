@@ -710,6 +710,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#html-attribute-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTML attribute helpers
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -824,6 +835,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#html-attribute-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTML attribute helpers
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -860,7 +882,7 @@
 <ul>
 <li><code>template_file</code> - Path to the component's template file. Resolved relative to the component's Python file, then relative to <code>COMPONENTS.dirs</code>, then Django template dirs.</li>
 <li><code>template</code> - Inline template string (alternative to <code>template_file</code>).</li>
-<li><code>template_name</code> - Legacy alias for <code>template_file</code>. Works as a descriptor for Django-style templating.</li>
+<li><code>template_name</code> - Legacy alias for <code>template_file</code>.</li>
 <li><code>css_file</code> - Path to a CSS file whose <code>&lt;link&gt;</code> tag is prepended to the rendered output. Resolved the same way as <code>template_file</code>.</li>
 <li><code>js_file</code> - Path to a JS file whose <code>&lt;script&gt;</code> tag is prepended to the rendered output.</li>
 </ul>
@@ -915,7 +937,11 @@
 <tbody>
 <tr>
 <td><code>{% comp "name" %}...{% endcomp %}</code></td>
-<td>Render a component</td>
+<td>Render a component with a body (slots)</td>
+</tr>
+<tr>
+<td><code>{% compc "name" / %}</code></td>
+<td>Self-closing form for components with no slots</td>
 </tr>
 <tr>
 <td><code>{% slot "name" %}...{% endslot %}</code></td>
@@ -925,8 +951,22 @@
 <td><code>{% fill "name" %}...{% endfill %}</code></td>
 <td>Fill a slot when using a component</td>
 </tr>
+<tr>
+<td><code>{% html_attrs attrs key=val %}</code></td>
+<td>Render an HTML attribute string from a dict, with overrides and <code>class:</code>/<code>style:</code> prefixes for appended values</td>
+</tr>
 </tbody>
 </table>
+<h2 id="html-attribute-helpers">HTML attribute helpers<a class="headerlink" href="#html-attribute-helpers" title="Permanent link">&para;</a></h2>
+<p>For composing attribute dicts in Python (used by <code>{% html_attrs %}</code> under the hood):</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">django_components_lite</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_attributes</span><span class="p">,</span> <span class="n">merge_attributes</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">merge_attributes</span><span class="p">({</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;btn&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;btn-primary&quot;</span><span class="p">})</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># &gt; {&quot;class&quot;: &quot;btn btn-primary&quot;}</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">format_attributes</span><span class="p">({</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;btn&quot;</span><span class="p">,</span> <span class="s2">&quot;disabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># &gt; &#39;class=&quot;btn&quot; disabled&#39;</span>
+</span></code></pre></div>
 
 
 
