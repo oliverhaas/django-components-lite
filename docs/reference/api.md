@@ -19,7 +19,7 @@ class MyComponent(Component):
 
 - `template_file` - Path to the component's template file. Resolved relative to the component's Python file, then relative to `COMPONENTS.dirs`, then Django template dirs.
 - `template` - Inline template string (alternative to `template_file`).
-- `template_name` - Legacy alias for `template_file`. Works as a descriptor for Django-style templating.
+- `template_name` - Legacy alias for `template_file`.
 - `css_file` - Path to a CSS file whose `<link>` tag is prepended to the rendered output. Resolved the same way as `template_file`.
 - `js_file` - Path to a JS file whose `<script>` tag is prepended to the rendered output.
 
@@ -78,6 +78,22 @@ Available after `{% load component_tags %}`:
 
 | Tag | Description |
 |-----|-------------|
-| `{% comp "name" %}...{% endcomp %}` | Render a component |
+| `{% comp "name" %}...{% endcomp %}` | Render a component with a body (slots) |
+| `{% compc "name" / %}` | Self-closing form for components with no slots |
 | `{% slot "name" %}...{% endslot %}` | Define a slot in a component template |
 | `{% fill "name" %}...{% endfill %}` | Fill a slot when using a component |
+| `{% html_attrs attrs key=val %}` | Render an HTML attribute string from a dict, with overrides and `class:`/`style:` prefixes for appended values |
+
+## HTML attribute helpers
+
+For composing attribute dicts in Python (used by `{% html_attrs %}` under the hood):
+
+```python
+from django_components_lite import format_attributes, merge_attributes
+
+merge_attributes({"class": "btn"}, {"class": "btn-primary"})
+# > {"class": "btn btn-primary"}
+
+format_attributes({"class": "btn", "disabled": True})
+# > 'class="btn" disabled'
+```

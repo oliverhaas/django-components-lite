@@ -63,7 +63,7 @@ COMPONENTS = ComponentsSettings(
 
 ### Added
 
-- `tag_name` and `tag_name_sc` settings to configure the component tag names. The end tag is always derived as `f"end{tag_name}"`. See [Settings](../user-guide/settings.md#customizing-tag-names).
+- `tag_name` and `tag_name_sc` settings to configure the component tag names. The end tag is always derived as `f"end{tag_name}"`. (Removed again in 0.5.0.)
 
 ## 0.2.1
 

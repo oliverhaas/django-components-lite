@@ -18,9 +18,9 @@ class Greeting(Component):
 Create the template at `components/greeting/greeting.html`:
 
 ```html
+{% load component_tags %}
 <div class="greeting">
   Hello, {{ name }}!
-  {% load component_tags %}
   {% slot "extra" %}{% endslot %}
 </div>
 ```
