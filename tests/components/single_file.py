@@ -1,31 +1,9 @@
-from django.http import HttpResponse
-
 from django_components_lite import Component, register
 
 
 @register("single_file_component")
 class SingleFileComponent(Component):
-    template: str = """
-        <form method="post">
-            {% csrf_token %}
-            <input type="text" name="variable" value="{{ variable }}">
-            <input type="submit">
-        </form>
-        """
-
-    class View:
-        def post(self, request, *args, **kwargs) -> HttpResponse:
-            variable = request.POST.get("variable")
-            return SingleFileComponent.render_to_response(
-                request=request,
-                kwargs={"variable": variable},
-            )
-
-        def get(self, request, *args, **kwargs) -> HttpResponse:
-            return SingleFileComponent.render_to_response(
-                request=request,
-                kwargs={"variable": "GET"},
-            )
+    template: str = "<div>{{ variable }}</div>"
 
     def get_context_data(self, **kwargs):
         return {"variable": kwargs["variable"]}
