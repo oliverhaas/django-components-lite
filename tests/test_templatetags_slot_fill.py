@@ -1663,7 +1663,7 @@ class TestScopedSlot:
             {% endcomp %}
         """
         with pytest.raises(
-            RuntimeError,
+            TemplateSyntaxError,
             match=re.escape(
                 "Fill 'my_slot' received the same string for slot fallback (fallback=...) and slot data (data=...)",
             ),

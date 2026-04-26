@@ -894,7 +894,7 @@ class FillNode(BaseNode):
             if not isinstance(data, str):
                 raise TemplateSyntaxError(f"Fill tag '{FILL_DATA_KWARG}' kwarg must resolve to a string, got {data}")
             if not is_identifier(data):
-                raise RuntimeError(
+                raise TemplateSyntaxError(
                     f"Fill tag kwarg '{FILL_DATA_KWARG}' does not resolve to a valid Python identifier, got '{data}'",
                 )
 
@@ -904,14 +904,14 @@ class FillNode(BaseNode):
                     f"Fill tag '{FILL_FALLBACK_KWARG}' kwarg must resolve to a string, got {fallback}",
                 )
             if not is_identifier(fallback):
-                raise RuntimeError(
+                raise TemplateSyntaxError(
                     f"Fill tag kwarg '{FILL_FALLBACK_KWARG}' does not resolve to a valid Python identifier,"
                     f" got '{fallback}'",
                 )
 
         # data and fallback cannot be bound to the same variable
         if data and fallback and data == fallback:
-            raise RuntimeError(
+            raise TemplateSyntaxError(
                 f"Fill '{name}' received the same string for slot fallback ({FILL_FALLBACK_KWARG}=...)"
                 f" and slot data ({FILL_DATA_KWARG}=...)",
             )
@@ -1287,12 +1287,12 @@ def _nodelist_to_slot(
     fill_node: Union[FillNode, "ComponentNode"] | None = None,
     extra: dict[str, Any] | None = None,
 ) -> Slot:
-    if data_var and not data_var.isidentifier():
+    if data_var and not is_identifier(data_var):
         raise TemplateSyntaxError(
             f"Slot data alias in fill '{slot_name}' must be a valid identifier. Got '{data_var}'",
         )
 
-    if fallback_var and not fallback_var.isidentifier():
+    if fallback_var and not is_identifier(fallback_var):
         raise TemplateSyntaxError(
             f"Slot fallback alias in fill '{slot_name}' must be a valid identifier. Got '{fallback_var}'",
         )
