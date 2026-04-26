@@ -17,9 +17,9 @@ def build_dependency_tags(comp_cls: type["Component"]) -> str:
     """
     Build <link> and <script> tags for a component's JS/CSS files.
 
-    The result depends only on the class, so it's cached on the class itself
-    (on first render, not at class creation — Django's ``static()`` may not
-    be ready during import).
+    The result depends only on the class, so it's cached on the class itself.
+    Caching happens on first render (not at class creation), because Django's
+    ``static()`` may not be ready at import time.
     """
     cached = comp_cls.__dict__.get("_dep_tags")
     if cached is not None:

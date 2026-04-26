@@ -21,7 +21,7 @@ Positional tag args are routed to named parameters on ``get_context_data``. For 
 {% comp "card" "My Title" "Body text" %}{% endcomp %}
 ```
 
-binds ``title="My Title"`` and ``body="Body text"``. Mixed positional + keyword args (``{% comp "card" "My Title" body="..." %}``) work the same way as a normal Python function call — passing the same parameter both ways raises ``TypeError``. If your override declares ``*args``, positional tag args are forwarded as ``args`` natively.
+binds ``title="My Title"`` and ``body="Body text"``. Mixed positional + keyword args (``{% comp "card" "My Title" body="..." %}``) follow normal Python call semantics: passing the same parameter both ways raises ``TypeError``. If your override declares ``*args``, positional tag args are forwarded as ``args`` natively.
 
 ## Template
 

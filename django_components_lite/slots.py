@@ -861,8 +861,8 @@ class FillNode(BaseNode):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        # Disallow {% block %} tags inside {% fill %} — these two systems don't compose.
-        # Use {% slot %}/{% fill %} for component composition instead.
+        # Disallow {% block %} tags inside {% fill %}; the two systems don't compose.
+        # Use {% slot %}/{% fill %} for component composition.
         from django.template.loader_tags import BlockNode
 
         for node in self.nodelist.get_nodes_by_type(BlockNode):

@@ -26,14 +26,14 @@ The custom template parser (`util/template_parser.py`, ~220 LOC) and the associa
 
 - Removed `RegistrySettings`. It was an empty `NamedTuple` reserved for future use; the `settings` parameter on `ComponentRegistry.__init__` is also gone.
 - Removed `BaseNode.node_id` (and the `node_id` argument it accepted). It was only used for `__repr__` and a now-removed extension hook.
-- Removed `BaseNode.template_component` (and `ComponentNode.template_component`). The field exposed the `Component` class that owned a tag's template — used only by user code via `Slot.fill_node.template_component` for introspection. Internal code never read it. Together with the supporting `Origin.component_cls` plumbing, the `cache_component_template_file` registry, and the `monkeypatch_template_init` patch, this was ~150 LOC of infrastructure for a niche, observation-only API.
+- Removed `BaseNode.template_component` (and `ComponentNode.template_component`). The field exposed the `Component` class that owned a tag's template, used only by user code via `Slot.fill_node.template_component` for introspection. Internal code never read it. Together with the supporting `Origin.component_cls` plumbing, the `cache_component_template_file` registry, and the `monkeypatch_template_init` patch, this was ~150 LOC of infrastructure for a niche, observation-only API.
 
 ### Removed (internal cleanup)
 
-- `util/cache.py` — hand-rolled LRU cache, never imported anywhere.
-- `util/nanoid.py` and `constants.py` — only used by `node_id`.
+- `util/cache.py`: hand-rolled LRU cache, never imported anywhere.
+- `util/nanoid.py` and `constants.py`: only used by `node_id`.
 - The `monkeypatch_inclusion_node` patches that set `_DJC_INSIDE_INCLUSION_TAG`. The flag was set but never read after the JS/CSS dependency system was removed.
-- The `monkeypatch_template_cls` patch and the entire `util/django_monkeypatch.py` module — only existed to support `template_component`. Django's `Template` class is no longer monkeypatched.
+- The `monkeypatch_template_cls` patch and the entire `util/django_monkeypatch.py` module: only existed to support `template_component`. Django's `Template` class is no longer monkeypatched.
 - Stale `PROTECTED_TAGS` entries (`component_css_dependencies`, `component_js_dependencies`).
 
 ## 0.4.1
@@ -46,7 +46,7 @@ The custom template parser (`util/template_parser.py`, ~220 LOC) and the associa
 
 ### Added
 
-- Positional tag arguments are now routed to named parameters on ``Component.get_context_data``. ``{% comp "form_input_label" "Email" "email" %}`` now binds cleanly to ``def get_context_data(self, label, for_)``. Mixed positional + keyword args follow Python function-call semantics: passing the same parameter both ways raises ``TypeError``, as does exceeding the declared positional count. Overrides that declare ``*args`` receive positional tag args natively. The base ``def get_context_data(self, **kwargs)`` is unchanged — positional args remain accessible via ``self.args``.
+- Positional tag arguments are now routed to named parameters on ``Component.get_context_data``. ``{% comp "form_input_label" "Email" "email" %}`` now binds cleanly to ``def get_context_data(self, label, for_)``. Mixed positional + keyword args follow Python function-call semantics: passing the same parameter both ways raises ``TypeError``, as does exceeding the declared positional count. Overrides that declare ``*args`` receive positional tag args natively. The base ``def get_context_data(self, **kwargs)`` is unchanged; positional args remain accessible via ``self.args``.
 
 ## 0.3.0
 
