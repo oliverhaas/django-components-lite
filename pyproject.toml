@@ -142,18 +142,15 @@ respect-type-ignore-comments = false
 [[tool.ty.overrides]]
 include = ["django_components_lite/**"]
 
+# Triggered mostly by Django stubs not modeling our dynamically-added class
+# attributes (e.g. `_dep_tags`, `_cached_template`) and incomplete Django stub
+# coverage (e.g. `Library._protected_tags`, `FileSystemStorage.prefix`).
 [tool.ty.overrides.rules]
 unresolved-attribute = "ignore"
 invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
 invalid-return-type = "ignore"
 invalid-overload = "ignore"
-redundant-cast = "ignore"
-call-top-callable = "ignore"
-too-many-positional-arguments = "ignore"
-not-subscriptable = "ignore"
-unsupported-operator = "ignore"
-no-matching-overload = "ignore"
 
 [[tool.ty.overrides]]
 include = ["tests/**"]
