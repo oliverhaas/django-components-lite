@@ -952,8 +952,8 @@
 <td>Fill a slot when using a component</td>
 </tr>
 <tr>
-<td><code>{% html_attrs attrs key=val %}</code></td>
-<td>Render an HTML attribute string from a dict, with overrides and <code>class:</code>/<code>style:</code> prefixes for appended values</td>
+<td><code>{% html_attrs attrs defaults key=val %}</code></td>
+<td>Render an HTML attribute string by merging <code>attrs</code> over <code>defaults</code>, then appending extra kwargs (<code>class</code>/<code>style</code> are space-joined)</td>
 </tr>
 </tbody>
 </table>
