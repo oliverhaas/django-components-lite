@@ -82,7 +82,7 @@ Available after `{% load component_tags %}`:
 | `{% compc "name" / %}` | Self-closing form for components with no slots |
 | `{% slot "name" %}...{% endslot %}` | Define a slot in a component template |
 | `{% fill "name" %}...{% endfill %}` | Fill a slot when using a component |
-| `{% html_attrs attrs key=val %}` | Render an HTML attribute string from a dict, with overrides and `class:`/`style:` prefixes for appended values |
+| `{% html_attrs attrs defaults key=val %}` | Render an HTML attribute string by merging `attrs` over `defaults`, then appending extra kwargs (`class`/`style` are space-joined) |
 
 ## HTML attribute helpers
 

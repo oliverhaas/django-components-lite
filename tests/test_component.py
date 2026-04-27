@@ -802,7 +802,7 @@ class TestComponentRender:
 
         with pytest.raises(
             TemplateSyntaxError,
-            match=r"An error occured while rendering components Other:[\s\S]*"
+            match=r"An error occurred while rendering components Other:[\s\S]*"
             r"Invalid block tag on line 4: 'endif', expected 'endcomp'",
         ):
             Other.render()
@@ -817,7 +817,7 @@ class TestComponentRender:
 
         with pytest.raises(
             TemplateSyntaxError,
-            match=r"An error occured while rendering components Other:[\s\S]*Unclosed tag on line 3: 'comp'",
+            match=r"An error occurred while rendering components Other:[\s\S]*Unclosed tag on line 3: 'comp'",
         ):
             Other.render()
 

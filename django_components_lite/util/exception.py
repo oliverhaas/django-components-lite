@@ -11,12 +11,12 @@ def set_component_error_message(err: Exception, component_path: list[str]) -> No
     components = err._components = [*component_path, *components]  # type: ignore[attr-defined]
 
     comp_path = " > ".join(components)
-    prefix = f"An error occured while rendering components {comp_path}:\n"
+    prefix = f"An error occurred while rendering components {comp_path}:\n"
 
     # See https://stackoverflow.com/a/75549200/9788634 for accessing exception messages.
     if len(err.args) and err.args[0] is not None:
         orig_msg = str(err.args[0])
-        if components and "An error occured while rendering components" in orig_msg:
+        if components and "An error occurred while rendering components" in orig_msg:
             orig_msg = str(err.args[0]).split("\n", 1)[-1]
     else:
         # Some exceptions (e.g. Pydantic) don't store the message in `args`,

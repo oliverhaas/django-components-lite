@@ -1,10 +1,11 @@
-"""Catch-all for tests that use template tags and don't fit other files"""
+"""Tests for component interop with Django's `{% extends %}` and `{% include %}` tags."""
 
 import pytest
 from django.template import Context, Template, TemplateSyntaxError
 from pytest_django.asserts import assertHTMLEqual
 
 from django_components_lite import Component, register, registry
+from django_components_lite.slots import _extends_context_reset
 
 
 def gen_slotted_component():
@@ -718,3 +719,36 @@ class TestExtendsCompat:
             </html>
         """
         assertHTMLEqual(rendered2, expected2)
+
+
+class TestExtendsContextReset:
+    """Regression tests for `slots._extends_context_reset`."""
+
+    def test_restores_extends_context_on_normal_exit(self):
+        ctx = Context()
+        ctx.render_context["extends_context"] = ["before"]
+        with _extends_context_reset(ctx):
+            ctx.render_context["extends_context"].append("during")
+            assert ctx.render_context["extends_context"] == ["before", "during"]
+        assert ctx.render_context["extends_context"] == ["before"]
+
+    def test_restores_extends_context_on_exception(self):
+        """Without the `try/finally`, the mutation would leak to subsequent renders."""
+        ctx = Context()
+        ctx.render_context["extends_context"] = ["before"]
+
+        def _mutate_and_raise() -> None:
+            with _extends_context_reset(ctx):
+                ctx.render_context["extends_context"].append("during")
+                raise RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            _mutate_and_raise()
+        assert ctx.render_context["extends_context"] == ["before"]
+
+    def test_initializes_missing_key(self):
+        ctx = Context()
+        assert "extends_context" not in ctx.render_context
+        with _extends_context_reset(ctx):
+            ctx.render_context["extends_context"].append("during")
+        assert ctx.render_context["extends_context"] == []

@@ -187,7 +187,6 @@ class SlotNode(BaseNode):
                 "Component was garbage collected before its slots could be rendered.",
             )
         component_name = component.name
-        is_dynamic_component = getattr(component, "_is_dynamic_component", False)
         # NOTE: Use `ComponentContext.outer_context`, and NOT `Component.outer_context`.
         #       The first is a SNAPSHOT of the outer context.
         outer_context = component_ctx.outer_context
@@ -197,7 +196,7 @@ class SlotNode(BaseNode):
         is_default = self.flags[SLOT_DEFAULT_FLAG]
         is_required = self.flags[SLOT_REQUIRED_FLAG]
 
-        if is_default and not is_dynamic_component:
+        if is_default:
             # Allow multiple slots marked 'default' only if they share a name.
             default_slot_name = component_ctx.default_slot
             if default_slot_name is not None and slot_name != default_slot_name:
@@ -244,10 +243,10 @@ class SlotNode(BaseNode):
 
         # Required-but-not-filled: fuzzy-match the slot name against provided fills to
         # surface likely typos in the error message.
-        if is_required and not slot_is_filled and not is_dynamic_component:
+        if is_required and not slot_is_filled:
             msg = (
                 f"Slot '{slot_name}' is marked as 'required' (i.e. non-optional), "
-                f"yet no fill is provided. Check template.'"
+                f"yet no fill is provided. Check template."
             )
             fill_names = list(slot_fills.keys())
             if fill_names:

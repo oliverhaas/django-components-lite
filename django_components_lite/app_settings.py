@@ -60,7 +60,7 @@ defaults = ComponentsSettings(
         ".jpeg", ".jfif", ".pjpeg", ".pjp", ".svg",
         ".webp", ".bmp", ".ico", ".cur", ".tif", ".tiff",
         # Fonts
-        ".eot", ".ttf", ".woff", ".otf", ".svg",
+        ".eot", ".ttf", ".woff", ".otf",
     ],
     static_files_forbidden=[
         # See https://marketplace.visualstudio.com/items?itemName=junstyle.vscode-django-support
