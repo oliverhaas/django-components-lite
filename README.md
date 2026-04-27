@@ -6,9 +6,24 @@ This package strips django-components down to its core: simple, reusable templat
 
 ## Attribution
 
-This project is built on the excellent work of the **[django-components](https://github.com/django-components/django-components)** project by **[Emil Stenström](https://github.com/EmilStenstrom)**, **[Juro Oravec](https://github.com/JuroOravec)**, and [all contributors](https://github.com/django-components/django-components/graphs/contributors). Their years of work made this possible.
+This project is built on the excellent work of the **[django-components](https://github.com/django-components/django-components)** project by **[Emil Stenström](https://github.com/EmilStenstrom)**, **[Juro Oravec](https://github.com/JuroOravec)**, and [all contributors](https://github.com/django-components/django-components/graphs/contributors). 
 
-**If you're looking for a mature, full-featured, and battle-tested component library for Django, use [django-components](https://github.com/django-components/django-components).** It has an active community, extensive documentation, and a rich feature set.
+**If you're looking for a mature, full-featured, and widely used component library for Django, use [django-components](https://github.com/django-components/django-components).** It has an active community, extensive documentation, and a rich feature set.
+
+
+## How this compares
+
+A few Django component libraries with different philosophies:
+
+- **[django-components](https://github.com/django-components/django-components)** — the upstream project. Big, full-featured, introduces a lot of new template behavior, almost a parallel template language.
+- **[django-cotton](https://github.com/wrabit/django-cotton)** — HTML-like syntax (`<c-card title="..." />`); template-only, no Python logic per component.
+- **[django-viewcomponent](https://pypi.org/project/django-viewcomponent/)** — modeled on Rails ViewComponent. One Python class per component encapsulating template + logic.
+- **[slippers](https://pypi.org/project/slippers/)** — intentionally tiny; template-only, no Python per component.
+- **[JinjaX](https://jinjax.scaletti.dev/)** — HTML-like component syntax for Jinja2 (not Django templates).
+
+`django-components-lite` sits on the small end of that spectrum: standard Django template tags (`{% comp %}` / `{% slot %}` / `{% fill %}`), one Python class per component for context logic, no special template syntax, no monkeypatches, no extension system.
+
+If even this is more than you need, the package is small (~3000 LOC of regular Django patterns) and is a reasonable starting point to copy into your project and inline rather than depend on as a separate package.
 
 
 ## Features
