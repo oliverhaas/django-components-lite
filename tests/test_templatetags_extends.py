@@ -10,14 +10,14 @@ from django_components_lite.slots import _extends_context_reset
 
 def gen_slotted_component():
     class SlottedComponent(Component):
-        template_file = "slotted_template.html"
+        template_name = "slotted_template.html"
 
     return SlottedComponent
 
 
 def gen_blocked_and_slotted_component():
     class BlockedAndSlottedComponent(Component):
-        template_file = "blocked_and_slotted_template.html"
+        template_name = "blocked_and_slotted_template.html"
 
     return BlockedAndSlottedComponent
 
@@ -25,8 +25,10 @@ def gen_blocked_and_slotted_component():
 def gen_component_inside_include():
     class ComponentInsideInclude(Component):
         template: str = """<div>Hello</div>"""
-        css_file = "style.css"
-        js_file = "script.js"
+
+        class Media:
+            css = ["style.css"]
+            js = ["script.js"]
 
     return ComponentInsideInclude
 
@@ -443,7 +445,7 @@ class TestExtendsCompat:
 
         @register("extended_component")
         class _ExtendedComponent(Component):
-            template_file = "included.html"
+            template_name = "included.html"
 
         template: str = """
             {% extends 'block.html' %}
@@ -595,7 +597,7 @@ class TestExtendsCompat:
     def test_component_using_template_file_extends_relative_file(self):
         @register("relative_file_component_using_template_file")
         class RelativeFileComponentUsingTemplateFile(Component):
-            template_file = "relative_extends.html"
+            template_name = "relative_extends.html"
 
         template: str = """
             {% load component_tags %}

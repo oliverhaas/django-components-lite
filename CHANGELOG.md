@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.6.0
+
+API alignment with Django conventions for class-based views and Forms.Media. Breaking.
+
+### Breaking
+
+- `template_file` is now `template_name`, matching Django's class-based view convention (`TemplateView.template_name`, etc.). The legacy `template_name` alias and the descriptor that proxied it onto `template_file` are gone.
+- `js_file` and `css_file` are gone, replaced by a nested `Media` class matching Django's [Forms.Media](https://docs.djangoproject.com/en/stable/topics/forms/media/) convention. `Media.css` and `Media.js` are lists of paths; one `<link>` / `<script>` is prepended per entry. Single-file via list-of-one is the only form (no string convenience, no media-type dict).
+
+```python
+# Before
+class Greeting(Component):
+    template_file = "greeting.html"
+    css_file = "greeting.css"
+    js_file = "greeting.js"
+
+# After
+class Greeting(Component):
+    template_name = "greeting.html"
+
+    class Media:
+        css = ["greeting.css"]
+        js = ["greeting.js"]
+```
+
+- Removed the dead `js: str | None = None` inline-string attribute. It was declared on `Component` but never read anywhere. Inline JS was never supported; put it inside the template (or in a `Media.js` file).
+
+### Removed (internal cleanup)
+
+- `ComponentTemplateNameDescriptor` and the entire `ComponentMeta` metaclass. After dropping the legacy alias, the metaclass only existed to call `resolve_component_files` on class creation; that's now done in `__init_subclass__`.
+
 ## 0.5.2
 
 Maintenance release. No API change. Bug fix + internal cleanup, with the docs site consolidated into the README so PyPI now ships the full reference.

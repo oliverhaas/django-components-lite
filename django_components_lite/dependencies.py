@@ -1,4 +1,4 @@
-"""Build per-component <link>/<script> dependency tags from JS/CSS file paths."""
+"""Build per-component <link>/<script> dependency tags from `Media.css` / `Media.js`."""
 
 from typing import TYPE_CHECKING
 
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def build_dependency_tags(comp_cls: type["Component"]) -> str:
-    """Return cached `<link>`/`<script>` tags for the component's CSS and JS files.
+    """Return cached `<link>` and `<script>` tags for the component's `Media.css` and `Media.js`.
 
     Cached on first render rather than at class creation, since `static()` may not be
     ready at import time.
@@ -19,12 +19,13 @@ def build_dependency_tags(comp_cls: type["Component"]) -> str:
         return cached
 
     tags: list[str] = []
-    css_file = getattr(comp_cls, "css_file", None)
-    if css_file:
-        tags.append(f'<link href="{static(css_file)}" media="all" rel="stylesheet">')
-    js_file = getattr(comp_cls, "js_file", None)
-    if js_file:
-        tags.append(f'<script src="{static(js_file)}"></script>')
+    media = getattr(comp_cls, "Media", None)
+    if media is not None:
+        tags.extend(
+            f'<link href="{static(css_path)}" media="all" rel="stylesheet">'
+            for css_path in getattr(media, "css", None) or ()
+        )
+        tags.extend(f'<script src="{static(js_path)}"></script>' for js_path in getattr(media, "js", None) or ())
 
     result = "\n".join(tags)
     comp_cls._dep_tags = result

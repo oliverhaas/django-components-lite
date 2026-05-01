@@ -9,7 +9,7 @@ from django_components_lite import Component, NotRegisteredError, register, regi
 
 def gen_slotted_component():
     class SlottedComponent(Component):
-        template_file = "slotted_template.html"
+        template_name = "slotted_template.html"
 
     return SlottedComponent
 

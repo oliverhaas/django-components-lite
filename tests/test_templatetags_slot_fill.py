@@ -32,7 +32,7 @@ class TestComponentSlot:
 
         @register("test2")
         class SimpleComponent(Component):
-            template_file = "test_templatetags_slot_fill/slotted-template-basic.html"
+            template_name = "test_templatetags_slot_fill/slotted-template-basic.html"
 
             def get_context_data(self, **kwargs):
                 return {
@@ -83,7 +83,7 @@ class TestComponentSlot:
 
         @register("test2")
         class SimpleComponent(Component):
-            template_file = "test_templatetags_slot_fill/slotted-template-basic-self-closing.html"
+            template_name = "test_templatetags_slot_fill/slotted-template-basic-self-closing.html"
 
             def get_context_data(self, **kwargs):
                 return {

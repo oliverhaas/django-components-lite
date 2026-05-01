@@ -630,7 +630,7 @@ def _nodelist_to_slot(
         component_name=component_name,
         slot_name=slot_name,
         nodelist=nodelist,
-        # The `contents` param may be `None` (e.g. self-closing `{% fill "footer" / %}`).
+        # The `contents` param may be `None` (e.g. self-closing `{% fill "footer" %}`).
         # Passing `None` would make `Slot.contents` the render function, so we coerce to "".
         contents=default(contents, ""),
         fill_node=default(fill_node, None),

@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 
 def get_component_template(component: "Component") -> Template | None:
     """Resolve the Template for a Component, or None if no template is defined."""
-    if component.template_file is not None:
+    if component.template_name is not None:
         # Cache the loaded Template on the class to avoid reloading every render.
         cached = getattr(component.__class__, "_cached_template", None)
         if cached is not None:
             return cached
-        template = _load_django_template(component.template_file)
+        template = _load_django_template(component.template_name)
         component.__class__._cached_template = template
         return template
 

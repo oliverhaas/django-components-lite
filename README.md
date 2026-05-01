@@ -112,7 +112,7 @@ from django_components_lite import Component, register
 
 @register("greeting")
 class Greeting(Component):
-    template_file = "greeting.html"
+    template_name = "greeting.html"
 
     def get_context_data(self, name="World"):
         return {"name": name}
@@ -127,9 +127,9 @@ class Greeting(Component):
 </div>
 ```
 
-`template_file` is resolved relative to the component's Python file, then relative to `COMPONENTS.dirs`, then Django's template dirs. You can use `template = "..."` for an inline template string instead.
+`template_name` is resolved relative to the component's Python file, then relative to `COMPONENTS.dirs`, then Django's template dirs. You can use `template = "..."` for an inline template string instead.
 
-To attach static files, place them next to the component and declare them on the class:
+To attach static files, place them next to the component and declare them via a nested `Media` class (matching Django's [Forms.Media](https://docs.djangoproject.com/en/stable/topics/forms/media/) convention):
 
 ```
 components/greeting/
@@ -141,9 +141,11 @@ components/greeting/
 
 ```python
 class Greeting(Component):
-    template_file = "greeting.html"
-    css_file = "greeting.css"
-    js_file = "greeting.js"
+    template_name = "greeting.html"
+
+    class Media:
+        css = ["greeting.css"]
+        js = ["greeting.js"]
 ```
 
 When the component renders, `<link>` and `<script>` tags for the declared files are prepended to the output.
@@ -162,7 +164,7 @@ From a template:
 Self-closing form (no body / no fills):
 
 ```html
-{% compc "greeting" name="Django" / %}
+{% compc "greeting" name="Django" %}
 ```
 
 Positional arguments are routed to named parameters on `get_context_data`:
@@ -258,11 +260,9 @@ Subclass to define your own component.
 
 **Class attributes:**
 
-- `template_file` — Path to the template. Resolved relative to the component's Python file, then `COMPONENTS.dirs`, then Django template dirs.
-- `template` — Inline template string (alternative to `template_file`).
-- `template_name` — Legacy alias for `template_file`.
-- `css_file` — Path to a CSS file. Its `<link>` is prepended to rendered output.
-- `js_file` — Path to a JS file. Its `<script>` is prepended.
+- `template_name` — Path to the template. Resolved relative to the component's Python file, then `COMPONENTS.dirs`, then Django template dirs.
+- `template` — Inline template string (alternative to `template_name`).
+- `class Media:` — Nested class declaring CSS/JS files. `Media.css` and `Media.js` are lists of paths; one `<link>` / `<script>` tag is prepended per entry.
 
 **Instance attributes (available in `get_context_data`):**
 
@@ -275,8 +275,8 @@ Subclass to define your own component.
 **Methods:**
 
 - `get_context_data(**kwargs)` — return a dict of context variables. Override with any signature.
-- `Component.render(args=None, kwargs=None, slots=None, context=None, request=None)` — class method, returns rendered HTML string.
-- `Component.render_to_response(...)` — class method, returns `HttpResponse`. Same arguments as `render()`.
+- `Component.render(context=None, args=None, kwargs=None, slots=None, request=None)` — class method, returns rendered HTML string.
+- `Component.render_to_response(...)` — class method, returns `HttpResponse`. Same arguments as `render()`, plus extra kwargs forwarded to the response class.
 
 ### Registration
 
@@ -300,7 +300,7 @@ Available after `{% load component_tags %}`:
 | Tag | Description |
 |---|---|
 | `{% comp "name" %}...{% endcomp %}` | Render a component, with optional slot fills in the body |
-| `{% compc "name" / %}` | Self-closing form, no body |
+| `{% compc "name" %}` | Self-closing form, no body, no end tag |
 | `{% slot "name" %}...{% endslot %}` | Define a slot in a component template |
 | `{% fill "name" %}...{% endfill %}` | Fill a slot when using a component |
 | `{% html_attrs attrs defaults key=val %}` | Render an HTML attribute string by merging `attrs` over `defaults`, then appending extra kwargs (`class`/`style` are space-joined) |

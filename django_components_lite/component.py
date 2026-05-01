@@ -6,8 +6,6 @@ from typing import (
     Any,
     ClassVar,
     Optional,
-    Union,
-    cast,
 )
 from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 
@@ -111,40 +109,6 @@ def _call_get_context_data(component: "Component", args: list[Any], kwargs: dict
     return component.get_context_data(**call_kwargs)
 
 
-# Proxies `template_name` reads/writes onto `template_file`.
-class ComponentTemplateNameDescriptor:
-    def __get__(self, instance: Optional["Component"], cls: type["Component"]) -> Any:
-        return default(instance, cls).template_file
-
-    def __set__(self, instance_or_cls: Union["Component", type["Component"]], value: Any) -> None:
-        cls = instance_or_cls if isinstance(instance_or_cls, type) else instance_or_cls.__class__
-        cls.template_file = value
-
-
-class ComponentMeta(type):
-    def __setattr__(cls, name: str, value: Any) -> None:
-        desc = cls.__dict__.get(name, None)
-        if hasattr(desc, "__set__"):
-            desc.__set__(cls, value)
-        else:
-            super().__setattr__(name, value)
-
-    def __new__(mcs, name: str, bases: tuple[type, ...], attrs: dict) -> type:
-        # Route `template_name = "..."` to `template_file`; the public `template_name`
-        # attr is the descriptor.
-        if "template_name" in attrs:
-            attrs["template_file"] = attrs.pop("template_name")
-        attrs["template_name"] = ComponentTemplateNameDescriptor()
-
-        cls = cast("type[Component]", super().__new__(mcs, name, bases, attrs))
-
-        # Resolve relative file paths now if Django settings are ready, else lazily.
-        with contextlib.suppress(Exception):
-            resolve_component_files(cls)
-
-        return cls
-
-
 # Internal per-render state, made available to slots/fills via the context.
 @dataclass
 class ComponentContext:
@@ -155,25 +119,15 @@ class ComponentContext:
     outer_context: Context | None
 
 
-class Component(metaclass=ComponentMeta):
+class Component:
     # User-configurable class attributes.
 
-    template_file: ClassVar[str | None] = None
+    template_name: ClassVar[str | None] = None
     """Path to the component's Django template. Resolved relative to the component's
     Python file, then `COMPONENTS.dirs` / `COMPONENTS.app_dirs`, then Django template dirs."""
 
-    # Descriptor proxying to `template_file`; declared here only for type hints.
-    template_name: ClassVar[str | None]
-    """Legacy alias for `template_file`."""
-
     template: str | None = None
-    """Inline Django template string. Mutually exclusive with `template_file`."""
-
-    js: str | None = None
-    """Inline JS string. Mutually exclusive with `js_file`."""
-
-    js_file: ClassVar[str | None] = None
-    """Path to a JS file rendered as a `<script>` tag prepended to the output. Resolved like `template_file`."""
+    """Inline Django template string. Mutually exclusive with `template_name`."""
 
     response_class: ClassVar[type[HttpResponse]] = HttpResponse
     """Response class used by `render_to_response()`."""
@@ -219,6 +173,10 @@ class Component(metaclass=ComponentMeta):
         gctx = cls.__dict__.get("get_context_data")
         if gctx is not None:
             cls._gctx_positional_names, cls._gctx_has_var_positional = _positional_param_info(gctx)
+
+        # Resolve relative file paths now if Django settings are ready, else lazily on first render.
+        with contextlib.suppress(Exception):
+            resolve_component_files(cls)
 
     # Defaults for the un-overridden base `get_context_data(**kwargs)`.
     _gctx_positional_names: ClassVar[tuple[str, ...]] = ()
@@ -507,7 +465,7 @@ class ComponentNode(BaseNode):
             return ""
 
         component_cls: type[Component] = self.registry.get(self.name)
-        # Skip the fill walk when there's no body (e.g. `{% compc "card" ... / %}`).
+        # Skip the fill walk when there's no body (e.g. `{% compc "card" ... %}`).
         slot_fills = resolve_fills(context, self, self.name) if self.nodelist else {}
         inner_context = make_isolated_context_copy(context)
 

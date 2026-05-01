@@ -48,7 +48,7 @@ class TestComponent:
 
     def test_template_file_static(self):
         class SimpleComponent(Component):
-            template_file = "simple_template.html"
+            template_name = "simple_template.html"
 
             def get_context_data(self, **kwargs):
                 return {
@@ -96,7 +96,7 @@ class TestComponent:
     )
     def test_template_file_static__cached(self):
         class SimpleComponent1(Component):
-            template_file = "simple_template.html"
+            template_name = "simple_template.html"
 
             def get_context_data(self, **kwargs):
                 return {
@@ -104,7 +104,7 @@ class TestComponent:
                 }
 
         class SimpleComponent2(Component):
-            template_file = "simple_template.html"
+            template_name = "simple_template.html"
 
             def get_context_data(self, **kwargs):
                 return {
@@ -136,54 +136,6 @@ class TestComponent:
             """,
         )
 
-    def test_template_file_static__compat(self):
-        class SimpleComponent(Component):
-            template_name = "simple_template.html"
-
-            def get_context_data(self, **kwargs):
-                return {
-                    "variable": kwargs.get("variable"),
-                }
-
-        # Access fields on Component class
-        assert SimpleComponent.template_name == "simple_template.html"
-        assert SimpleComponent.template_file == "simple_template.html"
-
-        SimpleComponent.template_name = "other_template.html"
-        assert SimpleComponent.template_name == "other_template.html"
-        assert SimpleComponent.template_file == "other_template.html"
-
-        SimpleComponent.template_name = "simple_template.html"
-        rendered = SimpleComponent.render(kwargs={"variable": "test"})
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong>
-            """,
-        )
-
-        # Access fields on Component instance
-        comp = SimpleComponent()
-        assert comp.template_name == "simple_template.html"
-        assert comp.template_file == "simple_template.html"
-
-        # NOTE: Setting `template_file` on INSTANCE is not supported, as users should work
-        #       with classes and not instances. This is tested for completeness.
-        comp.template_name = "other_template_2.html"  # type: ignore[misc]
-        assert comp.template_name == "other_template_2.html"
-        assert comp.template_file == "other_template_2.html"
-        assert SimpleComponent.template_name == "other_template_2.html"
-        assert SimpleComponent.template_file == "other_template_2.html"
-
-        SimpleComponent.template_name = "simple_template.html"
-        rendered = comp.render(kwargs={"variable": "test"})
-        assertHTMLEqual(
-            rendered,
-            """
-            Variable: <strong>test</strong>
-            """,
-        )
-
     def test_get_component_by_id(self):
         class SimpleComponent(Component):
             pass
@@ -196,7 +148,7 @@ class TestComponent:
 
     def test_get_context_data_returns_none(self):
         class SimpleComponent(Component):
-            template_file = "test_component/get-context-data-returns-none.html"
+            template_name = "test_component/get-context-data-returns-none.html"
 
             def get_context_data(self, **kwargs):
                 return None
@@ -242,7 +194,7 @@ class TestComponentRenderAPI:
         called = False
 
         class TestComponent(Component):
-            template_file = "test_component/args-kwargs-slots--simple.html"
+            template_name = "test_component/args-kwargs-slots--simple.html"
 
             def get_context_data(self, **kwargs):
                 nonlocal called
@@ -266,7 +218,7 @@ class TestComponentRenderAPI:
         comp: Any = None
 
         class TestComponent(Component):
-            template_file = "test_component/args-kwargs-slots--available-outside-render.html"
+            template_name = "test_component/args-kwargs-slots--available-outside-render.html"
 
             def get_context_data(self, **kwargs):
                 nonlocal comp
@@ -286,7 +238,7 @@ class TestComponentRenderAPI:
 
         @register("test")
         class TestComponent(Component):
-            template_file = "test_component/metadata--template.html"
+            template_name = "test_component/metadata--template.html"
 
             def get_context_data(self, **kwargs):
                 nonlocal comp
@@ -319,14 +271,14 @@ class TestComponentRenderAPI:
 
         @register("test")
         class TestComponent(Component):
-            template_file = "test_component/metadata--component.html"
+            template_name = "test_component/metadata--component.html"
 
             def get_context_data(self, **kwargs):
                 nonlocal comp
                 comp = self
 
         class Outer(Component):
-            template_file = "test_component/outer.html"
+            template_name = "test_component/outer.html"
 
         rendered = Outer.render()
 
@@ -342,7 +294,6 @@ class TestComponentRenderAPI:
 
         assert comp.node is not None
 
-        # Now uses template_file, so template_name is the file path
         assert comp.node.template_name.endswith("test_component/outer.html")  # type: ignore[union-attr]
 
     def test_metadata__python(self):
@@ -350,7 +301,7 @@ class TestComponentRenderAPI:
 
         @register("test")
         class TestComponent(Component):
-            template_file = "test_component/metadata--python.html"
+            template_name = "test_component/metadata--python.html"
 
             def get_context_data(self, **kwargs):
                 nonlocal comp
@@ -764,7 +715,7 @@ class TestComponentRender:
 
     def test_render_can_access_instance(self):
         class TestComponent(Component):
-            template_file = "test_component/render-can-access-instance.html"
+            template_name = "test_component/render-can-access-instance.html"
 
             def get_context_data(self, **kwargs):
                 return {
@@ -779,7 +730,7 @@ class TestComponentRender:
 
     def test_render_to_response_can_access_instance(self):
         class TestComponent(Component):
-            template_file = "test_component/render-to-response-can-access-instance.html"
+            template_name = "test_component/render-to-response-can-access-instance.html"
 
             def get_context_data(self, **kwargs):
                 return {
@@ -795,10 +746,10 @@ class TestComponentRender:
     def test_prepends_exceptions_on_template_compile_error(self):
         @register("simple_component")
         class SimpleComponent(Component):
-            template_file = "test_component/prepends-exceptions-on-template-compile-error.html"
+            template_name = "test_component/prepends-exceptions-on-template-compile-error.html"
 
         class Other(Component):
-            template_file = "test_component/other.html"
+            template_name = "test_component/other.html"
 
         with pytest.raises(
             TemplateSyntaxError,
@@ -810,10 +761,10 @@ class TestComponentRender:
     def test_prepends_exceptions_on_template_compile_error2(self):
         @register("simple_component")
         class SimpleComponent(Component):
-            template_file = "test_component/prepends-exceptions-on-template-compile-error2.html"
+            template_name = "test_component/prepends-exceptions-on-template-compile-error2.html"
 
         class Other(Component):
-            template_file = "test_component/other-1.html"
+            template_name = "test_component/other-1.html"
 
         with pytest.raises(
             TemplateSyntaxError,
