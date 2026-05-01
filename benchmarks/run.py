@@ -18,6 +18,8 @@ BACKENDS = [
     ("Django inclusion_tag", "benchmarks.inclusion.bench"),
     ("django-components-lite", "benchmarks.djc_lite.bench"),
     ("django-components (upstream)", "benchmarks.djc.bench"),
+    ("django-components-lite (slots)", "benchmarks.djc_lite_slots.bench"),
+    ("django-components (slots)", "benchmarks.djc_slots.bench"),
 ]
 
 

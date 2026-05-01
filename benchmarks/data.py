@@ -42,3 +42,22 @@ alerts = [
 ]
 
 context = {"cards": cards, "buttons": buttons, "alerts": alerts}
+
+
+# Slots benchmark: 4 filled blocks * len(outers) * len(items) component invocations.
+# Tuned so a single render produces 1000 slotted component renders, matching the
+# scale of the props-only benchmarks above.
+OUTERS_N = 5
+ITEMS_N = 50
+
+outers = [{"label": f"Outer {i}"} for i in range(OUTERS_N)]
+items = [
+    {
+        "title": f"Item {i}",
+        "body": f"Body for item {i}.",
+        "variant": VARIANTS[i % len(VARIANTS)],
+    }
+    for i in range(ITEMS_N)
+]
+
+context_slots = {"outers": outers, "items": items}
