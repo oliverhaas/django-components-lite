@@ -26,9 +26,7 @@ coverage.xml
 .ruff_cache/
 
 # Build artifacts
-site/
 .DS_Store
 .claude/worktrees/
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
-docs/superpowers/

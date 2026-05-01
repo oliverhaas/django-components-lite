@@ -25,7 +25,6 @@ dependencies = ["Django>=5.2,<7"]
 
 [project.urls]
 Homepage = "https://github.com/oliverhaas/django-components-lite"
-Documentation = "https://oliverhaas.github.io/django-components-lite/"
 Issues = "https://github.com/oliverhaas/django-components-lite/issues"
 
 [dependency-groups]
@@ -40,7 +39,6 @@ dev = [
   "ruff==0.15.12",
   "ty==0.0.32",
 ]
-docs = ["mkdocs", "mkdocs-material", "mike", "pygments", "pygments-djc"]
 benchmark = ["django-components"]
 
 [build-system]
@@ -110,7 +108,6 @@ suppress-none-returning = true
   "T201",   # print found
   "DTZ",    # datetime found
 ]
-"docs/examples/**" = ["ARG002", "ANN", "S101", "T201", "DTZ"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["django_components_lite"]
@@ -161,7 +158,7 @@ invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "docs/examples"]
+testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = ""
 xfail_strict = true

@@ -27,7 +27,7 @@ Production-readiness pass. No breaking changes.
 
 - Trim docstrings and comments package-wide. Roughly 2300 lines removed (-43% LOC) by collapsing inherited multi-paragraph upstream docstrings to one or two sentences and dropping references to features that no longer exist in this fork.
 - Quickstart: move `{% load component_tags %}` to the top of the template.
-- Document `{% compc %}`, `{% html_attrs %}`, `format_attributes`, and `merge_attributes` in `docs/reference/api.md`.
+- Document `{% compc %}`, `{% html_attrs %}`, `format_attributes`, and `merge_attributes`.
 - Ship `tests/` in the sdist so downstream packagers can run them.
 
 ## 0.5.0
