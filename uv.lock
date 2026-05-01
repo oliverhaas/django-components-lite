@@ -157,7 +157,7 @@ wheels = [
 
 [[package]]
 name = "django-components-lite"
-version = "0.5.1"
+version = "0.5.2"
 source = { editable = "." }
 dependencies = [
     { name = "django" },

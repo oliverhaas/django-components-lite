@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.5.2
+
+Maintenance release. No API change. Bug fix + internal cleanup, with the docs site consolidated into the README so PyPI now ships the full reference.
+
+### Fixed
+
+- Stray trailing `'` in the "required slot not provided" error message in `SlotNode.render`.
+
+### Removed (internal cleanup)
+
+- Dead `_is_dynamic_component` lookup and its two guards in `SlotNode.render`. `DynamicComponent` was removed in 0.1.0a1; the attribute is never set on any current `Component` subclass, so the guards were unreachable.
+- Brittle `ComponentNode.register(register)` / `ComponentScNode.register(register)` pre-registrations in `templatetags/component_tags.py` and the `component` / `componentsc` aliases. They would have crashed if ever invoked (`ComponentNode.parse` requires kwargs `Library.tag()` doesn't pass), but in practice were always overwritten by `ComponentRegistry._register_to_library` first.
+- `ComponentScNode` class. The registry never used it; it calls `ComponentNode.parse` with the appropriate `start_tag` / `end_tag` kwargs directly.
+
+### Docs
+
+- Consolidate the mkdocs site (8 pages) into `README.md` + `CHANGELOG.md` at the repo root. Drop `mkdocs.yml`, `docs/`, the `docs` dep group in pyproject, and the gh-pages deploy workflow.
+- Add a "How this compares" section to the README covering django-cotton, django-viewcomponent, slippers, JinjaX.
+
+### Tests
+
+- Add slot-heavy benchmark backends (`benchmarks/djc_lite_slots/`, `benchmarks/djc_slots/`) exercising `snapshot_context`, slot/fill machinery, and `{% extends %}` inheritance. The existing benches are props-only.
+- Replace the placeholder `tests/test_settings.py` with five tests covering defaults, partial override merging, `ComponentsSettings` NamedTuple acceptance, lazy `dirs` resolution, and explicit empty values.
+
 ## 0.5.1
 
 Production-readiness pass. No breaking changes.
