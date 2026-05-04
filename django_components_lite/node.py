@@ -1,6 +1,4 @@
 import functools
-import inspect
-import keyword
 from collections.abc import Iterable
 from typing import Any, ClassVar, cast
 
@@ -8,15 +6,13 @@ from django.template import Context, Library
 from django.template.base import FilterExpression, Node, NodeList, Parser, Token
 from django.template.exceptions import TemplateSyntaxError
 
-from django_components_lite.util.template_tag import (
-    TagParam,
-    validate_params,
-)
-
 
 # We wrap `render()` so the user-defined inner method can declare the tag's
 # parameters in its signature (e.g. `render(self, context, name, **kwargs)`),
-# while the outer wrapper still matches Django's `Node.render(context)`.
+# while the outer wrapper still matches Django's `Node.render(context)`. The
+# wrapper just resolves `FilterExpression`s to values and forwards them; Python's
+# call mechanism does the positional/keyword routing, default-applying, and
+# error-raising — no separate signature validation needed.
 class NodeMeta(type):
     def __new__(
         mcs,
@@ -37,52 +33,12 @@ class NodeMeta(type):
         if getattr(orig_render, "_djc_wrapped", False):
             return cls
 
-        signature = inspect.signature(orig_render)
-
-        # Drop `self` and `context` so the remaining signature describes the tag's params.
-        if len(signature.parameters) < 2:
-            raise TypeError(f"`render()` method of {name} must have at least two parameters")
-
-        validation_params = list(signature.parameters.values())
-        validation_params = validation_params[2:]
-        validation_signature = signature.replace(parameters=validation_params)
-
         @functools.wraps(orig_render)
         def wrapper_render(self: "BaseNode", context: Context) -> str:
             raw_args, raw_kwargs = self.params
             resolved_args = [arg.resolve(context) for arg in raw_args]
             resolved_kwargs = {k: v.resolve(context) for k, v in raw_kwargs.items()}
-
-            # `{% comp %}` accepts arbitrary args and non-identifier kwargs
-            # (e.g. `data-id`, `@click`), so signature validation is skipped.
-            if cls._skip_param_validation:
-                return orig_render(self, context, *resolved_args, **resolved_kwargs)
-
-            resolved_params_without_invalid_kwargs: list[TagParam] = []
-            invalid_kwargs: dict[str, Any] = {}
-            did_see_special_kwarg = False
-
-            for value in resolved_args:
-                if did_see_special_kwarg:
-                    raise SyntaxError("positional argument follows keyword argument")
-                resolved_params_without_invalid_kwargs.append(TagParam(key=None, value=value))
-
-            for key, value in resolved_kwargs.items():
-                if not key.isidentifier() or keyword.iskeyword(key):
-                    invalid_kwargs[key] = value
-                    did_see_special_kwarg = True
-                else:
-                    resolved_params_without_invalid_kwargs.append(TagParam(key=key, value=value))
-
-            args, kwargs = validate_params(
-                orig_render,
-                validation_signature,
-                self.tag,
-                resolved_params_without_invalid_kwargs,
-                invalid_kwargs,
-            )
-
-            return orig_render(self, context, *args, **kwargs)
+            return orig_render(self, context, *resolved_args, **resolved_kwargs)
 
         cls.render = wrapper_render  # type: ignore[method-assign]
         cls.render._djc_wrapped = True  # type: ignore[attr-defined]
@@ -131,9 +87,6 @@ class BaseNode(Node, metaclass=NodeMeta):
 
     end_tag: ClassVar[str | None] = None
     """The end tag name, e.g. ``"endslot"``. If ``None``, the tag has no body."""
-
-    _skip_param_validation: ClassVar[bool] = False
-    """If True, skip signature-based param validation and forward resolved args/kwargs as-is."""
 
     allowed_flags: ClassVar[Iterable[str] | None] = None
     """List of allowed positional flags, e.g. ``["required"]`` for ``{% slot required %}``."""

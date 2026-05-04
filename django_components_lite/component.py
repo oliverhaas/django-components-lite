@@ -404,7 +404,6 @@ class ComponentNode(BaseNode):
     tag = "comp"
     end_tag: ClassVar[str | None] = "endcomp"
     allowed_flags = ()
-    _skip_param_validation = True
 
     def __init__(
         self,

@@ -1,5 +1,3 @@
-import re
-
 import pytest
 from django.template import Context, Template
 from django.utils.safestring import SafeString, mark_safe
@@ -177,12 +175,7 @@ class TestHtmlAttrs:
         my_attrs = {"class": "padding-top-8"}
         template = Template(self.template_str)
 
-        with pytest.raises(
-            TypeError,
-            match=re.escape(
-                "Invalid parameters for tag 'html_attrs': takes 2 positional argument(s) but 3 were given",
-            ),
-        ):
+        with pytest.raises(TypeError):
             template.render(Context({"my_attrs": my_attrs}))
 
     def test_tag_kwargs(self):
