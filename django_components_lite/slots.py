@@ -15,7 +15,7 @@ from typing import (
     runtime_checkable,
 )
 
-from django.template import Context, Template
+from django.template import Context
 from django.template.base import NodeList, TextNode
 from django.template.exceptions import TemplateSyntaxError
 from django.utils.html import conditional_escape
@@ -592,10 +592,6 @@ def _nodelist_to_slot(
             f"Slot fallback alias in fill '{slot_name}' must be a valid identifier. Got '{fallback_var}'",
         )
 
-    # Use Template.render() so Django sets up and binds the context correctly.
-    template = Template("")
-    template.nodelist = nodelist
-
     def render_func(ctx: SlotContext) -> SlotResult:
         context = ctx.context or Context()
 
@@ -619,7 +615,7 @@ def _nodelist_to_slot(
 
         context.dicts.insert(index_of_last_component_layer, extra_context or {})
 
-        rendered = template.render(context)
+        rendered = nodelist.render(context)
 
         context.dicts.pop(index_of_last_component_layer)
 
