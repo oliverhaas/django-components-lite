@@ -642,30 +642,3 @@ class TestSlot:
         rendered: str = template.render(Context({"my_slot": "FROM_INSIDE_NAMED_SLOT"}))
 
         assert rendered.strip() == "FROM_INSIDE_NAMED_SLOT"
-
-    def test_pass_body_to_fill_raises_on_body(self):
-        @register("test")
-        class SimpleComponent(Component):
-            template: str = """
-                {% load component_tags %}
-                {% slot "first" default %}
-                {% endslot %}
-            """
-
-        template_str: str = """
-            {% load component_tags %}
-            {% comp "test" %}
-              {% fill "first" body=my_slot %}
-                FROM_INSIDE_NAMED_SLOT
-              {% endfill %}
-            {% endcomp %}
-        """
-        template = Template(template_str)
-
-        my_slot: Slot = Slot(lambda _ctx: "FROM_INSIDE_NAMED_SLOT")
-
-        with pytest.raises(
-            TemplateSyntaxError,
-            match=re.escape("Fill 'first' received content both through 'body' kwarg and '{% fill %}' body."),
-        ):
-            template.render(Context({"my_slot": my_slot}))

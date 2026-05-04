@@ -313,46 +313,8 @@ class FillNode(BaseNode):
         fallback: str | None = None,
         body: SlotInput | None = None,
     ) -> str:
-        if not _is_extracting_fill(context):
-            raise TemplateSyntaxError(
-                "FillNode.render() (AKA {% fill ... %} block) cannot be rendered outside of a Component context. "
-                "Make sure that the {% fill %} tags are nested within {% comp %} tags.",
-            )
-
-        if not isinstance(name, str):
-            raise TemplateSyntaxError(f"Fill tag '{SLOT_NAME_KWARG}' kwarg must resolve to a string, got {name}")
-
-        if data is not None:
-            if not isinstance(data, str):
-                raise TemplateSyntaxError(f"Fill tag '{FILL_DATA_KWARG}' kwarg must resolve to a string, got {data}")
-            if not is_identifier(data):
-                raise TemplateSyntaxError(
-                    f"Fill tag kwarg '{FILL_DATA_KWARG}' does not resolve to a valid Python identifier, got '{data}'",
-                )
-
-        if fallback is not None:
-            if not isinstance(fallback, str):
-                raise TemplateSyntaxError(
-                    f"Fill tag '{FILL_FALLBACK_KWARG}' kwarg must resolve to a string, got {fallback}",
-                )
-            if not is_identifier(fallback):
-                raise TemplateSyntaxError(
-                    f"Fill tag kwarg '{FILL_FALLBACK_KWARG}' does not resolve to a valid Python identifier,"
-                    f" got '{fallback}'",
-                )
-
-        if data and fallback and data == fallback:
-            raise TemplateSyntaxError(
-                f"Fill '{name}' received the same string for slot fallback ({FILL_FALLBACK_KWARG}=...)"
-                f" and slot data ({FILL_DATA_KWARG}=...)",
-            )
-
-        if body is not None and self.contents:
-            raise TemplateSyntaxError(
-                f"Fill '{name}' received content both through '{FILL_BODY_KWARG}' kwarg and '{{% fill %}}' body. "
-                f"Use only one method.",
-            )
-
+        # `{% fill %}` tags are only meaningful inside the body of a `{% comp %}` tag.
+        # `_extract_fill` raises if not.
         fill_data = FillWithData(
             fill=self,
             name=name,
@@ -361,9 +323,7 @@ class FillNode(BaseNode):
             extra_context={},
             body=body,
         )
-
         self._extract_fill(context, fill_data)
-
         return ""
 
     def _extract_fill(self, context: Context, data: "FillWithData") -> None:
@@ -372,7 +332,7 @@ class FillNode(BaseNode):
         captured_fills: list[FillWithData] | None = context.get(FILL_GEN_CONTEXT_KEY, None)
 
         if captured_fills is None:
-            raise RuntimeError(
+            raise TemplateSyntaxError(
                 "FillNode.render() (AKA {% fill ... %} block) cannot be rendered outside of a Component context. "
                 "Make sure that the {% fill %} tags are nested within {% comp %} tags.",
             )

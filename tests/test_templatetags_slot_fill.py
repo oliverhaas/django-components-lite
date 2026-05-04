@@ -1638,38 +1638,6 @@ class TestScopedSlot:
         """
         assertHTMLEqual(rendered, expected)
 
-    def test_slot_data_raises_on_slot_data_and_slot_fallback_same_var(self):
-        @register("test")
-        class TestComponent(Component):
-            template: str = """
-                {% load component_tags %}
-                <div>
-                    {% slot "my_slot" abc=abc var123=var123 %}Default text{% endslot %}
-                </div>
-            """
-
-            def get_context_data(self, **kwargs):
-                return {
-                    "abc": "def",
-                    "var123": 456,
-                }
-
-        template: str = """
-            {% load component_tags %}
-            {% comp "test" %}
-                {% fill "my_slot" data="slot_var" fallback="slot_var" %}
-                    {{ slot_var }}
-                {% endfill %}
-            {% endcomp %}
-        """
-        with pytest.raises(
-            TemplateSyntaxError,
-            match=re.escape(
-                "Fill 'my_slot' received the same string for slot fallback (fallback=...) and slot data (data=...)",
-            ),
-        ):
-            Template(template).render(Context())
-
     def test_slot_data_fill_without_data(self):
         @register("test")
         class TestComponent(Component):
