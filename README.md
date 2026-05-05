@@ -1,32 +1,24 @@
 # django-components-lite
 
-**An exploratory, lightweight fork of [django-components](https://github.com/django-components/django-components).**
+A fork of [django-components](https://github.com/django-components/django-components) with most features stripped out. A component is a Python class, a Django template, and optional CSS/JS.
 
-This package strips django-components down to its core: simple, reusable template components for Django, just templates with some optional Python logic. The goal is to see how a minimal django-components feels in practice.
+If you want the full feature set, use [django-components](https://github.com/django-components/django-components) directly.
 
 ## Attribution
 
-This project is built on the work of the **[django-components](https://github.com/django-components/django-components)** project by **[Emil Stenström](https://github.com/EmilStenstrom)**, **[Juro Oravec](https://github.com/JuroOravec)**, and [all contributors](https://github.com/django-components/django-components/graphs/contributors).
+Built on [django-components](https://github.com/django-components/django-components) by [Emil Stenström](https://github.com/EmilStenstrom), [Juro Oravec](https://github.com/JuroOravec), and [all contributors](https://github.com/django-components/django-components/graphs/contributors).
 
-**If you're looking for a mature, full-featured, and widely used component library for Django, use [django-components](https://github.com/django-components/django-components).** It has an active community, extensive documentation, and a rich feature set.
+## Other Django component libraries
 
-## How this compares
+- [django-components](https://github.com/django-components/django-components): the upstream project.
+- [django-cotton](https://github.com/wrabit/django-cotton): HTML-like syntax (`<c-card title="..." />`), template-only.
+- [django-viewcomponent](https://pypi.org/project/django-viewcomponent/): Rails-style, one Python class per component.
+- [slippers](https://pypi.org/project/slippers/): template-only, no Python per component.
+- [JinjaX](https://jinjax.scaletti.dev/): HTML-like component syntax for Jinja2.
 
-A few Django component libraries with different philosophies:
-
-- **[django-components](https://github.com/django-components/django-components)** — the upstream project. Big, full-featured, introduces a lot of new template behavior, almost a parallel template language.
-- **[django-cotton](https://github.com/wrabit/django-cotton)** — HTML-like syntax (`<c-card title="..." />`); template-only, no Python logic per component.
-- **[django-viewcomponent](https://pypi.org/project/django-viewcomponent/)** — modeled on Rails ViewComponent. One Python class per component encapsulating template + logic.
-- **[slippers](https://pypi.org/project/slippers/)** — intentionally tiny; template-only, no Python per component.
-- **[JinjaX](https://jinjax.scaletti.dev/)** — HTML-like component syntax for Jinja2 (not Django templates).
-
-`django-components-lite` sits on the small end of that spectrum: standard Django template tags (`{% comp %}` / `{% slot %}` / `{% fill %}`), one Python class per component for context logic, no special template syntax, no monkeypatches, no extension system.
-
-If even this is more than you need, the package is small (~3000 LOC of regular Django patterns) and is a reasonable starting point to copy into your project and inline rather than depend on as a separate package.
+`django-components-lite` is standard Django template tags (`{% comp %}` / `{% slot %}` / `{% fill %}`), one Python class per component, no special template syntax, no monkeypatches, no extension system. The package is ~3000 LOC and can be vendored.
 
 ## Features
-
-What django-components-lite keeps:
 
 - Component classes with Python logic and Django templates
 - `{% comp %}` / `{% endcomp %}` (and self-closing `{% compc %}`) template tags
@@ -37,7 +29,7 @@ What django-components-lite keeps:
 - Isolated component context
 - HTML attribute rendering utilities
 
-## What's removed (vs. upstream)
+## Removed vs. upstream
 
 - Extension system
 - Built-in components (`DynamicComponent`, `ErrorFallback`)
@@ -127,9 +119,9 @@ class Greeting(Component):
 </div>
 ```
 
-`template_name` is resolved relative to the component's Python file, then relative to `COMPONENTS.dirs`, then Django's template dirs. You can use `template = "..."` for an inline template string instead.
+`template_name` is resolved relative to the component's Python file, then `COMPONENTS.dirs`, then Django's template dirs. Use `template = "..."` for an inline template string.
 
-To attach static files, place them next to the component and declare them via a nested `Media` class (matching Django's [Forms.Media](https://docs.djangoproject.com/en/stable/topics/forms/media/) convention):
+Static files are declared via a nested `Media` class (same shape as Django's [Forms.Media](https://docs.djangoproject.com/en/stable/topics/forms/media/)):
 
 ```
 components/greeting/
@@ -148,7 +140,7 @@ class Greeting(Component):
         js = ["greeting.js"]
 ```
 
-When the component renders, `<link>` and `<script>` tags for the declared files are prepended to the output.
+A `<link>` or `<script>` tag is prepended to the output for each entry.
 
 ## Using a component
 
@@ -177,7 +169,7 @@ def get_context_data(self, title, body=""): ...
 {% comp "card" "My Title" "Body text" %}{% endcomp %}
 ```
 
-binds `title="My Title"` and `body="Body text"`. Mixed positional + keyword args follow Python call semantics — passing the same parameter both ways raises `TypeError`. If your override declares `*args`, positional tag args are forwarded as `args`.
+binds `title="My Title"` and `body="Body text"`. Mixed positional and keyword args follow Python call semantics. If `get_context_data` declares `*args`, positional tag args are forwarded.
 
 From Python:
 
@@ -185,11 +177,11 @@ From Python:
 html = Greeting.render(kwargs={"name": "Django"})
 ```
 
-`Component.render_to_response(...)` is also available and returns an `HttpResponse`.
+`Component.render_to_response(...)` returns an `HttpResponse`.
 
 ## Slots
 
-Slots let parent templates inject content into specific spots in a component.
+Slots are placeholders a parent template fills in.
 
 ```html
 {% load component_tags %}
@@ -209,7 +201,7 @@ Fill them with `{% fill %}`:
 {% endcomp %}
 ```
 
-Content placed directly inside `{% comp %}` (no `{% fill %}`) goes into the slot marked `default`:
+Content inside `{% comp %}` without a `{% fill %}` goes into the slot marked `default`:
 
 ```html
 {% slot "content" default %}{% endslot %}
@@ -221,7 +213,7 @@ Content placed directly inside `{% comp %}` (no `{% fill %}`) goes into the slot
 {% endcomp %}
 ```
 
-The body of `{% slot %}` is the fallback, used when no `{% fill %}` is provided. To branch on whether a slot was filled, check `self.slots` in Python and pass the result as a context variable:
+The body of `{% slot %}` is the fallback when no `{% fill %}` is provided. To branch on whether a slot was filled, check `self.slots`:
 
 ```python
 def get_context_data(self, **kwargs):
@@ -250,33 +242,31 @@ COMPONENTS = ComponentsSettings(
 | `static_files_allowed` | CSS, JS, images, fonts | File extensions served as static files |
 | `static_files_forbidden` | `.html`, `.py`, etc. | File extensions never served as static files |
 
-Component tag names are fixed: `{% comp %}` / `{% endcomp %}` / `{% compc %}`. They are not configurable.
+Tag names (`{% comp %}` / `{% endcomp %}` / `{% compc %}`) are not configurable.
 
 ## API reference
 
 ### `Component`
 
-Subclass to define your own component.
+Class attributes:
 
-**Class attributes:**
+- `template_name`: path to the template, resolved relative to the component's Python file, then `COMPONENTS.dirs`, then Django template dirs.
+- `template`: inline template string, used instead of `template_name`.
+- `class Media`: nested class with `css` and `js` lists of file paths.
 
-- `template_name` — Path to the template. Resolved relative to the component's Python file, then `COMPONENTS.dirs`, then Django template dirs.
-- `template` — Inline template string (alternative to `template_name`).
-- `class Media:` — Nested class declaring CSS/JS files. `Media.css` and `Media.js` are lists of paths; one `<link>` / `<script>` tag is prepended per entry.
+Instance attributes (available in `get_context_data`):
 
-**Instance attributes (available in `get_context_data`):**
+- `self.args`: positional arguments.
+- `self.kwargs`: keyword arguments.
+- `self.slots`: dict of slot name to `Slot`. `"name" in self.slots` checks whether a slot was filled.
+- `self.context`: outer Django `Context` at the call site.
+- `self.request`: the `HttpRequest`, or `None`.
 
-- `self.args` — positional arguments passed to the component.
-- `self.kwargs` — keyword arguments.
-- `self.slots` — dict of slot name to `Slot` instance. `"name" in self.slots` checks whether a slot was filled.
-- `self.context` — outer Django `Context` at the call site.
-- `self.request` — the `HttpRequest` if available, else `None`.
+Methods:
 
-**Methods:**
-
-- `get_context_data(**kwargs)` — return a dict of context variables. Override with any signature.
-- `Component.render(context=None, args=None, kwargs=None, slots=None, request=None)` — class method, returns rendered HTML string.
-- `Component.render_to_response(...)` — class method, returns `HttpResponse`. Same arguments as `render()`, plus extra kwargs forwarded to the response class.
+- `get_context_data(**kwargs)`: return a dict of context variables. Override with any signature.
+- `Component.render(context=None, args=None, kwargs=None, slots=None, request=None)`: returns rendered HTML.
+- `Component.render_to_response(...)`: same arguments as `render()`, returns an `HttpResponse`. Extra kwargs are forwarded to the response class.
 
 ### Registration
 
@@ -307,7 +297,7 @@ Available after `{% load component_tags %}`:
 
 ### HTML attribute helpers
 
-For composing attribute dicts in Python (used by `{% html_attrs %}` under the hood):
+Used by `{% html_attrs %}` and available in Python:
 
 ```python
 from django_components_lite import format_attributes, merge_attributes
@@ -325,9 +315,9 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## Links
 
-- [django-components (upstream)](https://github.com/django-components/django-components) — the full-featured upstream project
+- [django-components](https://github.com/django-components/django-components): upstream
 - [Issues](https://github.com/oliverhaas/django-components-lite/issues)
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
