@@ -19,7 +19,7 @@ class NodeMeta(type):
         name: str,
         bases: tuple[type, ...],
         attrs: dict[str, Any],
-    ) -> type["BaseNode"]:
+    ) -> type[BaseNode]:
         cls = cast("type[BaseNode]", super().__new__(mcs, name, bases, attrs))
 
         # Skip BaseNode itself
@@ -34,7 +34,7 @@ class NodeMeta(type):
             return cls
 
         @functools.wraps(orig_render)
-        def wrapper_render(self: "BaseNode", context: Context) -> str:
+        def wrapper_render(self: BaseNode, context: Context) -> str:
             raw_args, raw_kwargs = self.params
             resolved_args = [arg.resolve(context) for arg in raw_args]
             resolved_kwargs = {k: v.resolve(context) for k, v in raw_kwargs.items()}
@@ -145,7 +145,7 @@ class BaseNode(Node, metaclass=NodeMeta):
         return flags
 
     @classmethod
-    def parse(cls, parser: Parser, token: Token, **kwargs: Any) -> "BaseNode":
+    def parse(cls, parser: Parser, token: Token, **kwargs: Any) -> BaseNode:
         """Parse a tag occurrence; passed to Django's ``Library.tag()``."""
         bits = token.split_contents()
         tag_name = bits[0]

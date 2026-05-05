@@ -28,7 +28,7 @@ def set_component_error_message(err: Exception, component_path: list[str]) -> No
 
 
 @contextmanager
-def add_slot_to_error_message(component_name: str, slot_name: str) -> Generator[None, None, None]:
+def add_slot_to_error_message(component_name: str, slot_name: str) -> Generator[None]:
     """Append `<component>(slot:<name>)` to the component path on exceptions raised inside a SlotNode."""
     try:
         yield

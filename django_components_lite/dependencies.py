@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from django_components_lite.component import Component
 
 
-def build_dependency_tags(comp_cls: type["Component"]) -> str:
+def build_dependency_tags(comp_cls: type[Component]) -> str:
     """Return cached `<link>` and `<script>` tags for the component's `Media.css` and `Media.js`.
 
     Cached on first render rather than at class creation, since `static()` may not be

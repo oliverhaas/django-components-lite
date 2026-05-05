@@ -454,7 +454,7 @@ class TestPositionalArgRouting:
         class MyComponent(Component):
             template: str = "x: {{ x }}"
 
-            def get_context_data(self, x: "list[UndefinedAtRuntime]", **kwargs):
+            def get_context_data(self, x: list[UndefinedAtRuntime], **kwargs):
                 return {"x": x}
 
         # Class creation must not crash (was NameError on Python 3.14).

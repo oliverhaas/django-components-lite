@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from django_components_lite.component import Component
 
 
-def resolve_component_files(comp_cls: type["Component"]) -> None:
+def resolve_component_files(comp_cls: type[Component]) -> None:
     """Rewrite `template_name` and `Media.css`/`Media.js` from component-relative to dir-relative paths.
 
     E.g. for `components/calendar/calendar.py` with `class Media: js = ["calendar.js"]`,

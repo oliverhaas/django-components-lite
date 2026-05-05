@@ -10,7 +10,6 @@ from typing import (
     NamedTuple,
     Protocol,
     TypeVar,
-    Union,
     cast,
     runtime_checkable,
 )
@@ -52,7 +51,7 @@ class SlotContext[TSlotData: Mapping]:
 
     data: TSlotData
     """Data passed to the slot."""
-    fallback: Union[str, "SlotFallback"] | None = None
+    fallback: str | SlotFallback | None = None
     """Slot's fallback content. Lazily-rendered - coerce to string to force render."""
     context: Context | None = None
     """Django template `Context` available inside the `{% fill %}` tag."""
@@ -81,7 +80,7 @@ class Slot[TSlotData: Mapping]:
     """Slot name to which this Slot was initially assigned."""
     nodelist: NodeList | None = None
     """For `{% fill %}`-derived slots, the `NodeList` of the fill's body."""
-    fill_node: Union["FillNode", "ComponentNode"] | None = None
+    fill_node: FillNode | ComponentNode | None = None
     """Originating `FillNode` or `ComponentNode`, or `None` for slots constructed in Python."""
     extra: dict[str, Any] = field(default_factory=dict)
     """Dictionary for arbitrary user metadata about the slot."""
@@ -102,7 +101,7 @@ class Slot[TSlotData: Mapping]:
     def __call__(
         self,
         data: TSlotData | None = None,
-        fallback: Union[str, "SlotFallback"] | None = None,
+        fallback: str | SlotFallback | None = None,
         context: Context | None = None,
     ) -> SlotResult:
         slot_ctx: SlotContext = SlotContext(context=context, data=data or {}, fallback=fallback)
@@ -149,7 +148,7 @@ SlotName = str
 class SlotFallback:
     """Lazy wrapper around a slot's fallback content; coerce to string to render."""
 
-    def __init__(self, slot: "SlotNode", context: Context) -> None:
+    def __init__(self, slot: SlotNode, context: Context) -> None:
         self._slot = slot
         self._context = context
 
@@ -326,7 +325,7 @@ class FillNode(BaseNode):
         self._extract_fill(context, fill_data)
         return ""
 
-    def _extract_fill(self, context: Context, data: "FillWithData") -> None:
+    def _extract_fill(self, context: Context, data: FillWithData) -> None:
         # `FILL_GEN_CONTEXT_KEY` is set only while rendering between `{% comp %}...{% endcomp %}`
         # to collect fill tags (including dynamically-generated ones via {% for %}/{% if %}).
         captured_fills: list[FillWithData] | None = context.get(FILL_GEN_CONTEXT_KEY, None)
@@ -380,7 +379,7 @@ class FillWithData(NamedTuple):
 
 def resolve_fills(
     context: Context,
-    component_node: "ComponentNode",
+    component_node: ComponentNode,
     component_name: str,
 ) -> dict[SlotName, Slot]:
     """Find all slot fills in a component body, whether explicit `{% fill %}` or implicit default."""
@@ -539,7 +538,7 @@ def _nodelist_to_slot(
     data_var: str | None = None,
     fallback_var: str | None = None,
     extra_context: dict[str, Any] | None = None,
-    fill_node: Union[FillNode, "ComponentNode"] | None = None,
+    fill_node: FillNode | ComponentNode | None = None,
     extra: dict[str, Any] | None = None,
 ) -> Slot:
     if data_var and not is_identifier(data_var):
@@ -610,7 +609,7 @@ def _is_extracting_fill(context: Context) -> bool:
 # We need to clear that state, otherwise Django won't render the extended template the second time
 # (when we actually render it).
 @contextmanager
-def _extends_context_reset(context: Context) -> Generator[None, None, None]:
+def _extends_context_reset(context: Context) -> Generator[None]:
     b4_ctx_extends = context.render_context.setdefault("extends_context", []).copy()
     try:
         yield

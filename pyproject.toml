@@ -4,24 +4,21 @@ version = "0.6.0"
 description = "Lightweight reusable template components for Django. An exploratory fork of django-components."
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 keywords = ["django", "components", "css", "js", "html"]
 authors = [{ name = "Oliver Haas", email = "ohaas@e1plus.de" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Framework :: Django",
-  "Framework :: Django :: 5.2",
   "Framework :: Django :: 6.0",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Typing :: Typed",
 ]
-dependencies = ["Django>=5.2,<7"]
+dependencies = ["Django>=6.0,<7"]
 
 [project.urls]
 Homepage = "https://github.com/oliverhaas/django-components-lite"
@@ -52,7 +49,7 @@ packages = ["django_components_lite"]
 only-include = ["django_components_lite", "tests", "LICENSE", "README.md", "pyproject.toml"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 119
 fix = true
 src = ["django_components_lite", "tests"]
@@ -79,6 +76,7 @@ ignore = [
   "PLR0915", # Too many statements
   "PLR2004", # Magic value used in comparison
   "SLF001",  # Private member access
+  "TC",      # Move type-only imports under TYPE_CHECKING (stylistic, churny)
   "TRY003",  # Long exception messages are helpful
   "TRY300",  # return in try block is cleaner
 ]
@@ -113,7 +111,7 @@ suppress-none-returning = true
 known-first-party = ["django_components_lite"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 check_untyped_defs = true
 ignore_missing_imports = true
 pretty = true
@@ -131,7 +129,7 @@ disallow_untyped_defs = true
 invalid-method-override = "ignore"
 
 [tool.ty.environment]
-python-version = "3.12"
+python-version = "3.14"
 
 [tool.ty.analysis]
 respect-type-ignore-comments = false

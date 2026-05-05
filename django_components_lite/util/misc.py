@@ -57,7 +57,7 @@ def get_module_info(
         else:
             try:
                 module = import_module(module_name)
-            except (ImportError, AttributeError):
+            except ImportError, AttributeError:
                 module = None
     else:
         module = None
@@ -88,7 +88,7 @@ def get_last_index(lst: list, key: Callable[[Any], bool]) -> int | None:
 
 
 # Produce a stable per-class identifier like `TableComp_a91d03`.
-def hash_comp_cls(comp_cls: type["Component"]) -> str:
+def hash_comp_cls(comp_cls: type[Component]) -> str:
     full_name = get_import_path(comp_cls)
     name_hash = md5(full_name.encode()).hexdigest()[0:6]  # noqa: S324
     return comp_cls.__name__ + "_" + name_hash

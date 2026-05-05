@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from django_components_lite.component import Component
 
 
-def get_component_template(component: "Component") -> Template | None:
+def get_component_template(component: Component) -> Template | None:
     """Resolve the Template for a Component, or None if no template is defined."""
     if component.template_name is not None:
         # Cache the loaded Template on the class to avoid reloading every render.
@@ -26,7 +26,7 @@ def get_component_template(component: "Component") -> Template | None:
     return None
 
 
-def _create_template_from_string(component: type["Component"], template_string: str) -> Template:
+def _create_template_from_string(component: type[Component], template_string: str) -> Template:
     # Synthetic Origin so error messages reference `path/to/component.py::ComponentName`
     # instead of `<unknown source>`.
     from django.template import Origin

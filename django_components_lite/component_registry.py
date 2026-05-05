@@ -29,7 +29,7 @@ class NotRegisteredError(Exception):
 
 # Tags are tracked per-entry so we can remove them from the Library on unregister.
 class ComponentRegistryEntry(NamedTuple):
-    cls: type["Component"]
+    cls: type[Component]
     tags: tuple[str, ...]
 
 
@@ -37,7 +37,7 @@ class ComponentRegistryEntry(NamedTuple):
 ALL_REGISTRIES: AllRegistries = []
 
 
-def all_registries() -> list["ComponentRegistry"]:
+def all_registries() -> list[ComponentRegistry]:
     """Return all live `ComponentRegistry` instances."""
     registries: list[ComponentRegistry] = []
     for reg_ref in ALL_REGISTRIES:
@@ -57,7 +57,7 @@ class ComponentRegistry:
 
         ALL_REGISTRIES.append(cached_ref(self))
 
-    def __copy__(self) -> "ComponentRegistry":
+    def __copy__(self) -> ComponentRegistry:
         new_registry = ComponentRegistry(self.library)
         new_registry._registry = self._registry.copy()
         new_registry._tags = self._tags.copy()
@@ -79,7 +79,7 @@ class ComponentRegistry:
             lib = self._library = tag_library
         return lib
 
-    def register(self, name: str, component: type["Component"]) -> None:
+    def register(self, name: str, component: type[Component]) -> None:
         """Register `component` under `name`; raises `AlreadyRegisteredError` on conflict."""
         existing_component = self._registry.get(name)
         if existing_component and existing_component.cls.class_id != component.class_id:
@@ -119,7 +119,7 @@ class ComponentRegistry:
 
         del self._registry[name]
 
-    def get(self, name: str) -> type["Component"]:
+    def get(self, name: str) -> type[Component]:
         """Return the component class registered under `name`; raises `NotRegisteredError` if missing."""
         if name not in self._registry:
             raise NotRegisteredError(f'The component "{name}" is not registered')
@@ -130,7 +130,7 @@ class ComponentRegistry:
         """Return True if a component is registered under `name`."""
         return name in self._registry
 
-    def all(self) -> dict[str, type["Component"]]:
+    def all(self) -> dict[str, type[Component]]:
         """Return a `{name: component_class}` dict of all registered components."""
         return {key: entry.cls for key, entry in self._registry.items()}
 
@@ -146,7 +146,7 @@ class ComponentRegistry:
     def _register_to_library(
         self,
         comp_name: str,
-        component: type["Component"],
+        component: type[Component],
     ) -> ComponentRegistryEntry:
         # Lazily import to avoid circular dependencies
         from django_components_lite.component import ComponentNode

@@ -5,11 +5,11 @@ from dataclasses import dataclass
 from typing import (
     Any,
     ClassVar,
-    Optional,
 )
 from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 
 from django.http import HttpRequest, HttpResponse
+from django.template import Template
 from django.template.base import FilterExpression, NodeList, Parser, Token
 from django.template.context import Context, RequestContext
 from django.utils.safestring import mark_safe
@@ -47,7 +47,7 @@ ComponentRef = ReferenceType["Component"]
 ALL_COMPONENTS: AllComponents = []
 
 
-def all_components() -> list[type["Component"]]:
+def all_components() -> list[type[Component]]:
     """List all live Component subclasses."""
     return [c for c in (ref() for ref in ALL_COMPONENTS) if c is not None]
 
@@ -57,12 +57,12 @@ def all_components() -> list[type["Component"]]:
 comp_cls_id_mapping: CompHashMapping = WeakValueDictionary()
 
 
-def get_component_by_class_id(comp_cls_id: str) -> type["Component"]:
+def get_component_by_class_id(comp_cls_id: str) -> type[Component]:
     """Look up a Component by its `class_id`. Raises `KeyError` if unknown."""
     return comp_cls_id_mapping[comp_cls_id]
 
 
-def _get_component_name(cls: type["Component"], registered_name: str | None = None) -> str:
+def _get_component_name(cls: type[Component], registered_name: str | None = None) -> str:
     return default(registered_name, cls.__name__)
 
 
@@ -85,7 +85,7 @@ def _positional_param_info(func: Any) -> tuple[tuple[str, ...], bool]:
     return tuple(names), bool(code.co_flags & _CO_VARARGS)
 
 
-def _call_get_context_data(component: "Component", args: list[Any], kwargs: dict[str, Any]) -> Any:
+def _call_get_context_data(component: Component, args: list[Any], kwargs: dict[str, Any]) -> Any:
     """Call `get_context_data()` routing tag positional args to the override's named params."""
     cls = component.__class__
     if cls._gctx_has_var_positional:
@@ -138,6 +138,11 @@ class Component:
     do_not_call_in_templates: ClassVar[bool] = True
     """Django marker preventing the instance from being called as a function in templates."""
 
+    # Lazy per-class caches populated on first render. Declared so mypy/ty see them
+    # as part of the public attribute surface even though they're only assigned dynamically.
+    _cached_template: ClassVar[Template | None] = None
+    _dep_tags: ClassVar[str] = ""
+
     def __init__(
         self,
         registered_name: str | None = None,
@@ -148,7 +153,7 @@ class Component:
         kwargs: Any | None = None,
         slots: Any | None = None,
         request: HttpRequest | None = None,
-        node: Optional["ComponentNode"] = None,
+        node: ComponentNode | None = None,
         name: str | None = None,
     ) -> None:
         self.name = name if name is not None else _get_component_name(self.__class__, registered_name)
@@ -209,7 +214,7 @@ class Component:
     registry: ComponentRegistry
     """The `ComponentRegistry` that resolved this component."""
 
-    node: Optional["ComponentNode"]
+    node: ComponentNode | None
     """The `ComponentNode` that triggered this render, or `None` when rendered via `render()`."""
 
     request: HttpRequest | None
@@ -233,7 +238,7 @@ class Component:
         outer_context: Context | None = None,
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
-        node: Optional["ComponentNode"] = None,
+        node: ComponentNode | None = None,
         **response_kwargs: Any,
     ) -> HttpResponse:
         """Render to a string and wrap in `response_class`. Extra kwargs go to the response class."""
@@ -261,7 +266,7 @@ class Component:
         outer_context: Context | None = None,
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
-        node: Optional["ComponentNode"] = None,
+        node: ComponentNode | None = None,
     ) -> str:
         """Render the component to a string. Python equivalent of `{% comp "name" args... kwargs %}`.
 
@@ -292,7 +297,7 @@ class Component:
         outer_context: Context | None = None,
         registry: ComponentRegistry | None = None,
         registered_name: str | None = None,
-        node: Optional["ComponentNode"] = None,
+        node: ComponentNode | None = None,
     ) -> str:
         # Resolve request: explicit kwarg, RequestContext.request, then parent component's request.
         parent_comp_ctx = _get_parent_component_context(context) if context else None
@@ -395,7 +400,7 @@ class Component:
 
 # Cache of `ComponentNode` subclasses keyed by start tag, so we don't create a new
 # subclass on every parse. Tied to a single registry per tag.
-component_node_subclasses_by_name: dict[str, tuple[type["ComponentNode"], ComponentRegistry]] = {}
+component_node_subclasses_by_name: dict[str, tuple[type[ComponentNode], ComponentRegistry]] = {}
 
 
 class ComponentNode(BaseNode):
@@ -434,7 +439,7 @@ class ComponentNode(BaseNode):
         name: str,
         start_tag: str,
         end_tag: str | None,
-    ) -> "ComponentNode":
+    ) -> ComponentNode:
         # Component-specific start/end tags are encoded as a per-tag subclass, cached.
         subcls_name = cls.__name__ + "_" + name
 
