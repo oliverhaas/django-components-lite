@@ -146,6 +146,10 @@ invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
 invalid-return-type = "ignore"
 invalid-overload = "ignore"
+# `finders.py` overrides Django's `BaseFinder.list(...)`. ty mis-resolves
+# `list[str]` annotations elsewhere in that class to the method instead of
+# the builtin. mypy handles this correctly.
+invalid-type-form = "ignore"
 
 [[tool.ty.overrides]]
 include = ["tests/**"]
