@@ -396,9 +396,10 @@ class Component:
         return {}
 
 
-# Cache of `ComponentNode` subclasses keyed by start tag, so we don't create a new
-# subclass on every parse. Tied to a single registry per tag.
-component_node_subclasses_by_name: dict[str, tuple[type[ComponentNode], ComponentRegistry]] = {}
+# Cache of `ComponentNode` subclasses keyed by start tag. Tied to a single registry
+# per tag. The third tuple slot is an identity token so `finalize` callbacks only
+# evict the exact entry they were registered for.
+component_node_subclasses_by_name: dict[str, tuple[type[ComponentNode], ComponentRegistry, object]] = {}
 
 
 class ComponentNode(BaseNode):
@@ -443,12 +444,20 @@ class ComponentNode(BaseNode):
 
         if start_tag not in component_node_subclasses_by_name:
             subcls: type[ComponentNode] = type(subcls_name, (cls,), {"tag": start_tag, "end_tag": end_tag})
-            component_node_subclasses_by_name[start_tag] = (subcls, registry)
-            # Drop the cache entry when either the subclass or the registry dies.
-            finalize(subcls, lambda: component_node_subclasses_by_name.pop(start_tag, None))
-            finalize(registry, lambda: component_node_subclasses_by_name.pop(start_tag, None))
+            entry_token = object()
+            component_node_subclasses_by_name[start_tag] = (subcls, registry, entry_token)
 
-        cached_subcls, cached_registry = component_node_subclasses_by_name[start_tag]
+            # Evict when the subclass or registry dies, but only if the entry is
+            # still ours — a stale finalize must not clobber a replacement entry.
+            def _evict_if_current(tag: str = start_tag, tok: object = entry_token) -> None:
+                entry = component_node_subclasses_by_name.get(tag)
+                if entry is not None and entry[2] is tok:
+                    del component_node_subclasses_by_name[tag]
+
+            finalize(subcls, _evict_if_current)
+            finalize(registry, _evict_if_current)
+
+        cached_subcls, cached_registry, _ = component_node_subclasses_by_name[start_tag]
 
         if cached_registry is not registry:
             raise RuntimeError(
