@@ -10,15 +10,14 @@ if TYPE_CHECKING:
 
 
 def get_component_template(component: Component) -> Template | None:
-    """Resolve the Template for a Component, or None if no template is defined."""
+    """Resolve the Template for a Component, or None if no template is defined.
+
+    No local cache: Django's configured template loaders (e.g. `cached.Loader`
+    in prod) already memoize by template name. Caching here too would block
+    HTML hot-reload in dev for no extra benefit in prod.
+    """
     if component.template_name is not None:
-        # Cache the loaded Template on the class to avoid reloading every render.
-        cached = getattr(component.__class__, "_cached_template", None)
-        if cached is not None:
-            return cached
-        template = _load_django_template(component.template_name)
-        component.__class__._cached_template = template
-        return template
+        return _load_django_template(component.template_name)
 
     if component.template:
         return _create_template_from_string(component.__class__, component.template)

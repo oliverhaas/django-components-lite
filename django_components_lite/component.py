@@ -9,7 +9,6 @@ from typing import (
 from weakref import ReferenceType, WeakValueDictionary, finalize, ref
 
 from django.http import HttpRequest, HttpResponse
-from django.template import Template
 from django.template.base import FilterExpression, NodeList, Parser, Token
 from django.template.context import Context, RequestContext
 from django.utils.safestring import mark_safe
@@ -138,9 +137,8 @@ class Component:
     do_not_call_in_templates: ClassVar[bool] = True
     """Django marker preventing the instance from being called as a function in templates."""
 
-    # Lazy per-class caches populated on first render. Declared so mypy/ty see them
-    # as part of the public attribute surface even though they're only assigned dynamically.
-    _cached_template: ClassVar[Template | None] = None
+    # Lazy per-class cache populated on first render. Declared so mypy/ty see it
+    # as part of the public attribute surface even though it's only assigned dynamically.
     _dep_tags: ClassVar[str] = ""
 
     def __init__(

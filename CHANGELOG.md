@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+
+### Fixed
+
+- Remove the class-level `_cached_template` cache on `Component`. It pinned the parsed `Template` for the lifetime of the process, which blocked HTML hot-reload in dev (editing a component's `template.html` had no effect until `runserver` restarted, since Django's autoreloader only watches `.py` files). Django's loader stack already memoizes via `django.template.loaders.cached.Loader` when configured, so the local cache was redundant in prod and harmful in dev.
+
 ## 0.6.0
 
 API alignment with Django conventions for class-based views and Forms.Media. Breaking.

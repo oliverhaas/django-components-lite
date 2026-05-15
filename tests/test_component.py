@@ -63,8 +63,8 @@ class TestComponent:
             """,
         )
 
-    # Test that even with cached template loaders, each Component has its own `Template`
-    # even when multiple components point to the same template file.
+    # Two components sharing one template file both render correctly with
+    # `cached.Loader` configured (the loader memoizes the parsed Template).
     @override_settings(
         TEMPLATES=[
             {
@@ -94,7 +94,7 @@ class TestComponent:
             },
         ],
     )
-    def test_template_file_static__cached(self):
+    def test_template_file_static__shared_with_cached_loader(self):
         class SimpleComponent1(Component):
             template_name = "simple_template.html"
 
@@ -110,15 +110,6 @@ class TestComponent:
                 return {
                     "variable": kwargs.get("variable"),
                 }
-
-        # Render to trigger template caching
-        SimpleComponent1.render(kwargs={"variable": "test"})
-        SimpleComponent2.render(kwargs={"variable": "test"})
-
-        # Both components have their own cached Template instance
-        assert isinstance(SimpleComponent1._cached_template, Template)
-        assert isinstance(SimpleComponent2._cached_template, Template)
-        assert SimpleComponent1._cached_template.source == SimpleComponent2._cached_template.source
 
         rendered = SimpleComponent1.render(kwargs={"variable": "test"})
         assertHTMLEqual(
