@@ -441,17 +441,14 @@ class TestComponentTemplateSyntaxError:
 
 
 class TestComponentNodeParseFinalize:
-    """A previous parse's stale `finalize` callback (fired when its registry or
-    subclass is GC'd) must not pop a newer dict entry registered under the same
-    start_tag. Otherwise the next parse raises `KeyError: 'comp'`.
-    """
-
     def test_stale_finalize_does_not_drop_replacement_entry(self, monkeypatch):
+        """A finalize callback from an evicted entry must not pop a newer
+        entry registered under the same start_tag.
+        """
+        import django_components_lite.component as component_mod
         from django_components_lite.component import component_node_subclasses_by_name
 
         captured: list = []
-        import django_components_lite.component as component_mod
-
         real_finalize = component_mod.finalize
 
         def capturing_finalize(obj, func, *args, **kwargs):
@@ -462,11 +459,9 @@ class TestComponentNodeParseFinalize:
 
         registry.register("race_a", gen_slotted_component())
         Template('{% load component_tags %}{% compc "race_a" %}')
-
         stale_callbacks = list(captured)
-        assert stale_callbacks, "expected ComponentNode.parse to register finalize callbacks"
+        assert stale_callbacks
 
-        # Mimic conftest teardown + a fresh test starting on the same start_tag.
         component_node_subclasses_by_name.clear()
         registry.unregister("race_a")
 
@@ -474,8 +469,6 @@ class TestComponentNodeParseFinalize:
         Template('{% load component_tags %}{% compc "race_b" %}')
         assert "compc" in component_node_subclasses_by_name
 
-        # Now fire each stale callback (simulating delayed GC from the prior parse).
-        # They must not wipe the newer entry.
         for cb in stale_callbacks:
             cb()
 

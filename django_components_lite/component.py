@@ -396,11 +396,9 @@ class Component:
         return {}
 
 
-# Cache of `ComponentNode` subclasses keyed by start tag, so we don't create a new
-# subclass on every parse. Tied to a single registry per tag. The third tuple slot
-# is an identity token so `finalize` callbacks only evict their own entry — a stale
-# callback from a previously-evicted subclass/registry must not wipe a newer entry
-# that happens to reuse the same start tag.
+# Cache of `ComponentNode` subclasses keyed by start tag. Tied to a single registry
+# per tag. The third tuple slot is an identity token so `finalize` callbacks only
+# evict the exact entry they were registered for.
 component_node_subclasses_by_name: dict[str, tuple[type[ComponentNode], ComponentRegistry, object]] = {}
 
 
@@ -449,10 +447,8 @@ class ComponentNode(BaseNode):
             entry_token = object()
             component_node_subclasses_by_name[start_tag] = (subcls, registry, entry_token)
 
-            # Drop the cache entry when either the subclass or the registry dies — but
-            # only if the entry is still ours. A clear-then-replace (e.g. between tests)
-            # can leave stale finalizers pending whose `start_tag` now points at a newer
-            # entry; popping that would race with the next parse.
+            # Evict when the subclass or registry dies, but only if the entry is
+            # still ours — a stale finalize must not clobber a replacement entry.
             def _evict_if_current(tag: str = start_tag, tok: object = entry_token) -> None:
                 entry = component_node_subclasses_by_name.get(tag)
                 if entry is not None and entry[2] is tok:
